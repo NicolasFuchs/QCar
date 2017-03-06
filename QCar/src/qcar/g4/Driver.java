@@ -3,7 +3,7 @@ package qcar.g4;
 import qcar.IDriver;
 import qcar.IPlayerChannel;
 
-public class QCarDriver implements IDriver{
+public class Driver implements IDriver{
   @Override
   public void startDriverThread(IPlayerChannel pc) {
     // TODO Auto-generated method stub
@@ -16,7 +16,7 @@ public class QCarDriver implements IDriver{
     
   }
   
-  public QCarDriver (QCar qCarDriven) {
+  public Driver (QCar qCarDriven) {
     
   }
 
