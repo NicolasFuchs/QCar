@@ -7,6 +7,16 @@ public class Decision implements IDecision {
   private int sideId ;
   private double requestedTranslation ;
   
+  /**
+   * @param isAngleMovement
+   * @param sideId
+   * @param requestedTranslation
+   */
+  private Decision(boolean isAngleMovement, int sideId, double requestedTranslation) {
+    this.isAngleMovement = isAngleMovement;
+    this.sideId = sideId;
+    this.requestedTranslation = requestedTranslation;
+  }
   
 
   @Override
@@ -26,5 +36,7 @@ public class Decision implements IDecision {
     // TODO Auto-generated method stub
     return 0;
   }
+
+  
 
 }

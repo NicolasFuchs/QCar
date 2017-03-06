@@ -11,14 +11,24 @@ public class Collision implements ICollision {
   private int hitQCarId;
   private int hitSideOrVertexId;
   private boolean isAgainstVertex;
-  
-  
-  public Collision(Point2D position, 
-      int hittingQCarId, 
-      int hittingSideOrVertexId,
-      int hitQCarId,
-      int hitSideOrVertexId,
-      boolean isAgainstVertex) {}
+   
+  /**
+   * @param position
+   * @param hittingQCarId
+   * @param hittingSideOrVertexId
+   * @param hitQCarId
+   * @param hitSideOrVertexId
+   * @param isAgainstVertex
+   */
+  private Collision(Point2D position, int hittingQCarId, int hittingSideOrVertexId, int hitQCarId,
+      int hitSideOrVertexId, boolean isAgainstVertex) {
+    this.position = position;
+    this.hittingQCarId = hittingQCarId;
+    this.hittingSideOrVertexId = hittingSideOrVertexId;
+    this.hitQCarId = hitQCarId;
+    this.hitSideOrVertexId = hitSideOrVertexId;
+    this.isAgainstVertex = isAgainstVertex;
+  }  
 
   @Override
   public Point2D position() {
@@ -55,5 +65,7 @@ public class Collision implements ICollision {
     // TODO Auto-generated method stub
     return false;
   }
+
+  
 
 }

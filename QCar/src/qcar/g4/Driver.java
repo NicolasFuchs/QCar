@@ -7,17 +7,12 @@ public class Driver implements IDriver{
   @Override
   public void startDriverThread(IPlayerChannel pc) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void stopDriverThread() {
     // TODO Auto-generated method stub
-    
-  }
-  
-  public Driver (QCar qCarDriven) {
-    
-  }
 
+  }
 }
