@@ -6,39 +6,64 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
 import qcar.*;
+import simviou.ObserverRegistrar;
 import simviou.WorldChangeObserver;
 
-public class WorldManager implements IWorldManager {
+public class WorldManager implements IWorldManager, ObserverRegistrar {
+
+  private List<WorldChangeObserver> observers;      // contains all currently observing objects
+
+  private long step;                                // number of step played
+  private boolean isSimulationRunning;              // true if simulation is running else false
+
+  private List<IQCar> qcars;                        // contains all the qcars
+  private List<Line2D> photoSensors;
+  private List<Line2D> distanceSensors;
+  private Rectangle2D boundingBox;
+  private List<? extends IDriver> players;
 
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
-    // TODO Auto-generated method stub
+    if(o != null && !observers.contains(o))
+      observers.add(o);
   }
 
   @Override
   public void removeWorldObserver(WorldChangeObserver o) {
-    // TODO Auto-generated method stub
+    observers.remove(o);
   }
 
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
     // TODO Auto-generated method stub
+    qcars = description.allQCar();
+    for(IQCar q : qcars){
+      // TODO: get all sensors from qcar, check if is boundingBox
+    }
+    this.players = players;
+    this.step = 0;
   }
 
   @Override
   public boolean isSimulationOpened() {
     // TODO Auto-generated method stub
-    return false;
+    return isSimulationRunning;
   }
 
   @Override
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
     // TODO Auto-generated method stub
+    step++;
+    // for each player, play
+    notifyAll();
   }
 
   @Override
   public void closeSimulation() {
     // TODO Auto-generated method stub
+    isSimulationRunning = false;
+    for(int i = 0; i < observers.size(); i++)
+      observers.remove(i);
   }
 
   @Override
@@ -49,28 +74,17 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public long stepNumber() {
-    // TODO Auto-generated method stub
-    return 0;
+    return step;
   }
 
   @Override
   public Rectangle2D boundingBox() {
-    // TODO Auto-generated method stub
-    return null;
+    return boundingBox;
   }
 
   @Override
   public List<IQCar> allQCars() {
-    Point2D[] vertices = {new Point2D.Double(0,0), new Point2D.Double(10,20), new Point2D.Double(30,20), new Point2D.Double(20,0)};
-    boolean[] vertexOffersBonus = {true, true, true, true};
-    boolean[] sideOffersBonus = {true, true, true, true};
-    boolean parkOffersBonus = false;
-    QCarNature qCarNature = new QCarNature(true, false, true, true, 10, 100);
-    
-    QCar car1 = new QCar(qCarNature, vertices);
-    List<IQCar> listQCars = new ArrayList<IQCar>();
-    listQCars.add(car1);
-    return listQCars;
+    return qcars;
   }
 
   @Override
@@ -90,5 +104,7 @@ public class WorldManager implements IWorldManager {
     // TODO Auto-generated method stub
     return new ArrayList<Line2D>();
   }
+
+
 
 }
