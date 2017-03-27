@@ -7,7 +7,6 @@ import qcar.IQCarNature;
 
 public class QCar implements IQCar {
   
-  
 
   private Point2D[] vertex ;
   private int score ;
