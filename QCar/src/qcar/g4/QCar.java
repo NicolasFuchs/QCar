@@ -1,19 +1,16 @@
 package qcar.g4;
 
 import java.awt.geom.Point2D;
-
 import qcar.IQCar;
 import qcar.IQCarNature;
 
 public class QCar implements IQCar {
-  
-  
 
   private Point2D[] vertex ;
   private int score ;
   private boolean isAlive ;
   private boolean[] vertexOffersBonus ;
-  private boolean[] sieOffersBonus ;
+  private boolean[] sideOffersBonus ;
   private boolean parkOffersBonus ;  
   private QCarNature nature ;
   
@@ -27,12 +24,12 @@ public class QCar implements IQCar {
    * @param nature, the nature of the QCar
    */
   public QCar(Point2D[] vertex, int score, boolean isAlive, boolean[] vertexOffersBonus,
-      boolean[] sieOffersBonus, boolean parkOffersBonus, QCarNature nature) {
+      boolean[] sideOffersBonus, boolean parkOffersBonus, QCarNature nature) {
     this.vertex = vertex;
     this.score = score;
     this.isAlive = isAlive;
     this.vertexOffersBonus = vertexOffersBonus;
-    this.sieOffersBonus = sieOffersBonus;
+    this.sideOffersBonus = sideOffersBonus;
     this.parkOffersBonus = parkOffersBonus;
     this.nature = nature;
   }
@@ -40,44 +37,37 @@ public class QCar implements IQCar {
 
   @Override
   public Point2D vertex(int vertexId) {
-    // TODO Auto-generated method stub
-    return null;
+    return vertex[vertexId];
   }
 
   @Override
   public int score() {
-    // TODO Auto-generated method stub
-    return 0;
+    return score;
   }
 
   @Override
   public boolean isAlive() {
-    // TODO Auto-generated method stub
-    return false;
+    return this.isAlive;
   }
 
   @Override
   public boolean vertexOffersBonus(int vertexId) {
-    // TODO Auto-generated method stub
-    return false;
+    return this.vertexOffersBonus[vertexId];
   }
 
   @Override
   public boolean sideOffersBonus(int sideId) {
-    // TODO Auto-generated method stub
-    return false;
+    return this.sideOffersBonus[sideId];
   }
 
   @Override
   public boolean parkOffersBonus() {
-    // TODO Auto-generated method stub
-    return false;
+    return this.parkOffersBonus;
   }
 
   @Override
   public IQCarNature nature() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.nature;
   }
 
 }
