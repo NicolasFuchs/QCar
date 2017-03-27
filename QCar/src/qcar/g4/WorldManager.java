@@ -1,7 +1,10 @@
 package qcar.g4;
 
 import java.awt.geom.Line2D;
+<<<<<<< HEAD
 import java.awt.geom.Point2D;
+=======
+>>>>>>> Ajout des methodes add, remove et openNewSimulation au worldmanager
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
@@ -22,10 +25,11 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
   private Rectangle2D boundingBox;
   private List<? extends IDriver> players;
 
+
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
     if(o != null && !observers.contains(o))
-      observers.add(o);
+      this.observers.add(o);
   }
 
   @Override
@@ -46,7 +50,6 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
 
   @Override
   public boolean isSimulationOpened() {
-    // TODO Auto-generated method stub
     return isSimulationRunning;
   }
 
@@ -54,8 +57,9 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
     // TODO Auto-generated method stub
     step++;
-    // for each player, play
+    // TODO for each player, play
     notifyAll();
+
   }
 
   @Override
@@ -105,6 +109,8 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
     return new ArrayList<Line2D>();
   }
 
-
+  public WorldManager(){
+    this.observers = new ArrayList<>();
+  }
 
 }
