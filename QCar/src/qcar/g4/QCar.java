@@ -1,82 +1,98 @@
 package qcar.g4;
 
 import java.awt.geom.Point2D;
+import java.util.Arrays;
+import java.util.BitSet;
 
 import qcar.IQCar;
 import qcar.IQCarNature;
 
 public class QCar implements IQCar {
-  
 
-  private Point2D[] vertex ;
-  private int score ;
-  private boolean isAlive ;
-  private boolean[] vertexOffersBonus ;
-  private boolean[] sieOffersBonus ;
-  private boolean parkOffersBonus ;  
-  private QCarNature nature ;
-  
-  /**
-   * @param vertex, array of vertexes the 4 edges of the QCar
-   * @param score, the current score of the QCar
-   * @param isAlive, true if the QCar is alive
-   * @param vertexOffersBonus, array of booleans, true if the concerned vertex offers bonus
-   * @param sieOffersBonus, array of booleans, true if the concerned side offers bonus
-   * @param parkOffersBonus, true if park offers bonus
-   * @param nature, the nature of the QCar
-   */
-  public QCar(Point2D[] vertex, int score, boolean isAlive, boolean[] vertexOffersBonus,
-      boolean[] sieOffersBonus, boolean parkOffersBonus, QCarNature nature) {
-    this.vertex = vertex;
-    this.score = score;
-    this.isAlive = isAlive;
-    this.vertexOffersBonus = vertexOffersBonus;
-    this.sieOffersBonus = sieOffersBonus;
-    this.parkOffersBonus = parkOffersBonus;
+  private Point2D[] vertices = new Point2D[4];
+  private BitSet bonuses = new BitSet(vertices.length*2+1); //ex: 9 bits: 0-3=vertices, 4-7=sides, 8=parking
+  private int score = 0;
+  private IQCarNature nature;
+
+  //TODO check if we can pass vertices in the constructor
+  public QCar(QCarNature nature, Point2D[] vertices) {
     this.nature = nature;
+    this.vertices = vertices;
   }
   
-
   @Override
   public Point2D vertex(int vertexId) {
-    // TODO Auto-generated method stub
-    return null;
+    if(vertexId >= 0 && vertexId < vertices.length)
+      return vertices[vertexId];
+    else
+      throw new IndexOutOfBoundsException("vertexId: "+vertexId+" should be >= 0 but < "+vertices.length);
   }
 
   @Override
   public int score() {
-    // TODO Auto-generated method stub
-    return 0;
+    return score;
   }
 
   @Override
   public boolean isAlive() {
-    // TODO Auto-generated method stub
-    return false;
+    return bonuses.isEmpty();
   }
 
   @Override
   public boolean vertexOffersBonus(int vertexId) {
-    // TODO Auto-generated method stub
-    return false;
+    if (vertexId >= 0 && vertexId < vertices.length)
+      return bonuses.get(vertexId);
+    else 
+      throw new IndexOutOfBoundsException("vertexId: "+vertexId+" should be >= 0 but < "+vertices.length);
   }
 
   @Override
   public boolean sideOffersBonus(int sideId) {
-    // TODO Auto-generated method stub
-    return false;
+    if (sideId >= 0 && sideId < vertices.length)
+      return bonuses.get(sideId+vertices.length);
+    else 
+      throw new IndexOutOfBoundsException("sideId: "+sideId+" should be >= 0 but < "+vertices.length);
   }
 
   @Override
   public boolean parkOffersBonus() {
-    // TODO Auto-generated method stub
-    return false;
+    return bonuses.get(vertices.length);
   }
 
   @Override
   public IQCarNature nature() {
-    // TODO Auto-generated method stub
-    return null;
+    return nature;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder bld = new StringBuilder();
+    
+    if (vertices[0].getX() == vertices[1].getX()) { //offsetVertical
+      bld.append("          -----*\n");
+      bld.append("     -----     |\n");
+      bld.append("*-----         |\n");
+      bld.append("|              |\n");
+      bld.append("|              |\n");
+      bld.append("|         -----*\n");
+      bld.append("|    -----      \n");
+      bld.append("*-----           \n\n\n");
+    } else {
+      bld.append("*--------------*\n");
+      bld.append(" |              |\n");
+      bld.append("   |              |\n");
+      bld.append("     |              |\n");
+      bld.append("      *--------------*\n");
+    }
+    bld.append(Arrays.toString(vertices)+"\n");
+    bld.append(nature);
+    bld.append("\n\n");
+    
+    return bld.toString();
+  }
+  
+//  public static double distance(Point2D a, Point2D b) {
+//    return Math.sqrt(Math.sqrt(Math.abs(b.getX())-Math.abs(a.getX()) + Math.abs(b.getY())-Math.abs(a.getY())));
+//  }
+  
 }

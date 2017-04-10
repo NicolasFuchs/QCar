@@ -2,76 +2,78 @@ package qcar.g4;
 
 import qcar.IQCarNature;
 
-public class QCarNature implements IQCarNature{
-  
-  private int qCarId ;
-  private boolean isDriven ;
-  private double maxSideLength ;
-  private double minArea ;
-  private boolean isParkingTarget ;
-  private boolean isVertexTarget ;
-  private boolean isSideTarget ;  
+public class QCarNature implements IQCarNature {
 
-  /**
-   * @param qCarId, the Id of the QCar
-   * @param isDriven, true if the QCar is driven
-   * @param maxSideLength, the maximum sideLength allowed for that nature
-   * @param minArea, the minimum area allowed for that nature
-   * @param isParkingTarget, true if this nature gives points for parking
-   * @param isVertexTarget, true if this nature gives points for touching his vertexes
-   * @param isSideTarget, true if this nature gives points for touching his sides
-   */
-  public QCarNature(int qCarId, boolean isDriven, double maxSideLength, double minArea,
-      boolean isParkingTarget, boolean isVertexTarget, boolean isSideTarget) {
-    this.qCarId = qCarId;
-    this.isDriven = isDriven;
-    this.maxSideLength = maxSideLength;
-    this.minArea = minArea;
-    this.isParkingTarget = isParkingTarget;
-    this.isVertexTarget = isVertexTarget;
-    this.isSideTarget = isSideTarget;
-  }
+  private static int ID_COUNTER = 0;
   
+  private int id;
+  private boolean driven;
+  private boolean parkingTarget;
+  private boolean vertexTarget;
+  private boolean sideTarget;
+  private double maxSideLenght;
+  private double minArea;
+  
+  public QCarNature(boolean driven, boolean parkingTarget, boolean vertexTarget,
+      boolean sideTarget, double maxSideLenght, double minArea) {
+    super();
+    this.id = ID_COUNTER++;
+    this.driven = driven;
+    this.parkingTarget = parkingTarget;
+    this.vertexTarget = vertexTarget;
+    this.sideTarget = sideTarget;
+    this.maxSideLenght = maxSideLenght;
+    this.minArea = minArea;
+  }
+
   @Override
   public int qCarId() {
-    // TODO Auto-generated method stub
-    return 0;
+    return id;
   }
 
   @Override
   public boolean isDriven() {
-    // TODO Auto-generated method stub
-    return false;
+    return driven;
   }
 
   @Override
   public double maxSideLength() {
-    // TODO Auto-generated method stub
-    return 0;
+    return maxSideLenght;
   }
 
   @Override
   public double minArea() {
-    // TODO Auto-generated method stub
-    return 0;
+    return minArea;
   }
 
   @Override
   public boolean isParkingTarget() {
-    // TODO Auto-generated method stub
-    return false;
+    return parkingTarget;
   }
 
   @Override
   public boolean isVertexTarget() {
-    // TODO Auto-generated method stub
-    return false;
+    return vertexTarget;
   }
 
   @Override
   public boolean isSideTarget() {
-    // TODO Auto-generated method stub
-    return false;
+    return sideTarget;
   }
-
+  
+  @Override
+  public String toString() {
+    StringBuilder bld = new StringBuilder();
+    
+    bld.append("| ------- Nature ------- \n");
+    bld.append("| id: "+id+"\n");
+    bld.append("| driven: "+driven+"\n");
+    bld.append("| parkingTarget: "+parkingTarget+"\n");
+    bld.append("| vertexTarget: "+vertexTarget+"\n");
+    bld.append("| sideTarget: "+sideTarget+"\n");
+    bld.append("| maxSideLenght: "+maxSideLenght+"\n");
+    bld.append("| minArea: "+minArea+"\n");
+    
+    return bld.toString();
+  }
 }
