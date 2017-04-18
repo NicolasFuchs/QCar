@@ -9,6 +9,15 @@ public class SeenVertex implements ISeenVertex {
   
   QCar mySelf;
 
+  private QCarNature nature;
+  private int vertexId;
+  private boolean offersBonus;
+
+  public SeenVertex(int vertexId, QCarNature nature){
+    this.nature = nature;
+    this.vertexId = vertexId;
+  }
+
   @Override
   public IQCarNature nature() {
     // TODO Auto-generated method stub
@@ -17,14 +26,12 @@ public class SeenVertex implements ISeenVertex {
 
   @Override
   public int vertexId() {
-    // TODO Auto-generated method stub
-    return 0;
+    return vertexId;
   }
 
   @Override
   public boolean offersBonus() {
-    // TODO Auto-generated method stub
-    return false;
+    return offersBonus;
   }
 
   @Override
