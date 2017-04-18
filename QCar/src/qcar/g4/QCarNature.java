@@ -2,48 +2,43 @@ package qcar.g4;
 
 import qcar.IQCarNature;
 
-public class QCarNature implements IQCarNature{
-  
-  private int qCarId;
-  private boolean isDriven;
-  private double maxSideLength;
-  private double minArea;
-  private boolean isParkingTarget;
-  private boolean isVertexTarget;
-  private boolean isSideTarget;  
+public class QCarNature implements IQCarNature {
 
-  /**
-   * @param qCarId, the Id of the QCar
-   * @param isDriven, true if the QCar is driven
-   * @param maxSideLength, the maximum sideLength allowed for that nature
-   * @param minArea, the minimum area allowed for that nature
-   * @param isParkingTarget, true if this nature gives points for parking
-   * @param isVertexTarget, true if this nature gives points for touching his vertexes
-   * @param isSideTarget, true if this nature gives points for touching his sides
-   */
-  public QCarNature(int qCarId, boolean isDriven, double maxSideLength, double minArea, boolean isParkingTarget, boolean isVertexTarget, boolean isSideTarget) {
-    this.qCarId = qCarId;
-    this.isDriven = isDriven;
-    this.maxSideLength = maxSideLength;
-    this.minArea = minArea;
-    this.isParkingTarget = isParkingTarget;
-    this.isVertexTarget = isVertexTarget;
-    this.isSideTarget = isSideTarget;
-  }
+  private static int ID_COUNTER = 0;
   
+  private int id;
+  private boolean driven;
+  private boolean parkingTarget;
+  private boolean vertexTarget;
+  private boolean sideTarget;
+  private double maxSideLenght;
+  private double minArea;
+  
+  public QCarNature(boolean driven, boolean parkingTarget, boolean vertexTarget,
+      boolean sideTarget, double maxSideLenght, double minArea) {
+    super();
+    this.id = ID_COUNTER++;
+    this.driven = driven;
+    this.parkingTarget = parkingTarget;
+    this.vertexTarget = vertexTarget;
+    this.sideTarget = sideTarget;
+    this.maxSideLenght = maxSideLenght;
+    this.minArea = minArea;
+  }
+
   @Override
   public int qCarId() {
-    return this.qCarId;
+    return id;
   }
 
   @Override
   public boolean isDriven() {
-    return this.isDriven;
+    return driven;
   }
 
   @Override
   public double maxSideLength() {
-    return this.maxSideLength;
+    return maxSideLenght;
   }
 
   @Override
@@ -53,17 +48,32 @@ public class QCarNature implements IQCarNature{
 
   @Override
   public boolean isParkingTarget() {
-    return this.isParkingTarget;
+    return parkingTarget;
   }
 
   @Override
   public boolean isVertexTarget() {
-    return this.isVertexTarget;
+    return vertexTarget;
   }
 
   @Override
   public boolean isSideTarget() {
-    return this.isSideTarget;
+    return sideTarget;
   }
-
+  
+  @Override
+  public String toString() {
+    StringBuilder bld = new StringBuilder();
+    
+    bld.append("| ------- Nature ------- \n");
+    bld.append("| id: "+id+"\n");
+    bld.append("| driven: "+driven+"\n");
+    bld.append("| parkingTarget: "+parkingTarget+"\n");
+    bld.append("| vertexTarget: "+vertexTarget+"\n");
+    bld.append("| sideTarget: "+sideTarget+"\n");
+    bld.append("| maxSideLenght: "+maxSideLenght+"\n");
+    bld.append("| minArea: "+minArea+"\n");
+    
+    return bld.toString();
+  }
 }
