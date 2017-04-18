@@ -13,19 +13,16 @@ public class WorldManager implements IWorldManager {
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void removeWorldObserver(WorldChangeObserver o) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -37,13 +34,11 @@ public class WorldManager implements IWorldManager {
   @Override
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void closeSimulation() {
     // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -66,13 +61,13 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public List<IQCar> allQCars() {
-    Point2D[] vertex = {new Point2D.Double(0,0), new Point2D.Double(10,20), new Point2D.Double(30,20), new Point2D.Double(20,0)};
+    Point2D[] vertices = {new Point2D.Double(0,0), new Point2D.Double(10,20), new Point2D.Double(30,20), new Point2D.Double(20,0)};
     boolean[] vertexOffersBonus = {true, true, true, true};
     boolean[] sideOffersBonus = {true, true, true, true};
     boolean parkOffersBonus = false;
-    QCarNature qCarNature = new QCarNature(0, true, 100, 200, false, true, true);
+    QCarNature qCarNature = new QCarNature(true, false, true, true, 10, 100);
     
-    QCar car1 = new QCar(vertex, 0, true, vertexOffersBonus, sideOffersBonus, parkOffersBonus, qCarNature);
+    QCar car1 = new QCar(qCarNature, vertices);
     List<IQCar> listQCars = new ArrayList<IQCar>();
     listQCars.add(car1);
     return listQCars;
