@@ -1,7 +1,6 @@
 package qcar.g4;
 
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
@@ -21,7 +20,6 @@ public class WorldManager implements IWorldManager {
   private Rectangle2D boundingBox;
 
   private List<? extends IDriver> players;
-
 
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
@@ -55,6 +53,7 @@ public class WorldManager implements IWorldManager {
     // TODO Auto-generated method stub
     step++;
     // TODO for each player, play
+
     notifyAll();
   }
 
@@ -91,12 +90,14 @@ public class WorldManager implements IWorldManager {
   public List<Line2D> allPhotoSensors() {
     // TODO Auto-generated method stub
     return new ArrayList<Line2D>();
+
   }
 
   @Override
   public List<ICollision> allNewCollisions() {
     // TODO Auto-generated method stub
     return new ArrayList<ICollision>();
+
   }
 
   @Override
