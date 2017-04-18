@@ -9,26 +9,22 @@ public class Factory implements IFactory{
 
   @Override
   public int numberOfStyles() {
-    // TODO Auto-generated method stub
-    return 0;
+    return GameDescription.GameStyles.values().length;
   }
 
   @Override
   public IGameProvider newGameProvider(int style) {
-    // TODO Auto-generated method stub
-    return null;
+    return new GameProvider();
   }
 
   @Override
   public IDriver newSmartDriver() {
-    // TODO Auto-generated method stub
-    return null;
+    return new Driver();
   }
 
   @Override
   public IWorldManager newWorldManager() {
-    // TODO Auto-generated method stub
-    return null;
+    return new WorldManager();
   }
 
 }
