@@ -29,7 +29,7 @@ public class GameProvider implements IGameProvider {
     for (int i = 0; i < MAX_QCARS; i++) {
       
       if (R.nextDouble() > SPAWN_PROBABILITY) {
-        QCarNature nature = randomNature(drivers, nbOfDrivers);
+        QCarNature nature = randomNature(drivers++, nbOfDrivers);
         QCar car = new QCar(nature, randomAlignedPositions(nature));
         cars.add(car);
         System.out.println(car);
