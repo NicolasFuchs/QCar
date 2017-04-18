@@ -6,14 +6,20 @@ import java.util.List;
 
 import javafx.geometry.Rectangle2D;
 import qcar.*;
-import simviou.ObserverRegistrar;
 import simviou.WorldChangeObserver;
 
-public class WorldManager implements IWorldManager, ObserverRegistrar {
+public class WorldManager implements IWorldManager {
 
   private List<WorldChangeObserver> observers;      // contains all currently observing objects
   private long step;                                // number of step played
   private boolean isSimulationRunning;              // true if simulation is running else false
+  private List<IQCar> qcars;                        // contains all the qcars
+
+  private List<Line2D> photoSensors;
+  private List<Line2D> distanceSensors;
+  private Rectangle2D boundingBox;
+
+  private List<? extends IDriver> players;
 
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
@@ -28,15 +34,12 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
 
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
-    // TODO Auto-generated method stub
-    // add each qcar to the observer list
-    for (IQCar qcar : description.allQCar()) {
-      addWorldObserver((WorldChangeObserver) qcar);
+    qcars = description.allQCar();
+    for (IQCar qcar : qcars) {
+
     }
-    // add each driver to the observer list
-    for (IDriver driver: players) {
-      addWorldObserver((WorldChangeObserver) driver);
-    }
+    this.players = players;
+    this.step = 0;
   }
 
   @Override
@@ -48,9 +51,8 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
     // TODO Auto-generated method stub
     step++;
-    for (WorldChangeObserver o: observers) {
-      o.notify();
-    }
+    // for each player, play
+    notifyAll();
   }
 
   @Override
@@ -81,13 +83,7 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
 
   @Override
   public List<IQCar> allQCars() {
-    // TODO Auto-generated method stub
-    List<IQCar> allQCars;
-    for(int i = 0; i < observers.size(); i++){
-      // if(observers.get(i) instanceof IQCar)
-        // allQCars.add((IQCar) observers.get(i));
-    }
-    return null; //allQCars;
+    return qcars;
   }
 
   @Override
@@ -115,7 +111,9 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
   }
 
   public WorldManager(){
-    this.observers = new ArrayList<>();
+    this.observers = new ArrayList<WorldChangeObserver>();
+    this.step = 0;
+    isSimulationRunning = false;
   }
 
 }

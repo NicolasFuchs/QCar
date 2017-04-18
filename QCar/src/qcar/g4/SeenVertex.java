@@ -7,22 +7,28 @@ import qcar.ISeenVertex;
 
 public class SeenVertex implements ISeenVertex {
 
+  private QCarNature nature;
+  private int vertexId;
+  private boolean offersBonus;
+
+  public SeenVertex(int vertexId, QCarNature nature){
+    this.nature = nature;
+    this.vertexId = vertexId;
+  }
+
   @Override
   public IQCarNature nature() {
-    // TODO Auto-generated method stub
-    return null;
+    return nature;
   }
 
   @Override
   public int vertexId() {
-    // TODO Auto-generated method stub
-    return 0;
+    return vertexId;
   }
 
   @Override
   public boolean offersBonus() {
-    // TODO Auto-generated method stub
-    return false;
+    return offersBonus;
   }
 
   @Override
