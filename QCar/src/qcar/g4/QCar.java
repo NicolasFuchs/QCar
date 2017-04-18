@@ -10,7 +10,7 @@ import qcar.IQCarNature;
 public class QCar implements IQCar {
 
   private Point2D[] vertices = new Point2D[4];
-  private BitSet bonuses = new BitSet(vertices.length*2+1); //ex: 9 bits: 0-3=vertices, 4-7=sides, 8=parking
+  private BitSet bonuses = new BitSet(); //ex: 9 bits: 0-3=vertices, 4-7=sides, 8=parking
   private int score = 0;
   private IQCarNature nature;
 
@@ -18,15 +18,15 @@ public class QCar implements IQCar {
   public QCar(QCarNature nature, Point2D[] vertices) {
     this.nature = nature;
     this.vertices = vertices;
-    if(nature.isParkingTarget()){
+
+    bonuses.clear(0, 9);
+    
+    if(nature.isVertexTarget())
       bonuses.set(0, 4, true);
+    if(nature.isSideTarget())
+      bonuses.set(4, 8, true);
+    if(nature.isParkingTarget())
       bonuses.set(8);
-      bonuses.set(4, 8, false);
-    }
-    else{
-      bonuses.set(0, 8, true);
-      bonuses.clear(8);
-    }
   }
   
   @Override
@@ -44,7 +44,7 @@ public class QCar implements IQCar {
 
   @Override
   public boolean isAlive() {
-    return true;
+    return !bonuses.isEmpty();
   }
 
   @Override
