@@ -13,19 +13,16 @@ public class WorldManager implements IWorldManager {
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void removeWorldObserver(WorldChangeObserver o) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -37,13 +34,11 @@ public class WorldManager implements IWorldManager {
   @Override
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void closeSimulation() {
     // TODO Auto-generated method stub
-
   }
 
   @Override

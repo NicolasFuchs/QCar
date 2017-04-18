@@ -4,13 +4,13 @@ import qcar.IQCarNature;
 
 public class QCarNature implements IQCarNature{
   
-  private int qCarId ;
-  private boolean isDriven ;
-  private double maxSideLength ;
-  private double minArea ;
-  private boolean isParkingTarget ;
-  private boolean isVertexTarget ;
-  private boolean isSideTarget ;  
+  private int qCarId;
+  private boolean isDriven;
+  private double maxSideLength;
+  private double minArea;
+  private boolean isParkingTarget;
+  private boolean isVertexTarget;
+  private boolean isSideTarget;  
 
   /**
    * @param qCarId, the Id of the QCar

@@ -23,8 +23,7 @@ public class QCar implements IQCar {
    * @param parkOffersBonus, true if park offers bonus
    * @param nature, the nature of the QCar
    */
-  public QCar(Point2D[] vertex, int score, boolean isAlive, boolean[] vertexOffersBonus,
-      boolean[] sideOffersBonus, boolean parkOffersBonus, QCarNature nature) {
+  public QCar(Point2D[] vertex, int score, boolean isAlive, boolean[] vertexOffersBonus, boolean[] sideOffersBonus, boolean parkOffersBonus, QCarNature nature) {
     this.vertex = vertex;
     this.score = score;
     this.isAlive = isAlive;
@@ -33,7 +32,6 @@ public class QCar implements IQCar {
     this.parkOffersBonus = parkOffersBonus;
     this.nature = nature;
   }
-  
 
   @Override
   public Point2D vertex(int vertexId) {
