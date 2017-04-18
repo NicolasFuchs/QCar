@@ -1,8 +1,9 @@
 package qcar.g4;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.List;
-
 import javafx.geometry.Rectangle2D;
 import qcar.*;
 import simviou.WorldChangeObserver;
@@ -65,26 +66,34 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public List<IQCar> allQCars() {
-    // TODO Auto-generated method stub
-    return null;
+    Point2D[] vertex = {new Point2D.Double(0,0), new Point2D.Double(10,20), new Point2D.Double(30,20), new Point2D.Double(20,0)};
+    boolean[] vertexOffersBonus = {true, true, true, true};
+    boolean[] sideOffersBonus = {true, true, true, true};
+    boolean parkOffersBonus = false;
+    QCarNature qCarNature = new QCarNature(0, true, 100, 200, false, true, true);
+    
+    QCar car1 = new QCar(vertex, 0, true, vertexOffersBonus, sideOffersBonus, parkOffersBonus, qCarNature);
+    List<IQCar> listQCars = new ArrayList<IQCar>();
+    listQCars.add(car1);
+    return listQCars;
   }
 
   @Override
   public List<Line2D> allPhotoSensors() {
     // TODO Auto-generated method stub
-    return null;
+    return new ArrayList<Line2D>();
   }
 
   @Override
   public List<ICollision> allNewCollisions() {
     // TODO Auto-generated method stub
-    return null;
+    return new ArrayList<ICollision>();
   }
 
   @Override
   public List<Line2D> allDistanceSensors() {
     // TODO Auto-generated method stub
-    return null;
+    return new ArrayList<Line2D>();
   }
 
 }
