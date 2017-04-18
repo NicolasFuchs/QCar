@@ -1,28 +1,25 @@
 package qcar.g4;
 
 import java.awt.geom.Line2D;
-<<<<<<< HEAD
 import java.awt.geom.Point2D;
-=======
->>>>>>> Ajout des methodes add, remove et openNewSimulation au worldmanager
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
 import qcar.*;
-import simviou.ObserverRegistrar;
 import simviou.WorldChangeObserver;
 
-public class WorldManager implements IWorldManager, ObserverRegistrar {
+public class WorldManager implements IWorldManager {
 
   private List<WorldChangeObserver> observers;      // contains all currently observing objects
 
   private long step;                                // number of step played
   private boolean isSimulationRunning;              // true if simulation is running else false
-
   private List<IQCar> qcars;                        // contains all the qcars
+
   private List<Line2D> photoSensors;
   private List<Line2D> distanceSensors;
   private Rectangle2D boundingBox;
+
   private List<? extends IDriver> players;
 
 
@@ -59,7 +56,6 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
     step++;
     // TODO for each player, play
     notifyAll();
-
   }
 
   @Override
@@ -110,7 +106,9 @@ public class WorldManager implements IWorldManager, ObserverRegistrar {
   }
 
   public WorldManager(){
-    this.observers = new ArrayList<>();
+    this.observers = new ArrayList<WorldChangeObserver>();
+    this.step = 0;
+    isSimulationRunning = false;
   }
 
 }
