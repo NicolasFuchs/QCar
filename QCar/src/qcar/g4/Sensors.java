@@ -5,6 +5,10 @@ import java.util.List;
 import qcar.*;
 
 public class Sensors implements ISensors {
+  
+  QCar myself;
+  
+  
 
   @Override
   public List<ICollision> collisionsWithMe() {
@@ -21,7 +25,7 @@ public class Sensors implements ISensors {
   @Override
   public IQCar mySelf() {
     // TODO Auto-generated method stub
-    return null;
+    return this.mySelf;
   }
 
   @Override

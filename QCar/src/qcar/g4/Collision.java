@@ -31,38 +31,37 @@ public class Collision implements ICollision {
 
   @Override
   public Point2D position() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.position;
   }
 
   @Override
   public int hittingQCarId() {
     // TODO Auto-generated method stub
-    return 0;
+    return this.hittingQCarId;
   }
 
   @Override
   public int hittingSideOrVertexId() {
     // TODO Auto-generated method stub
-    return 0;
+    return this.hittingSideOrVertexId;
   }
 
   @Override
   public int hitQCarId() {
     // TODO Auto-generated method stub
-    return 0;
+    return this.hitQCarId;
   }
 
   @Override
   public int hitSideOrVertexId() {
     // TODO Auto-generated method stub
-    return 0;
+    return this.hitSideOrVertexId;
   }
 
   @Override
   public boolean isAgainstVertex() {
     // TODO Auto-generated method stub
-    return false;
+    return this.isAgainstVertex;
   }
 
   
