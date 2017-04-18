@@ -6,11 +6,13 @@ import qcar.IQCarNature;
 import qcar.ISeenVertex;
 
 public class SeenVertex implements ISeenVertex {
+  
+  QCar mySelf;
 
   @Override
   public IQCarNature nature() {
     // TODO Auto-generated method stub
-    return null;
+    return this.mySelf.nature();
   }
 
   @Override
