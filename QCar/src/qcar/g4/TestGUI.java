@@ -1,5 +1,7 @@
 package qcar.g4;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
@@ -13,6 +15,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import qcar.IDriver;
+import qcar.IGameDescription;
+import qcar.IGameProvider;
+import qcar.IWorldManager;
 import qcar.ui.*;
 import simviou.*;
 
@@ -53,7 +59,12 @@ public class TestGUI extends Application {
       }
     };
     
-    WorldManager wm = new WorldManager();
+    Factory fac = new Factory();
+    IGameProvider gp = fac.newGameProvider(10);
+    IWorldManager wm = fac.newWorldManager();
+    IGameDescription desc = gp.nextGame(10);
+    List<IDriver> dl = new ArrayList<IDriver>(); dl.add(fac.newSmartDriver());
+    wm.openNewSimulation(desc, dl);
     
     GridPane bigGrid = new GridPane();
     bigGrid.setPadding(new Insets(25));
