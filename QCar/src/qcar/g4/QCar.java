@@ -18,6 +18,15 @@ public class QCar implements IQCar {
   public QCar(QCarNature nature, Point2D[] vertices) {
     this.nature = nature;
     this.vertices = vertices;
+    if(nature.isParkingTarget()){
+      bonuses.set(0, 4, true);
+      bonuses.set(8);
+      bonuses.set(4, 8, false);
+    }
+    else{
+      bonuses.set(0, 8, true);
+      bonuses.clear(8);
+    }
   }
   
   @Override
