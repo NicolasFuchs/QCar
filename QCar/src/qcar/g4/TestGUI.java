@@ -1,7 +1,5 @@
 package qcar.g4;
 
-import java.awt.geom.Point2D;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
@@ -98,7 +96,7 @@ public class TestGUI extends Application {
             
             for (int vertexId = 0; vertexId < 4; vertexId++) {
               //System.out.println("current location : x = " + car.vertex(vertexId).getX() + " y = " + car.vertex(vertexId).getY());
-              car.
+              //car.
               //System.out.println("new location : x = " + car.vertex(vertexId).getX() + " y = " + car.vertex(vertexId).getY());
             }
           }

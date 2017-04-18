@@ -14,8 +14,7 @@ public class QCarNature implements IQCarNature {
   private double maxSideLenght;
   private double minArea;
   
-  public QCarNature(boolean driven, boolean parkingTarget, boolean vertexTarget,
-      boolean sideTarget, double maxSideLenght, double minArea) {
+  public QCarNature(boolean driven, boolean parkingTarget, boolean vertexTarget, boolean sideTarget, double maxSideLenght, double minArea) {
     super();
     this.id = ID_COUNTER++;
     this.driven = driven;
