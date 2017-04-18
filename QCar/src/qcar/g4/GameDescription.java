@@ -18,13 +18,6 @@ public class GameDescription implements IGameDescription{
     this.cars = cars;
   }
   
-  public void addQCar(IQCar qCar) {
-    if (qCar != null)
-      cars.add(qCar);
-    else 
-      throw new NullPointerException("qCar is null");
-  }
-  
   @Override
   public List<IQCar> allQCar() {
     return cars;

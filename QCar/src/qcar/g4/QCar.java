@@ -44,7 +44,7 @@ public class QCar implements IQCar {
 
   @Override
   public boolean isAlive() {
-    return bonuses.isEmpty();
+    return true;
   }
 
   @Override

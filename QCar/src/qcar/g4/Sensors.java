@@ -6,7 +6,7 @@ import qcar.*;
 
 public class Sensors implements ISensors {
   
-  QCar myself;
+  QCar mySelf;
   
   
 
