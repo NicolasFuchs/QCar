@@ -5,10 +5,8 @@ import qcar.IPlayerChannel;
 import qcar.ISensors;
 
 public class PlayerChannel implements IPlayerChannel {
-
   @Override
-  public ISensors play(IDecision decision) {
-    // TODO Auto-generated method stub
+  public ISensors play(IDecision decision) {    
     return null;
   }
 
