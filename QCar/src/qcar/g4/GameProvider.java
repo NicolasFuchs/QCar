@@ -49,7 +49,7 @@ public class GameProvider implements IGameProvider {
     double maxSideLenght = MAX_SIDE_LEGHT;
     double minArea = MIN_AREA;
     
-    QCarNature nature = new QCarNature(true, parkingTarget, vertexTarget, sideTarget, maxSideLenght, minArea);
+    QCarNature nature = new QCarNature(driven, parkingTarget, vertexTarget, sideTarget, maxSideLenght, minArea);
     
     return nature;
   }
