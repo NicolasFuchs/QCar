@@ -4,11 +4,8 @@ import java.util.List;
 
 import qcar.*;
 
-public class Sensors implements ISensors {
-  
-  QCar mySelf;
-  
-  
+public class Sensors implements ISensors {  
+  QCar mySelf;  
 
   @Override
   public List<ICollision> collisionsWithMe() {
