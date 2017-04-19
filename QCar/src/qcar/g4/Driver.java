@@ -1,5 +1,6 @@
 package qcar.g4;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -8,16 +9,16 @@ import qcar.*;
 public class Driver implements IDriver {
   Random r = new Random();
   IPlayerChannel pc;
-  
+
   Thread driverThread = new Thread() {
     public void run() {
       while (!interrupted()) {
-        sensors = pc.play(takeDecision(sensors)) ;
+        sensors = pc.play(takeDecision(sensors));
       }
     }
   };
-  
-  
+
+
   ISensors sensors;
   QCar myCar;
   int previousVertexCode = -1;
@@ -28,7 +29,7 @@ public class Driver implements IDriver {
     this.pc = pc;
     sensors = pc.play(MyDecision.IMMOBILE_DECISION);
     driverThread.start();
-    
+
   }
 
   @Override
@@ -50,7 +51,7 @@ public class Driver implements IDriver {
 
   // PRE : collisionWithMe is empty
   private IDecision freeDecision(ISensors sensors) {
-    return null;
+    return MyDecision.randomDecision();
   }
 
   // PRE : collisionWithMe is not empty
@@ -292,8 +293,8 @@ public class Driver implements IDriver {
             return decision;
           }
       }
-      previousSideCode = sideCode ;
-      return decision ;
+      previousSideCode = sideCode;
+      return decision;
     }
   }
 
@@ -337,10 +338,10 @@ public class Driver implements IDriver {
         new MyDecision(true, 3, -GameProvider.MAX_SIDE_LEGHT);
 
 
-
     private boolean isAngleMovement;
     private int sideId;
     private double requestedTranslation;
+    private static Random r = new Random();
 
     private MyDecision(boolean isAngleMovement, int sideId, double requestedTranslation) {
       this.isAngleMovement = isAngleMovement;
@@ -361,6 +362,10 @@ public class Driver implements IDriver {
     @Override
     public double requestedTranslation() {
       return requestedTranslation;
+    }
+
+    public static MyDecision randomDecision() {
+      return new MyDecision(r.nextBoolean(), r.nextInt(4), r.nextDouble()*GameProvider.MAX_SIDE_LEGHT);
     }
 
   }
