@@ -18,8 +18,7 @@ public class DistanceSensor implements IDistanceSensor {
    * @param sideId
    * @param rayEnd
    */
-  public DistanceSensor(boolean isSomethingDetected, QCarNature sensedSideNature, int sideId,
-      Point2D rayEnd) {
+  public DistanceSensor(boolean isSomethingDetected, QCarNature sensedSideNature, int sideId, Point2D rayEnd) {
     this.isSomethingDetected = isSomethingDetected;
     this.sensedSideNature = sensedSideNature;
     this.sideId = sideId;
