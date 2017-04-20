@@ -64,6 +64,4 @@ public class Collision implements ICollision {
     return this.isAgainstVertex;
   }
 
-  
-
 }

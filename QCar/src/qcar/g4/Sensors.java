@@ -1,30 +1,32 @@
 package qcar.g4;
 
 import java.util.List;
-
 import qcar.*;
 
 public class Sensors implements ISensors {
   
   QCar mySelf;
+  List<ISeenVertex> seenVert;
+  List<ICollision> colWithMe;
   
-  
+  public Sensors(IQCar myself, List<ISeenVertex> sv, List<ICollision> cwm) {
+    this.mySelf = (QCar)myself;
+    this.seenVert = sv;
+    this.colWithMe = cwm;
+  }
 
   @Override
   public List<ICollision> collisionsWithMe() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.colWithMe;
   }
 
   @Override
   public List<ISeenVertex> seenVertices() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.seenVert;
   }
 
   @Override
   public IQCar mySelf() {
-    // TODO Auto-generated method stub
     return this.mySelf;
   }
 

@@ -4,7 +4,6 @@ package qcar.g4;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Random;
-
 import qcar.IGameDescription;
 import qcar.IGameProvider;
 import qcar.IQCar;
