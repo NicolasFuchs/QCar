@@ -36,34 +36,27 @@ public class Collision implements ICollision {
 
   @Override
   public int hittingQCarId() {
-    // TODO Auto-generated method stub
     return this.hittingQCarId;
   }
 
   @Override
   public int hittingSideOrVertexId() {
-    // TODO Auto-generated method stub
     return this.hittingSideOrVertexId;
   }
 
   @Override
   public int hitQCarId() {
-    // TODO Auto-generated method stub
     return this.hitQCarId;
   }
 
   @Override
   public int hitSideOrVertexId() {
-    // TODO Auto-generated method stub
     return this.hitSideOrVertexId;
   }
 
   @Override
   public boolean isAgainstVertex() {
-    // TODO Auto-generated method stub
     return this.isAgainstVertex;
   }
-
-  
 
 }

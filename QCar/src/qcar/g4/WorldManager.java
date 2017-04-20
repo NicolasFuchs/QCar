@@ -13,14 +13,15 @@ public class WorldManager implements IWorldManager {
 
   private long step;                                // number of step played
   private boolean isSimulationRunning;              // true if simulation is running else false
-  private Rectangle2D boundingBox;
   private boolean isWarOver;
+  private Rectangle2D boundingBox;
 
   private List<IQCar> qcars;                        // contains all the qcars
   private List<Line2D> photoSensors;
   private List<Line2D> distanceSensors;
 
   private List<ICollision> collisions;
+
 
   private List<? extends IDriver> players;
   private ArrayList<IPlayerChannel> playerChannels;
@@ -30,7 +31,7 @@ public class WorldManager implements IWorldManager {
   */
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
-    if(o != null && !observers.contains(o))
+    if (o != null && !observers.contains(o))
       this.observers.add(o);
   }
 
@@ -55,6 +56,7 @@ public class WorldManager implements IWorldManager {
     for(IQCar q : qcars){
       if(q.nature().isDriven()){
         // TODO create sensors for the pilotes
+
       }
     }
 
@@ -85,7 +87,7 @@ public class WorldManager implements IWorldManager {
   @Override
   public void closeSimulation() {
     isSimulationRunning = false;
-    for(int i = 0; i < observers.size(); i++)
+    for (int i = 0; i < observers.size(); i++)
       observers.remove(i);
   }
 

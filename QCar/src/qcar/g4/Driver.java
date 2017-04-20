@@ -1,6 +1,5 @@
 package qcar.g4;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -9,10 +8,12 @@ import qcar.*;
 public class Driver implements IDriver {
   Random r = new Random();
   IPlayerChannel pc;
+  volatile boolean finished = false;
 
   Thread driverThread = new Thread() {
+
     public void run() {
-      while (!interrupted()) {
+      while (!finished) {
         sensors = pc.play(takeDecision(sensors));
       }
     }
@@ -29,12 +30,12 @@ public class Driver implements IDriver {
     this.pc = pc;
     sensors = pc.play(MyDecision.IMMOBILE_DECISION);
     driverThread.start();
-
   }
 
   @Override
   public void stopDriverThread() {
     try {
+      finished = true;
       driverThread.join();
     } catch (InterruptedException e) {
       e.printStackTrace();
@@ -365,7 +366,8 @@ public class Driver implements IDriver {
     }
 
     public static MyDecision randomDecision() {
-      return new MyDecision(r.nextBoolean(), r.nextInt(4), r.nextDouble()*GameProvider.MAX_SIDE_LEGHT);
+      return new MyDecision(r.nextBoolean(), r.nextInt(4),
+          r.nextDouble() * GameProvider.MAX_SIDE_LEGHT);
     }
 
   }
