@@ -1,6 +1,5 @@
 package qcar.g4;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -9,10 +8,10 @@ import qcar.*;
 public class Driver implements IDriver {
   Random r = new Random();
   IPlayerChannel pc;
-  volatile boolean finished = false ;
+  volatile boolean finished = false;
 
   Thread driverThread = new Thread() {
-    
+
     public void run() {
       while (!finished) {
         sensors = pc.play(takeDecision(sensors));
@@ -36,7 +35,7 @@ public class Driver implements IDriver {
   @Override
   public void stopDriverThread() {
     try {
-      finished = true ;
+      finished = true;
       driverThread.join();
     } catch (InterruptedException e) {
       e.printStackTrace();
