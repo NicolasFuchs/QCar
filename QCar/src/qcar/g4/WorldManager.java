@@ -13,14 +13,21 @@ public class WorldManager implements IWorldManager {
 
   private long step;                                // number of step played
   private boolean isSimulationRunning;              // true if simulation is running else false
-  private List<IQCar> qcars;                        // contains all the qcars
+  private Rectangle2D boundingBox;
+  private boolean isWarOver;
 
+  private List<IQCar> qcars;                        // contains all the qcars
   private List<Line2D> photoSensors;
   private List<Line2D> distanceSensors;
-  private Rectangle2D boundingBox;
+
+  private List<ICollision> collisions;
 
   private List<? extends IDriver> players;
+  private ArrayList<IPlayerChannel> playerChannels;
 
+  /*
+  *   Observers management
+  */
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
     if(o != null && !observers.contains(o))
@@ -32,14 +39,32 @@ public class WorldManager implements IWorldManager {
     observers.remove(o);
   }
 
+  private void notifyAllWorldObserver(int eventType){
+    for(WorldChangeObserver wo : observers){
+      wo.worldStateChanged(eventType, step);
+    }
+  }
+
+  /*
+  *   Simulation setup/teardown
+  */
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
-    // TODO Auto-generated method stub
     qcars = description.allQCar();
+
     for(IQCar q : qcars){
-      // TODO: get all sensors from qcar, check if is boundingBox
+      if(q.nature().isDriven()){
+        // TODO create sensors for the pilotes
+      }
     }
+
     this.players = players;
+
+    for(int i  = 0; i < players.size(); i++){
+      playerChannels.add(new PlayerChannel());
+    }
+
+    this.isSimulationRunning = true;
     this.step = 0;
   }
 
@@ -50,25 +75,27 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
-    // TODO Auto-generated method stub
-    step++;
     // TODO for each player, play
-
-    notifyAll();
+    for(int i = 0; i < players.size(); i++){
+      players.get(i).startDriverThread(playerChannels.get(i));
+    }
+    step++;
   }
 
   @Override
   public void closeSimulation() {
-    // TODO Auto-generated method stub
     isSimulationRunning = false;
     for(int i = 0; i < observers.size(); i++)
       observers.remove(i);
   }
 
+  /*
+  *   Snapshot of the current state. Common PRE-condition: isSimulationOpened()
+  */
+
   @Override
   public boolean isWarOver() {
-    // TODO Auto-generated method stub
-    return false;
+    return isWarOver;
   }
 
   @Override
@@ -88,28 +115,24 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public List<Line2D> allPhotoSensors() {
-    // TODO Auto-generated method stub
-    return new ArrayList<Line2D>();
-
+    return photoSensors;
   }
 
   @Override
   public List<ICollision> allNewCollisions() {
-    // TODO Auto-generated method stub
-    return new ArrayList<ICollision>();
-
+    return collisions;
   }
 
   @Override
   public List<Line2D> allDistanceSensors() {
-    // TODO Auto-generated method stub
-    return new ArrayList<Line2D>();
+    return distanceSensors;
   }
 
   public WorldManager(){
     this.observers = new ArrayList<WorldChangeObserver>();
-    this.step = 0;
-    isSimulationRunning = false;
+    this.photoSensors = new ArrayList<Line2D>();
+    this.distanceSensors = new ArrayList<Line2D>();
+    this.collisions = new ArrayList<ICollision>();
   }
 
 }
