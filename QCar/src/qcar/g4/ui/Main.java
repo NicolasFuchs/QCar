@@ -1,15 +1,19 @@
 package qcar.g4.ui;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import qcar.IDriver;
 import qcar.IGameDescription;
 import qcar.IGameProvider;
 import qcar.IWorldManager;
@@ -29,10 +33,10 @@ public class Main extends Application {
     stage.setWidth(1500);
     stage.setHeight(750);
 
-    int wX0 = 0;      // top left corner x world area
-    int wY0 = 0;      // top left corner y world area
-    int wX1 = 100;       // bottom right corner x world area
-    int wY1 = 100;       // bottom right corner y world area
+    int wX0 = -50;      // top left corner x world area
+    int wY0 = -50;      // top left corner y world area
+    int wX1 = 50;       // bottom right corner x world area
+    int wY1 = 50;       // bottom right corner y world area
     int sWidth = 750;   // screen area x-axis
     int sHeight = 500;  // screen area y-axis
     boolean keepRatio = true;
@@ -55,15 +59,11 @@ public class Main extends Application {
     };
     
     Factory fac = new Factory();
-    IGameProvider gp = fac.newGameProvider(0);
+    IGameProvider gp = fac.newGameProvider(10);
     IWorldManager wm = fac.newWorldManager();
-    IGameDescription desc = gp.nextGame(1);
-    List<IDriver> dl = new ArrayList<IDriver>(); dl.add(fac.newSmartDriver());
-    wm.openNewSimulation(desc, dl);
-    while(!wm.isWarOver()) {
-    //  wm.simulateOneStep(collectiveDelayInMicroSeconds);
-    }
-    wm.closeSimulation();
+    IGameDescription desc = gp.nextGame(10);
+    wm.openNewSimulation(desc, Arrays.asList(fac.newSmartDriver()));
+    //wm.closeSimulation();
     
     GridPane bigGrid = new GridPane();
     bigGrid.setPadding(new Insets(25));
@@ -72,11 +72,92 @@ public class Main extends Application {
     QCarAnimationPane pane = new QCarAnimationPane(v,Color.WHITE,uiOp,wm);
     pane.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, BorderWidths.DEFAULT)));
     
-    bigGrid.add(pane,1,0);
+    GridPane controls = new GridPane();
+    ImageView arrow_top =       new ImageView(new Image("qcar/g4/ui/resources/arrow_top.png")); arrow_top.setFitHeight(100); arrow_top.setFitWidth(100);
+    ImageView arrow_right =     new ImageView(new Image("qcar/g4/ui/resources/arrow_right.png")); arrow_right.setFitHeight(100); arrow_right.setFitWidth(100);
+    ImageView arrow_bottom =    new ImageView(new Image("qcar/g4/ui/resources/arrow_bottom.png")); arrow_bottom.setFitHeight(100); arrow_bottom.setFitWidth(100);
+    ImageView arrow_left =      new ImageView(new Image("qcar/g4/ui/resources/arrow_left.png")); arrow_left.setFitHeight(100); arrow_left.setFitWidth(100);
+    controls.add(arrow_top,1,0); controls.add(arrow_right,2,1); controls.add(arrow_bottom,1,2); controls.add(arrow_left,0,1);
     
+    Slider slider = new Slider();
+    
+    VBox trans_rot = new VBox();
+    Button translation = new Button("TRANSLATION");
+    Button rotation = new Button("ROTATION");
+    Button simulOneStep = new Button("SIMULATE ONE STEP");
+    trans_rot.getChildren().add(translation); trans_rot.getChildren().add(rotation); trans_rot.getChildren().add(simulOneStep);
+
+    bigGrid.add(pane,1,0); bigGrid.add(controls,0,1); bigGrid.add(trans_rot,0,0); bigGrid.add(slider,1,1);
+
     Scene scene = new Scene(bigGrid);
     stage.setScene(scene); stage.setHeight(850); stage.setWidth(1250);
     stage.show();
     
+    arrow_top.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+          System.out.println("arrow_top clicked!");
+      }
+    });
+    arrow_right.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+          System.out.println("arrow_right clicked!");
+//          for (qcar.IQCar car : wm.allQCars()) {
+//            
+//            for (int vertexId = 0; vertexId < 4; vertexId++) {
+//              System.out.println("current location : x = " + car.vertex(vertexId).getX() + " y = " + car.vertex(vertexId).getY());
+//              car.
+//              System.out.println("new location : x = " + car.vertex(vertexId).getX() + " y = " + car.vertex(vertexId).getY());
+//            }
+//          }
+          pane.updateLayersTransforms();
+      }
+    });
+    arrow_bottom.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+          System.out.println("arrow_bottom clicked!");
+      }
+    });
+    arrow_left.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+          System.out.println("arrow_left clicked!");
+      }
+    });
+    translation.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      boolean is_trans_selected = false;
+      @Override
+      public void handle(MouseEvent event) {
+        if (is_trans_selected) {
+          is_trans_selected = false;
+          rotation.setDisable(false);
+        } else {
+          is_trans_selected = true;
+          rotation.setDisable(true);
+        }
+      }
+    });
+    rotation.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      boolean is_rot_selected = false;
+      @Override
+      public void handle(MouseEvent event) {
+        if (is_rot_selected) {
+          is_rot_selected = false;
+          translation.setDisable(false);
+        } else {
+          is_rot_selected = true;
+          translation.setDisable(true);
+        }
+      }
+    });
+    simulOneStep.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+        wm.simulateOneStep(0);
+      }
+    });
   }
+
 }

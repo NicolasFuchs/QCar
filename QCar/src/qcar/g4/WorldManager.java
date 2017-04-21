@@ -24,7 +24,7 @@ public class WorldManager implements IWorldManager {
 
 
   private List<? extends IDriver> players;
-  private ArrayList<IPlayerChannel> playerChannels;
+  private ArrayList<PlayerChannel> playerChannels;
 
   /*
   *   Observers management
@@ -78,6 +78,7 @@ public class WorldManager implements IWorldManager {
   @Override
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
     // TODO for each player, play
+    System.out.println("simulateOneStep Method entered !");
     for(int i = 0; i < players.size(); i++){
       players.get(i).startDriverThread(playerChannels.get(i));
     }
@@ -135,6 +136,7 @@ public class WorldManager implements IWorldManager {
     this.photoSensors = new ArrayList<Line2D>();
     this.distanceSensors = new ArrayList<Line2D>();
     this.collisions = new ArrayList<ICollision>();
+    this.playerChannels = new ArrayList<PlayerChannel>();
   }
 
 }
