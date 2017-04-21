@@ -11,9 +11,9 @@ public class PlayerChannel implements IPlayerChannel {
 
   @Override
   public ISensors play(IDecision decision) {  
-    // 1 : reÃ§oit une dÃ©cision du Driver
-    this.decision = decision ;   
-    // 2 : envoie la dÃ©cision au WorldManager (il la rÃ©cupÃ¨re)    
+    // 1 : reçoit une décision du Driver
+    this.decision = decision ;
+    // 2 : envoie la décision au WorldManager (il la récupère)    
     // 3 : BLOCK : attend les senseurs du WorldManager 
     // (le world manager setSensors) + unlock
     // 4 : envoie les senseurs au Driver

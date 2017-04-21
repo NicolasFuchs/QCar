@@ -43,11 +43,14 @@ public class Driver implements IDriver {
   }
 
   private IDecision takeDecision(ISensors sensors) {
+    if (sensors != null) {
     if (sensors.collisionsWithMe().isEmpty()) {
       return freeDecision(sensors);
     } else {
       return collisionDecision(sensors.collisionsWithMe());
     }
+    }
+    return null;
   }
 
   // PRE : collisionWithMe is empty

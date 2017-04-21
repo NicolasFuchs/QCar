@@ -1,15 +1,17 @@
 package qcar.g4.ui;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import qcar.IDriver;
 import qcar.IGameDescription;
 import qcar.IGameProvider;
 import qcar.IWorldManager;
@@ -55,24 +57,92 @@ public class Main extends Application {
     };
     
     Factory fac = new Factory();
-    IGameProvider gp = fac.newGameProvider(0);
+    IGameProvider gp = fac.newGameProvider(10);
     IWorldManager wm = fac.newWorldManager();
-    IGameDescription desc = gp.nextGame(1);
-    List<IDriver> dl = new ArrayList<IDriver>(); dl.add(fac.newSmartDriver());
-    wm.openNewSimulation(desc, dl);
+    IGameDescription desc = gp.nextGame(10);
+    wm.openNewSimulation(desc, Arrays.asList(fac.newSmartDriver()));
+    //wm.closeSimulation();
     
-    GridPane bigGrid = new GridPane();
-    bigGrid.setPadding(new Insets(25));
-    bigGrid.setBorder(new Border(new BorderStroke(Color.ORANGE, BorderStrokeStyle.SOLID, null, BorderWidths.DEFAULT)));
-    
-    QCarAnimationPane pane = new QCarAnimationPane(v,Color.WHITE,uiOp,wm);
-    pane.setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, BorderWidths.DEFAULT)));
-    
-    bigGrid.add(pane,1,0);
-    
-    Scene scene = new Scene(bigGrid);
-    stage.setScene(scene); stage.setHeight(850); stage.setWidth(1250);
-    stage.show();
-    
+    try {
+      FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("resources/fxml/view.fxml"));
+      GridPane fxmlpane = (GridPane) fxmlloader.load();
+      
+      QCarAnimationPane pane = new QCarAnimationPane(v,Color.WHITE,uiOp,wm);
+      ImageView arrow_top = (ImageView) fxmlloader.getNamespace().get("arrow_top");
+      ImageView arrow_right = (ImageView) fxmlloader.getNamespace().get("arrow_right");
+      ImageView arrow_bottom = (ImageView) fxmlloader.getNamespace().get("arrow_bottom");
+      ImageView arrow_left = (ImageView) fxmlloader.getNamespace().get("arrow_left");
+      Button translation = (Button) fxmlloader.getNamespace().get("translation");
+      Button rotation = (Button) fxmlloader.getNamespace().get("rotation");
+      Button simulOneStep = (Button) fxmlloader.getNamespace().get("simulOneStep");
+      Pane qcarPane = (Pane) fxmlloader.getNamespace().get("qcarPane");
+      qcarPane.getChildren().add(pane);
+      
+      arrow_top.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+            System.out.println("arrow_top clicked!");
+        }
+      });
+      arrow_right.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+          System.out.println("arrow_right clicked!");
+        }
+      });
+      arrow_bottom.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+          System.out.println("arrow_bottom clicked!");
+        }
+      });
+      arrow_left.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+          System.out.println("arrow_left clicked!");
+        }
+      });
+      translation.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        boolean is_trans_selected = false;
+        @Override
+        public void handle(MouseEvent event) {
+          if (is_trans_selected) {
+            is_trans_selected = false;
+            rotation.setDisable(false);
+          } else {
+            is_trans_selected = true;
+            rotation.setDisable(true);
+          }
+        }
+      });
+      rotation.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        boolean is_rot_selected = false;
+        @Override
+        public void handle(MouseEvent event) {
+          if (is_rot_selected) {
+            is_rot_selected = false;
+            translation.setDisable(false);
+          } else {
+            is_rot_selected = true;
+            translation.setDisable(true);
+          }
+        }
+      });
+      simulOneStep.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+          wm.simulateOneStep(0);
+        }
+      });
+      
+      Scene scene = new Scene(fxmlpane);
+      stage.setScene(scene); stage.setHeight(850); stage.setWidth(1250);
+      stage.show();
+      
+    } catch (Exception e) {
+      System.out.println("The FXMLLoader has failed to load the fxml file view.fxml!");
+      e.printStackTrace();
+    }
   }
+
 }
