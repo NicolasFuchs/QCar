@@ -60,6 +60,10 @@ public class Main extends Application {
     IGameDescription desc = gp.nextGame(1);
     List<IDriver> dl = new ArrayList<IDriver>(); dl.add(fac.newSmartDriver());
     wm.openNewSimulation(desc, dl);
+    while(!wm.isWarOver()) {
+    //  wm.simulateOneStep(collectiveDelayInMicroSeconds);
+    }
+    wm.closeSimulation();
     
     GridPane bigGrid = new GridPane();
     bigGrid.setPadding(new Insets(25));
