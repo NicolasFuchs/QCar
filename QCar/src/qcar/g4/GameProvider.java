@@ -1,6 +1,5 @@
 package qcar.g4;
 
-
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Random;
@@ -16,8 +15,7 @@ public class GameProvider implements IGameProvider {
   public static final int PARALLELOGRAM_SCALE = 20;
   
   public static final double MIN_AREA = 1.3;
-  public static final double MAX_SIDE_LEGHT = 7.4;
-  
+  public static final double MAX_SIDE_LENGHT = 7.4;
   
   @Override
   public IGameDescription nextGame(int nbOfDrivers) {
@@ -45,7 +43,7 @@ public class GameProvider implements IGameProvider {
     boolean parkingTarget = driven ? false : R.nextBoolean();
     boolean vertexTarget = R.nextBoolean();
     boolean sideTarget = R.nextBoolean();
-    double maxSideLenght = MAX_SIDE_LEGHT;
+    double maxSideLenght = MAX_SIDE_LENGHT;
     double minArea = MIN_AREA;
     
     QCarNature nature = new QCarNature(driven, parkingTarget, vertexTarget, sideTarget, maxSideLenght, minArea);
@@ -68,24 +66,24 @@ public class GameProvider implements IGameProvider {
     
     double posX = R.nextDouble()*positionFactor;
     double posY = R.nextDouble()*positionFactor;
-    points[0] = new Point2D.Double(posX, posY);
+    points[1] = new Point2D.Double(posX, posY);
 
     if (offsetVertical) {
       posY = posY-verticalSideLenght;
-      points[1] = new Point2D.Double(posX, posY);
+      points[0] = new Point2D.Double(posX, posY);
       posY = posY - offset;
       posX = posX - Math.sqrt(Math.abs((horizontalSideLenght*horizontalSideLenght)-(offset*offset)));
-      points[2] = new Point2D.Double(posX, posY);
+      points[3] = new Point2D.Double(posX, posY);
       posY = posY + verticalSideLenght;
-      points[3] = new Point2D.Double(posX, posY);
-    }else {
+      points[2] = new Point2D.Double(posX, posY);
+    } else {
       posX = posX-horizontalSideLenght;
-      points[3] = new Point2D.Double(posX, posY);
+      points[2] = new Point2D.Double(posX, posY);
       posX = posX - offset;
       posY = posY - Math.sqrt(Math.abs((verticalSideLenght*verticalSideLenght)-(offset*offset)));
-      points[2] = new Point2D.Double(posX, posY);
+      points[3] = new Point2D.Double(posX, posY);
       posX = posX + horizontalSideLenght;
-      points[1] = new Point2D.Double(posX, posY);
+      points[0] = new Point2D.Double(posX, posY);
     }
     
     return points;
