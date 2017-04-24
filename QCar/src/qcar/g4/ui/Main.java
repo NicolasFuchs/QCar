@@ -1,6 +1,7 @@
 package qcar.g4.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -58,8 +59,7 @@ public class Main extends Application {
     IGameProvider gp = fac.newGameProvider(0);
     IWorldManager wm = fac.newWorldManager();
     IGameDescription desc = gp.nextGame(1);
-    List<IDriver> dl = new ArrayList<IDriver>(); dl.add(fac.newSmartDriver());
-    wm.openNewSimulation(desc, dl);
+    wm.openNewSimulation(desc, Arrays.asList(fac.newSmartDriver()));
     
     GridPane bigGrid = new GridPane();
     bigGrid.setPadding(new Insets(25));
