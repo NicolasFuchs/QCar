@@ -1,4 +1,4 @@
-package qcar.g4.test.junit;
+package qcar.g4.test.api;
 
 import static org.junit.Assert.*;
 
