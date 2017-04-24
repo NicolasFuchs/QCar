@@ -17,6 +17,9 @@ public class GameProvider implements IGameProvider {
   public static final double MIN_AREA = 1.3;
   public static final double MAX_SIDE_LENGHT = 7.4;
   
+  
+  
+  
   @Override
   public IGameDescription nextGame(int nbOfDrivers) {
     

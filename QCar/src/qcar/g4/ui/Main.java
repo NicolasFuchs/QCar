@@ -61,9 +61,11 @@ public class Main extends Application {
     Factory fac = new Factory();
     IGameProvider gp = fac.newGameProvider(10);
     IWorldManager wm = fac.newWorldManager();
+
     IGameDescription desc = gp.nextGame(10);
     wm.openNewSimulation(desc, Arrays.asList(fac.newSmartDriver()));
     //wm.closeSimulation();
+
     
     try {
       FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("resources/fxml/view.fxml"));
