@@ -49,13 +49,6 @@ public class QCar implements IQCar {
       vertices[p1] = new Point2D.Double(vertices[p1].getX()-vector[0],vertices[p1].getY()-vector[1]);
       vertices[p2] = new Point2D.Double(vertices[p2].getX()-vector[0],vertices[p2].getY()-vector[1]);
     }
-//    System.out.println("QCar " + nature.qCarId());
-//    for (int i = 0; i < 4; i++) {
-//      System.out.println("Vertex " + i);
-//      System.out.println("X : " + vertices[i].getX());
-//      System.out.println("Y : " + vertices[i].getY());
-//    }
-//    System.out.println();
   }
   
   @Override

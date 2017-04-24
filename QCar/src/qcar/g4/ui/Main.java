@@ -135,7 +135,7 @@ public class Main extends Application {
         public void handle(MouseEvent event) {
           //wm.simulateOneStep(0);
           for (IQCar car : wm.allQCars()) {
-            ((QCar)car).update(false, 2, 5);
+            ((QCar)car).update(true, 0, 5);
           }
           pane.refreshView();
         }
