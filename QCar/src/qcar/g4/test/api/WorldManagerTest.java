@@ -5,6 +5,11 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 import qcar.*;
 
+/*
+    This class tests the api implementation of the world manager
+    Author: group 4
+ */
+
 public class WorldManagerTest extends ApiTest{
 
   private final IWorldManager wm;

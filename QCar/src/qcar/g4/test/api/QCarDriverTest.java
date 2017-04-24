@@ -4,6 +4,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import qcar.*;
 
+/*
+    This class tests the api implementation of the smart driver
+    Author: group 4
+ */
+
 public class QCarDriverTest extends ApiTest{
 
   public QCarDriverTest(IFactory fact, IFactory aux) {
