@@ -1,5 +1,28 @@
 package qcar.g4.test.api;
 
-public class QCarDriverTest {
+import org.junit.Test;
+import static org.junit.Assert.*;
+import qcar.*;
+
+public class QCarDriverTest extends ApiTest{
+
+  public QCarDriverTest(IFactory fact, IFactory aux) {
+    super(fact, aux);
+  }
+
+  @Test
+  public void driverTest(){
+    int nThreads = Thread.activeCount();
+    IFactory f = factoryUnderTest;
+    IDriver driver = f.newSmartDriver();
+    driver.startDriverThread(new DummyPlayerChannel());
+    assertEquals(nThreads + 1, Thread.activeCount());
+    driver.stopDriverThread();
+    assertEquals(nThreads, Thread.activeCount());
+  }
+
+  private static class DummyPlayerChannel implements IPlayerChannel{
+    @Override public ISensors play(IDecision d){return null;}
+  }
 
 }
