@@ -51,6 +51,12 @@ public class WorldManager implements IWorldManager {
   */
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
+    /*
+     * create sensors
+     * start driver threads
+     * receive decisions (discard them)
+     * compute sensors
+     */
     qcars = description.allQCar();
 
     for(IQCar q : qcars){
@@ -62,6 +68,8 @@ public class WorldManager implements IWorldManager {
 
     this.players = players;
 
+    playerChannels = new ArrayList<IPlayerChannel>();
+    
     for(int i  = 0; i < players.size(); i++){
       playerChannels.add(new PlayerChannel());
     }
@@ -77,6 +85,13 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
+    /*
+     * send sensors
+     * receive decisions
+     * execute decisions
+     * compute collisions
+     * compute sensors
+     */
     // TODO for each player, play
     for(int i = 0; i < players.size(); i++){
       players.get(i).startDriverThread(playerChannels.get(i));
@@ -86,6 +101,10 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public void closeSimulation() {
+    /*
+     * stop threads
+     * send sensors
+     */
     isSimulationRunning = false;
     for (int i = 0; i < observers.size(); i++)
       observers.remove(i);

@@ -9,7 +9,7 @@ import qcar.IQCar;
 public class GameDescription implements IGameDescription{
   
   public enum GameStyles {
-    WITHOUT_BORDERS, WITH_BORDERS
+    WITHOUT_BORDERS, WITH_BORDERS, NO_PARKINGS, DRIVERS_ONLY
   }
   
   private ArrayList<IQCar> cars;
