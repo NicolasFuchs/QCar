@@ -65,7 +65,7 @@ public class WorldManager implements IWorldManager {
     updateWorldState(); // update the world for the initial configuration
 
     for(int i = 0; i < players.size(); i++) {
-      players.get(i).startDriverThread(playerChannels.get(i));
+      //players.get(i).startDriverThread(playerChannels.get(i));
     }
 
     for(int i = 0; i < players.size(); i++) {

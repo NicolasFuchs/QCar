@@ -32,7 +32,7 @@ public class GameProvider implements IGameProvider {
         QCarNature nature = randomNature(drivers++, nbOfDrivers);
         QCar car = new QCar(nature, randomAlignedPositions(nature));
         cars.add(car);
-        System.out.println(car);
+        //System.out.println(car);
       }
       
     }
