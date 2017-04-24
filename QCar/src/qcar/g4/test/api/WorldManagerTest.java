@@ -32,6 +32,19 @@ public class WorldManagerTest extends ApiTest{
   }
 
   @Test
+  public void testQCarSensors(){
+    int nDrivenQCar = 3;
+    IGameDescription gd = factoryUnderTest.newGameProvider(0).nextGame(nDrivenQCar);
+    wm.openNewSimulation(gd, Arrays.asList(
+        factoryUnderTest.newSmartDriver(),
+        factoryUnderTest.newSmartDriver(),
+        factoryUnderTest.newSmartDriver()));
+    assertTrue(nDrivenQCar == wm.allDistanceSensors().size());
+    assertTrue(nDrivenQCar == wm.allPhotoSensors().size());
+  }
+
+
+  @Test
   public void testSimulationTearDown(){
     IGameDescription gd = factoryUnderTest.newGameProvider(0).nextGame(1);
     wm.openNewSimulation(gd, Arrays.asList(factoryUnderTest.newSmartDriver()));
