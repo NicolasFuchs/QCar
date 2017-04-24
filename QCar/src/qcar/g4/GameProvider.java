@@ -19,6 +19,9 @@ public class GameProvider implements IGameProvider {
   public static final double MAX_SIDE_LEGHT = 7.4;
   
   
+  
+  
+  
   @Override
   public IGameDescription nextGame(int nbOfDrivers) {
     
