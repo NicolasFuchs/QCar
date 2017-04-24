@@ -12,10 +12,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import qcar.IQCar;
 import qcar.IGameDescription;
 import qcar.IGameProvider;
 import qcar.IWorldManager;
 import qcar.g4.Factory;
+import qcar.g4.QCar;
 import qcar.ui.*;
 import simviou.*;
 
@@ -62,7 +64,7 @@ public class Main extends Application {
     IGameDescription desc = gp.nextGame(10);
     wm.openNewSimulation(desc, Arrays.asList(fac.newSmartDriver()));
     //wm.closeSimulation();
-    
+
     try {
       FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("resources/fxml/view.fxml"));
       GridPane fxmlpane = (GridPane) fxmlloader.load();
@@ -131,7 +133,11 @@ public class Main extends Application {
       simulOneStep.setOnMouseClicked(new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent event) {
-          wm.simulateOneStep(0);
+          //wm.simulateOneStep(0);
+          for (IQCar car : wm.allQCars()) {
+            ((QCar)car).update(true, 0, 5);
+          }
+          pane.refreshView();
         }
       });
       

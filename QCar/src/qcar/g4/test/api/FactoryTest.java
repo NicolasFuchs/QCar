@@ -1,12 +1,10 @@
 package qcar.g4.test.api;
 
 import static org.junit.Assert.*;
-import org.junit.Test;
 
-import qcar.ApiTest;
-import qcar.IFactory;
-import qcar.IGameDescription;
-import qcar.IGameProvider;
+import java.util.List;
+import org.junit.Test;
+import qcar.*;
 
 public class FactoryTest extends ApiTest {
   
@@ -15,7 +13,7 @@ public class FactoryTest extends ApiTest {
   }
   
   @Test
-  public void testNumberOfPlayers(){
+  public void testNumberOfDrivers(){
     int nbPlayers = 10;
     IFactory f = factoryUnderTest;
     int nStyles = f.numberOfStyles();
@@ -25,7 +23,12 @@ public class FactoryTest extends ApiTest {
     for(int i=1; i < nbPlayers; i++){
       gd = g.nextGame(i);
       assertTrue(!gd.allQCar().isEmpty());
-      assertTrue(gd.allQCar().size()==i);
+      int driverCount = 0;
+      List<IQCar> qcars = gd.allQCar();
+      for(int j = 0; j <qcars.size(); j++){
+        if(qcars.get(j).nature().isDriven()) driverCount++;
+      }
+      assertTrue(i == driverCount);
     }
   }
   
@@ -52,11 +55,5 @@ public class FactoryTest extends ApiTest {
     assertTrue(factoryUnderTest.newWorldManager()!=null);
   }
   // ---------------------------------------------------------------------------
-
-  
-  public static void main(String[] args) {
-
-
-  }
 
 }

@@ -1,6 +1,7 @@
 package qcar.g4;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
@@ -21,7 +22,6 @@ public class WorldManager implements IWorldManager {
   private List<Line2D> distanceSensors;
 
   private List<ICollision> collisions;
-
 
   private List<? extends IDriver> players;
   private ArrayList<PlayerChannel> playerChannels;
@@ -51,23 +51,27 @@ public class WorldManager implements IWorldManager {
   */
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
+
     qcars = description.allQCar();
-
-    for(IQCar q : qcars){
-      if(q.nature().isDriven()){
-        // TODO create sensors for the pilotes
-
-      }
-    }
-
     this.players = players;
+    this.isSimulationRunning = true;
+    this.step = 0;
 
+    // create a channel for each player
     for(int i  = 0; i < players.size(); i++){
       playerChannels.add(new PlayerChannel());
     }
 
-    this.isSimulationRunning = true;
-    this.step = 0;
+    updateWorldState(); // update the world for the initial configuration
+
+    for(int i = 0; i < players.size(); i++) {
+      //players.get(i).startDriverThread(playerChannels.get(i));
+    }
+
+    for(int i = 0; i < players.size(); i++) {
+      playerChannels.get(i).sendSensors(null);
+    }
+
   }
 
   @Override
@@ -77,19 +81,30 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public void simulateOneStep(long collectiveDelayInMicroSeconds) {
-    // TODO for each player, play
-    System.out.println("simulateOneStep Method entered !");
-    for(int i = 0; i < players.size(); i++){
-      players.get(i).startDriverThread(playerChannels.get(i));
-    }
+
+    /*
+        This method needs to :
+          - get each driver decision and apply it to their qcar
+          - update the state of the world (sensors, collision, isWarOver, ...)
+          - send the sensors the qcar drivers
+          - notify the view of the change
+          - increment the number of step
+     */
+
     step++;
+    // notifyAllWorldObserver(0);
   }
 
   @Override
   public void closeSimulation() {
+
+    // stop each player's thread and release them from the chan
+    for(int i = 0; i < players.size(); i++) {
+      players.get(i).stopDriverThread();
+      playerChannels.get(i).sendSensors(null);
+    }
+
     isSimulationRunning = false;
-    for (int i = 0; i < observers.size(); i++)
-      observers.remove(i);
   }
 
   /*
@@ -138,5 +153,15 @@ public class WorldManager implements IWorldManager {
     this.collisions = new ArrayList<ICollision>();
     this.playerChannels = new ArrayList<PlayerChannel>();
   }
+
+  // ======== Private methods =======================================
+
+  /*
+        Update the state of the world according to the latest changes
+   */
+  private void updateWorldState(){
+
+  }
+
 
 }
