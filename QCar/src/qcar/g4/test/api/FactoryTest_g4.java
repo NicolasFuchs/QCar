@@ -11,9 +11,9 @@ import qcar.*;
     Author: group 4
  */
 
-public class FactoryTest extends ApiTest {
+public class FactoryTest_g4 extends ApiTest {
   
-  public FactoryTest(IFactory fact, IFactory aux) {
+  public FactoryTest_g4(IFactory fact, IFactory aux) {
     super(fact, aux);
   }
   
