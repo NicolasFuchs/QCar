@@ -17,13 +17,78 @@ public class GameProvider implements IGameProvider {
   public static final double MIN_AREA = 1.3;
   public static final double MAX_SIDE_LENGHT = 7.4;
   
+  private GameDescription.GameStyles game;
   
+  // Create constructor for game styles
+  // take enum from GameDescritpion as input and load wanted datas in GameProvider instance
+  public GameProvider(GameDescription.GameStyles game){
+    
+    ArrayList<IQCar> cars = new ArrayList<IQCar>();
+
+    this.game = game;
+    /*
+    switch (game){
+      case STANDARD:;
+        
+        break;
+      case PARKINGS:;
+        break;
+      case DEBUG:
+        QCarNature nature = new QCarNature(true, false, true, true, MAX_SIDE_LENGHT, MIN_AREA);
+        QCar car = new QCar(nature, randomAlignedPositions(nature));
+        cars.add(car);
+        
+      break;
+
+      case WITHOUT_BORDERS:;
+      break;
+
+      case WITH_BORDERS:;
+      break;
+
+      case NO_PARKINGS:;
+      break;
+
+      case DRIVERS_ONLY:;
+      break;
+        
+      default:;    
+    }
+    */
+  }
   
   
   @Override
   public IGameDescription nextGame(int nbOfDrivers) {
     
     ArrayList<IQCar> cars = new ArrayList<IQCar>();
+    switch (game){
+      case STANDARD: cars = standardStyle(nbOfDrivers);
+        break;
+      case PARKINGS: cars = parkingsStyle(nbOfDrivers, 2);
+        break;
+      case DEBUG: cars = debugStyle();
+        break;
+
+      case WITHOUT_BORDERS:;
+      break;
+
+      case WITH_BORDERS:;
+      break;
+
+      case NO_PARKINGS:;
+      break;
+
+      case DRIVERS_ONLY:;
+      break;
+        
+      default:;    
+    }
+    
+    
+    
+    
+    
     
     int drivers = 0;
     for (int i = 0; i < MAX_QCARS; i++) {
@@ -38,6 +103,58 @@ public class GameProvider implements IGameProvider {
     }
     
     return new GameDescription(cars);
+  }
+  
+  
+  private ArrayList<IQCar> parkingsStyle(int nbOfDrivers, int multiplier){
+    
+    ArrayList<IQCar> cars = new ArrayList<IQCar>();
+    QCarNature parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGHT, MIN_AREA);
+    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGHT, MIN_AREA);
+    
+    int totalDriven = 0, totalParkings = 0;
+    int parkings = nbOfDrivers * multiplier;
+    int totalCars = nbOfDrivers + parkings;
+    QCar car;
+    
+    for(int i = 0; i<totalCars; i++){
+      if(totalParkings<parkings && R.nextBoolean()){
+        car = new QCar(parking, randomAlignedPositions(parking));
+        totalParkings++;
+      }
+      else{
+        car = new QCar(driven, randomAlignedPositions(driven));
+        totalDriven++;
+      }
+      cars.add(car);
+    }
+    
+    return cars;
+  }
+  
+  private ArrayList<IQCar> standardStyle(int nbOfDrivers){
+    ArrayList<IQCar> cars = new ArrayList<IQCar>();
+    
+    int drivers = 0;
+    for (int i = 0; i < MAX_QCARS; i++) {
+      
+      if (R.nextDouble() > SPAWN_PROBABILITY) {
+        QCarNature nature = randomNature(drivers++, nbOfDrivers);
+        QCar car = new QCar(nature, randomAlignedPositions(nature));
+        cars.add(car);
+        //System.out.println(car);
+      }
+    }
+    return cars;  
+  }
+  
+  private ArrayList<IQCar> debugStyle(){
+    
+    ArrayList<IQCar> cars = new ArrayList<IQCar>();
+    QCarNature nature = new QCarNature(true, false, true, true, MAX_SIDE_LENGHT, MIN_AREA);
+    QCar car = new QCar(nature, randomAlignedPositions(nature));
+    cars.add(car);
+    return cars;
   }
   
   private QCarNature randomNature (int currDrivers, int wantedDrivers) {

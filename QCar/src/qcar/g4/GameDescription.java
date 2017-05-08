@@ -9,6 +9,7 @@ import qcar.IQCar;
 public class GameDescription implements IGameDescription{
   
   public enum GameStyles {
+    STANDARD, PARKINGS, DEBUG,
     WITHOUT_BORDERS, WITH_BORDERS, NO_PARKINGS, DRIVERS_ONLY
   }
   
