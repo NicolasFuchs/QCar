@@ -1,11 +1,14 @@
 package qcar.g4;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import qcar.*;
 
 public class Driver implements IDriver {
+  List<IDecision> pendingDecisions;
+  List<ISensors> memory ;
   Random r = new Random();
   IPlayerChannel pc;
   volatile boolean finished = false;
@@ -18,8 +21,7 @@ public class Driver implements IDriver {
       }
     }
   };
-
-
+  
   ISensors sensors;
   QCar myCar;
   int previousVertexCode = -1;
@@ -29,6 +31,7 @@ public class Driver implements IDriver {
   public void startDriverThread(IPlayerChannel pc) {
     this.pc = pc;
     sensors = pc.play(MyDecision.IMMOBILE_DECISION);
+    pendingDecisions = new ArrayList<IDecision>();
     driverThread.start();
   }
 
@@ -43,18 +46,25 @@ public class Driver implements IDriver {
   }
 
   private IDecision takeDecision(ISensors sensors) {
-    if (sensors != null) {
-    if (sensors.collisionsWithMe().isEmpty()) {
-      return freeDecision(sensors);
-    } else {
-      return collisionDecision(sensors.collisionsWithMe());
+
+    if (!pendingDecisions.isEmpty()) {
+      return pendingDecisions.remove(0);
     }
+
+    if (sensors != null) {
+      if (sensors.collisionsWithMe().isEmpty()) {
+        return freeDecision(sensors);
+      } else {
+        return collisionDecision(sensors.collisionsWithMe());
+      }
     }
     return null;
   }
 
   // PRE : collisionWithMe is empty
   private IDecision freeDecision(ISensors sensors) {
+
+
     return MyDecision.randomDecision();
   }
 
@@ -301,6 +311,42 @@ public class Driver implements IDriver {
       return decision;
     }
   }
+
+  //2-steps to make an advance in direction 0 (down)
+  IDecision advanceDirection0() {
+    pendingDecisions.add(MyDecision.REDUC_SIDE_2);
+    return MyDecision.INCR_SIDE_0;
+  }
+  //2-steps to make an advance in direction 1 (right)
+  IDecision advanceDirection1() {
+    pendingDecisions.add(MyDecision.REDUC_SIDE_3);
+    return MyDecision.INCR_SIDE_1;
+  }
+//2-steps to make an advance in direction 2 (up)
+  IDecision advanceDirection2() {
+    pendingDecisions.add(MyDecision.REDUC_SIDE_0);
+    return MyDecision.INCR_SIDE_2;
+  }
+  //2-steps to make an advance in direction 3 (left)
+  IDecision advanceDirection3() {
+    pendingDecisions.add(MyDecision.REDUC_SIDE_1);
+    return MyDecision.INCR_SIDE_3;
+  }
+
+  // 3-steps to make a quarter turn left
+  IDecision quarterTurnLeft() {
+    pendingDecisions.add(MyDecision.ANGLE_POS_SIDE_1);
+    pendingDecisions.add(MyDecision.ANGLE_POS_SIDE_2);
+    return MyDecision.ANGLE_POS_SIDE_3;
+  }
+
+  // 3-steps to make a quarter turn right
+  IDecision quarterTurnRight() {
+    pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_3);
+    pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_2);
+    return MyDecision.ANGLE_NEG_SIDE_1;
+  }
+
 
   private static class MyDecision implements IDecision {
     public final static MyDecision IMMOBILE_DECISION = new MyDecision(false, 0, 0);
