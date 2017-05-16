@@ -97,29 +97,7 @@ public class QCar implements IQCar {
 
   @Override
   public String toString() {
-    StringBuilder bld = new StringBuilder();
-    
-    if (vertices[0].getX() == vertices[1].getX()) { //offsetVertical
-      bld.append("          -----*\n");
-      bld.append("     -----     |\n");
-      bld.append("*-----         |\n");
-      bld.append("|              |\n");
-      bld.append("|              |\n");
-      bld.append("|         -----*\n");
-      bld.append("|    -----      \n");
-      bld.append("*-----           \n\n\n");
-    } else {
-      bld.append("*--------------*\n");
-      bld.append(" |              |\n");
-      bld.append("   |              |\n");
-      bld.append("     |              |\n");
-      bld.append("      *--------------*\n");
-    }
-    bld.append(Arrays.toString(vertices)+"\n");
-    bld.append(nature);
-    bld.append("\n\n");
-    
-    return bld.toString();
+    return "QCar n°" + nature().qCarId();
   }
   
 //  public static double distance(Point2D a, Point2D b) {

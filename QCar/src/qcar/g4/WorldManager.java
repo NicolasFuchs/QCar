@@ -123,6 +123,7 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public Rectangle2D boundingBox() {
+    // todo go throught the qcar list and find the furthest apart points
     return boundingBox;
   }
 

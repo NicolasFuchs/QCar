@@ -17,9 +17,7 @@ public class GameProvider implements IGameProvider {
   public static final double MIN_AREA = 1.3;
   public static final double MAX_SIDE_LENGHT = 7.4;
   
-  
-  
-  
+
   @Override
   public IGameDescription nextGame(int nbOfDrivers) {
     
@@ -32,7 +30,6 @@ public class GameProvider implements IGameProvider {
         QCarNature nature = randomNature(drivers++, nbOfDrivers);
         QCar car = new QCar(nature, randomAlignedPositions(nature));
         cars.add(car);
-        //System.out.println(car);
       }
       
     }

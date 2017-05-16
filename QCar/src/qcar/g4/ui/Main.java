@@ -66,7 +66,7 @@ public class Main extends Application {
     //wm.closeSimulation();
 
     try {
-      FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("resources/fxml/view.fxml"));
+      FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("resources/fxml/simulation.fxml"));
       GridPane fxmlpane = (GridPane) fxmlloader.load();
       
       QCarAnimationPane pane = new QCarAnimationPane(v,Color.WHITE,uiOp,wm);

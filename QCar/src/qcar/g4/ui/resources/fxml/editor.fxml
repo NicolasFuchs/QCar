@@ -1,14 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-  xmlns:fx="http://javafx.com/fxml"
-  fx:controller="qcar.g4.ui.resources.fxml.Editor"
-  prefHeight="400.0" prefWidth="600.0">
-
-</AnchorPane>
+<VBox prefHeight="455.0" prefWidth="642.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="qcar.g4.ui.EditorCtrl">
+   <children>
+      <HBox alignment="CENTER" prefHeight="59.0" prefWidth="642.0">
+         <children>
+            <Label text="QCar Editor">
+               <font>
+                  <Font size="24.0" />
+               </font>
+               <HBox.margin>
+                  <Insets right="70.0" />
+               </HBox.margin>
+            </Label>
+            <Label text="Style n°">
+               <HBox.margin>
+                  <Insets right="5.0" />
+               </HBox.margin>
+            </Label>
+            <ComboBox fx:id="comboStyle" prefHeight="27.0" prefWidth="65.0">
+               <HBox.margin>
+                  <Insets right="20.0" />
+               </HBox.margin>
+            </ComboBox>
+            <Label text="N° of drivers">
+               <HBox.margin>
+                  <Insets right="5.0" />
+               </HBox.margin>
+            </Label>
+            <TextField fx:id="txtDriverNum" prefHeight="27.0" prefWidth="56.0">
+               <HBox.margin>
+                  <Insets right="20.0" />
+               </HBox.margin>
+            </TextField>
+            <Button fx:id="btnApply" mnemonicParsing="false" onAction="#handleBtnApply" text="Apply">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="btnPlay" mnemonicParsing="false" onAction="#handleBtnPlay" text="Play" />
+         </children>
+      </HBox>
+      <HBox prefHeight="359.0" prefWidth="642.0">
+         <children>
+            <VBox prefHeight="339.0" prefWidth="194.0">
+               <children>
+                  <Label text="QCar list :" />
+                  <ListView fx:id="listQCar" onMouseClicked="#handleListSelection" prefHeight="339.0" prefWidth="148.0" />
+               </children>
+            </VBox>
+            <GridPane alignment="BOTTOM_RIGHT" prefHeight="339.0" prefWidth="453.0">
+              <columnConstraints>
+                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="226.0" minWidth="10.0" prefWidth="169.0" />
+                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="284.0" minWidth="10.0" prefWidth="284.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" />
+              </rowConstraints>
+               <children>
+                  <Label text="QCar id :" />
+                  <TextField fx:id="txtQCarId" editable="false" prefHeight="27.0" prefWidth="199.0" GridPane.columnIndex="1" />
+                  <Label GridPane.rowIndex="1" />
+                  <Label text="Max side length :" GridPane.rowIndex="2" />
+                  <Label text="Minimum area :" GridPane.rowIndex="3" />
+                  <TextField fx:id="txtMaxSide" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <TextField fx:id="txtMinArea" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <FlowPane alignment="CENTER_LEFT" hgap="30.0" vgap="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <children>
+                        <CheckBox fx:id="checkDriven" disable="true" mnemonicParsing="false" style="-fx-opacity: 0.5;" text="isDriven" />
+                        <CheckBox fx:id="checkParking" disable="true" mnemonicParsing="false" style="-fx-opacity: 0.5;" text="isParkingTarget" />
+                        <CheckBox fx:id="checkVertex" disable="true" mnemonicParsing="false" style="-fx-opacity: 0.5;" text="isVertexTarget" />
+                        <CheckBox fx:id="checkSide" disable="true" mnemonicParsing="false" style="-fx-opacity: 0.5;" text="isSideTarget" />
+                     </children>
+                  </FlowPane>
+                  <Label text="Nature :" GridPane.rowIndex="1" />
+                  <CheckBox fx:id="checkIsManual" mnemonicParsing="false" onAction="#handleManualDriverSelection" text="Drive this QCar manually" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <HBox.margin>
+                  <Insets left="20.0" right="20.0" />
+               </HBox.margin>
+            </GridPane>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="15.0" right="10.0" top="10.0" />
+         </padding>
+      </HBox>
+   </children>
+</VBox>
