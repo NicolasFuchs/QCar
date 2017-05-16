@@ -7,8 +7,9 @@ import java.util.Random;
 import qcar.*;
 
 public class Driver implements IDriver {
-  List<IDecision> pendingDecisions;
-  List<ISensors> memory ;
+  List<IDecision> pendingDecisions; // a list of decisions to be executed, for movement who require
+                                    // multiple steps
+  List<ISensors> memory;
   Random r = new Random();
   IPlayerChannel pc;
   volatile boolean finished = false;
@@ -21,7 +22,7 @@ public class Driver implements IDriver {
       }
     }
   };
-  
+
   ISensors sensors;
   QCar myCar;
   int previousVertexCode = -1;
@@ -82,6 +83,7 @@ public class Driver implements IDriver {
     return decisionFromCodes(vertexCode, sideCode);
   }
 
+  // called from collisionDecision
   private IDecision decisionFromCodes(int vertexCode, int sideCode) {
     MyDecision decision = MyDecision.IMMOBILE_DECISION;
     if (vertexCode != 0) {
@@ -312,22 +314,25 @@ public class Driver implements IDriver {
     }
   }
 
-  //2-steps to make an advance in direction 0 (down)
+  // 2-steps to make an advance in direction 0 (down)
   IDecision advanceDirection0() {
     pendingDecisions.add(MyDecision.REDUC_SIDE_2);
     return MyDecision.INCR_SIDE_0;
   }
-  //2-steps to make an advance in direction 1 (right)
+
+  // 2-steps to make an advance in direction 1 (right)
   IDecision advanceDirection1() {
     pendingDecisions.add(MyDecision.REDUC_SIDE_3);
     return MyDecision.INCR_SIDE_1;
   }
-//2-steps to make an advance in direction 2 (up)
+
+  // 2-steps to make an advance in direction 2 (up)
   IDecision advanceDirection2() {
     pendingDecisions.add(MyDecision.REDUC_SIDE_0);
     return MyDecision.INCR_SIDE_2;
   }
-  //2-steps to make an advance in direction 3 (left)
+
+  // 2-steps to make an advance in direction 3 (left)
   IDecision advanceDirection3() {
     pendingDecisions.add(MyDecision.REDUC_SIDE_1);
     return MyDecision.INCR_SIDE_3;
