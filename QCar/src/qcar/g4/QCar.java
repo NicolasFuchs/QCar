@@ -3,6 +3,8 @@ package qcar.g4;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.BitSet;
+
+import qcar.IDecision;
 import qcar.IQCar;
 import qcar.IQCarNature;
 
@@ -49,6 +51,10 @@ public class QCar implements IQCar {
       vertices[p1] = new Point2D.Double(vertices[p1].getX()-vector[0],vertices[p1].getY()-vector[1]);
       vertices[p2] = new Point2D.Double(vertices[p2].getX()-vector[0],vertices[p2].getY()-vector[1]);
     }
+  }
+  
+  public void update(IDecision decision) {
+    update(decision.isAngleMovement(), decision.sideId(), decision.requestedTranslation()) ;
   }
   
   @Override

@@ -1,11 +1,15 @@
 package qcar.g4;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import qcar.*;
 
 public class Driver implements IDriver {
+  List<IDecision> pendingDecisions; // a list of decisions to be executed, for movement who require
+                                    // multiple steps
+  List<ISensors> memory;
   Random r = new Random();
   IPlayerChannel pc;
   volatile boolean finished = false;
@@ -19,7 +23,6 @@ public class Driver implements IDriver {
     }
   };
 
-
   ISensors sensors;
   QCar myCar;
   int previousVertexCode = -1;
@@ -29,6 +32,7 @@ public class Driver implements IDriver {
   public void startDriverThread(IPlayerChannel pc) {
     this.pc = pc;
     sensors = pc.play(MyDecision.IMMOBILE_DECISION);
+    pendingDecisions = new ArrayList<IDecision>();
     driverThread.start();
   }
 
@@ -41,20 +45,33 @@ public class Driver implements IDriver {
       e.printStackTrace();
     }
   }
+  
+  
 
+  // method called by the driver thread to take one decision
   private IDecision takeDecision(ISensors sensors) {
-    if (sensors != null) {
-    if (sensors.collisionsWithMe().isEmpty()) {
-      return freeDecision(sensors);
-    } else {
-      return collisionDecision(sensors.collisionsWithMe());
+
+    if (!pendingDecisions.isEmpty()) {
+      return pendingDecisions.remove(0);
     }
+
+    if (sensors != null) {
+      if (sensors.collisionsWithMe().isEmpty()) {
+        return freeDecision(sensors);
+      } else {
+        return collisionDecision(sensors.collisionsWithMe());
+      }
     }
     return null;
   }
+  
+  
 
   // PRE : collisionWithMe is empty
   private IDecision freeDecision(ISensors sensors) {
+    
+    // TODO : implement the free will of the Driver
+
     return MyDecision.randomDecision();
   }
 
@@ -72,6 +89,8 @@ public class Driver implements IDriver {
     return decisionFromCodes(vertexCode, sideCode);
   }
 
+  // called from collisionDecision
+  // TODO : When collisions will be implemented, test if the reactions are correct
   private IDecision decisionFromCodes(int vertexCode, int sideCode) {
     MyDecision decision = MyDecision.IMMOBILE_DECISION;
     if (vertexCode != 0) {
@@ -88,10 +107,10 @@ public class Driver implements IDriver {
           break;
         case 12: // vertices 0 and 1 touch something
           if (previousVertexCode != vertexCode) {
-            decision = MyDecision.REDUC_SIDE_0;
+            decision = MyDecision.GROWTH_SIDE_0;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_2;
+            decision = MyDecision.GROWTH_SIDE_2;
             previousVertexCode = -1;
             return decision;
           }
@@ -107,10 +126,10 @@ public class Driver implements IDriver {
           break;
         case 9: // vertices 0 and 3 touch something
           if (previousVertexCode != vertexCode) {
-            decision = MyDecision.REDUC_SIDE_3;
+            decision = MyDecision.REDUCTION_SIDE_3;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_1;
+            decision = MyDecision.REDUCTION_SIDE_1;
             previousVertexCode = -1;
             return decision;
           }
@@ -122,10 +141,10 @@ public class Driver implements IDriver {
           break;
         case 6: // vertices 1 and 2 touch something
           if (previousVertexCode != vertexCode) {
-            decision = MyDecision.REDUC_SIDE_1;
+            decision = MyDecision.GROWTH_SIDE_1;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_3;
+            decision = MyDecision.GROWTH_SIDE_3;
             previousVertexCode = -1;
             return decision;
           }
@@ -141,10 +160,10 @@ public class Driver implements IDriver {
           break;
         case 3: // vertices 2 and 3 touch something
           if (previousVertexCode != vertexCode) {
-            decision = MyDecision.REDUC_SIDE_2;
+            decision = MyDecision.REDUCTION_SIDE_2;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_0;
+            decision = MyDecision.REDUCTION_SIDE_0;
             previousVertexCode = -1;
             return decision;
           }
@@ -165,19 +184,19 @@ public class Driver implements IDriver {
           break;
         case 14: // all sides excepted the 3rd touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUC_SIDE_1;
+            decision = MyDecision.GROWTH_SIDE_1;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_3;
+            decision = MyDecision.GROWTH_SIDE_3;
             previousSideCode = -1;
             return decision;
           }
         case 13: // all sides excepted the 2nd touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUC_SIDE_0;
+            decision = MyDecision.GROWTH_SIDE_0;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_2;
+            decision = MyDecision.GROWTH_SIDE_2;
             previousSideCode = -1;
             return decision;
           }
@@ -190,10 +209,10 @@ public class Driver implements IDriver {
           break;
         case 11: // all sides excepted the 1st touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUC_SIDE_3;
+            decision = MyDecision.REDUCTION_SIDE_3;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_1;
+            decision = MyDecision.REDUCTION_SIDE_1;
             previousSideCode = -1;
             return decision;
           }
@@ -224,19 +243,19 @@ public class Driver implements IDriver {
           break;
         case 8: // side 0 touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUC_SIDE_0;
+            decision = MyDecision.GROWTH_SIDE_0;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_2;
+            decision = MyDecision.GROWTH_SIDE_2;
             previousSideCode = -1;
             return decision;
           }
         case 7: // all sides excepted the 0th touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUC_SIDE_2;
+            decision = MyDecision.REDUCTION_SIDE_2;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_0;
+            decision = MyDecision.REDUCTION_SIDE_0;
             previousSideCode = -1;
             return decision;
           }
@@ -264,10 +283,10 @@ public class Driver implements IDriver {
           break;
         case 4: // side 1 touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUC_SIDE_1;
+            decision = MyDecision.GROWTH_SIDE_1;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_3;
+            decision = MyDecision.GROWTH_SIDE_3;
             previousSideCode = -1;
             return decision;
           }
@@ -280,19 +299,19 @@ public class Driver implements IDriver {
           break;
         case 2: // side 2 touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUC_SIDE_2;
+            decision = MyDecision.REDUCTION_SIDE_2;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_0;
+            decision = MyDecision.REDUCTION_SIDE_0;
             previousSideCode = -1;
             return decision;
           }
         case 1: // side 3 touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUC_SIDE_3;
+            decision = MyDecision.REDUCTION_SIDE_3;
             break;
           } else {
-            decision = MyDecision.INCR_SIDE_1;
+            decision = MyDecision.REDUCTION_SIDE_1;
             previousSideCode = -1;
             return decision;
           }
@@ -302,25 +321,70 @@ public class Driver implements IDriver {
     }
   }
 
-  private static class MyDecision implements IDecision {
+  // 2-steps to make an advance in direction 0 (down)
+  IDecision advanceDirection0() {
+    pendingDecisions.add(MyDecision.REDUCTION_SIDE_2);
+    return MyDecision.GROWTH_SIDE_0;
+  }
+
+  // 2-steps to make an advance in direction 1 (right)
+  IDecision advanceDirection1() {
+    pendingDecisions.add(MyDecision.REDUCTION_SIDE_3);
+    return MyDecision.GROWTH_SIDE_1;
+  }
+
+  // 2-steps to make an advance in direction 2 (up)
+  IDecision advanceDirection2() {
+    pendingDecisions.add(MyDecision.REDUCTION_SIDE_0);
+    return MyDecision.GROWTH_SIDE_2;
+  }
+
+  // 2-steps to make an advance in direction 3 (left)
+  IDecision advanceDirection3() {
+    pendingDecisions.add(MyDecision.REDUCTION_SIDE_1);
+    return MyDecision.GROWTH_SIDE_3;
+    
+  }
+
+  // 3-steps to make a quarter turn left
+  // TODO : CORRECTION, this is not correct
+  IDecision quarterTurnLeft() {
+    pendingDecisions.add(MyDecision.ANGLE_POS_SIDE_1);
+    pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_2);
+    return MyDecision.ANGLE_POS_SIDE_3;
+  }
+
+  // 3-steps to make a quarter turn right
+  //TODO : CORRECTION, this is not correct
+  IDecision quarterTurnRight() {
+    pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_3);
+    pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_2);
+    return MyDecision.ANGLE_NEG_SIDE_1;
+  }
+
+
+  // Decision generator with hardcoded ones
+  public static class MyDecision implements IDecision {
     public final static MyDecision IMMOBILE_DECISION = new MyDecision(false, 0, 0);
+    
 
-    public final static MyDecision REDUC_SIDE_0 =
-        new MyDecision(false, 0, -GameProvider.MAX_SIDE_LENGHT);
-    public final static MyDecision REDUC_SIDE_1 =
-        new MyDecision(false, 1, -GameProvider.MAX_SIDE_LENGHT);
-    public final static MyDecision REDUC_SIDE_2 =
-        new MyDecision(false, 2, -GameProvider.MAX_SIDE_LENGHT);
-    public final static MyDecision REDUC_SIDE_3 =
-        new MyDecision(false, 3, -GameProvider.MAX_SIDE_LENGHT);
-
-    public final static MyDecision INCR_SIDE_0 =
+    public final static MyDecision REDUCTION_SIDE_0 =
         new MyDecision(false, 0, GameProvider.MAX_SIDE_LENGHT);
-    public final static MyDecision INCR_SIDE_1 =
+    public final static MyDecision REDUCTION_SIDE_1 =
         new MyDecision(false, 1, GameProvider.MAX_SIDE_LENGHT);
-    public final static MyDecision INCR_SIDE_2 =
+    public final static MyDecision REDUCTION_SIDE_2 =
+        new MyDecision(false, 2, -GameProvider.MAX_SIDE_LENGHT);
+    public final static MyDecision REDUCTION_SIDE_3 =
+        new MyDecision(false, 3, -GameProvider.MAX_SIDE_LENGHT);
+    
+    
+    public final static MyDecision GROWTH_SIDE_0 =
+        new MyDecision(false, 0, -GameProvider.MAX_SIDE_LENGHT);
+    public final static MyDecision GROWTH_SIDE_1 =
+        new MyDecision(false, 1, -GameProvider.MAX_SIDE_LENGHT);    
+    public final static MyDecision GROWTH_SIDE_2 =
         new MyDecision(false, 2, GameProvider.MAX_SIDE_LENGHT);
-    public final static MyDecision INCR_SIDE_3 =
+    public final static MyDecision GROWTH_SIDE_3 =
         new MyDecision(false, 3, GameProvider.MAX_SIDE_LENGHT);
 
     public final static MyDecision ANGLE_POS_SIDE_0 =
@@ -340,7 +404,6 @@ public class Driver implements IDriver {
         new MyDecision(true, 2, -GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision ANGLE_NEG_SIDE_3 =
         new MyDecision(true, 3, -GameProvider.MAX_SIDE_LENGHT);
-
 
     private boolean isAngleMovement;
     private int sideId;
@@ -372,7 +435,6 @@ public class Driver implements IDriver {
       return new MyDecision(r.nextBoolean(), r.nextInt(4),
           r.nextDouble() * GameProvider.MAX_SIDE_LENGHT);
     }
-
   }
 
 }
