@@ -3,13 +3,12 @@ package qcar.g4;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.awt.geom.Point2D;
 
 import qcar.*;
 
 public class Driver implements IDriver {
   List<IDecision> pendingDecisions; // a list of decisions to be executed, for movement who require
-  // multiple steps
+                                    // multiple steps
   List<ISensors> memory;
   Random r = new Random();
   IPlayerChannel pc;
@@ -25,7 +24,7 @@ public class Driver implements IDriver {
   };
 
   ISensors sensors;
-  IQCar myCar;
+  QCar myCar;
   int previousVertexCode = -1;
   int previousSideCode = -1;
 
@@ -46,30 +45,15 @@ public class Driver implements IDriver {
       e.printStackTrace();
     }
   }
-
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TEST
-
-  public IDecision testDecision() {
-    int side = 0 ;
-    boolean left = true ;
-    //double sideLength = myCar.vertex((side+1)%4).distance(myCar.vertex(side)) ;
-    return MyDecision.sideDecisionMax(left, side) ;
-  }
-
-  public void giveQCar (IQCar iqCar) {
-    myCar = iqCar ;
-  }
-  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
+  
+  
 
   // method called by the driver thread to take one decision
   private IDecision takeDecision(ISensors sensors) {
+
     if (!pendingDecisions.isEmpty()) {
       return pendingDecisions.remove(0);
     }
-    
-    
 
     if (sensors != null) {
       if (sensors.collisionsWithMe().isEmpty()) {
@@ -78,39 +62,14 @@ public class Driver implements IDriver {
         return collisionDecision(sensors.collisionsWithMe());
       }
     }
-    return MyDecision.IMMOBILE_DECISION;
+    return null;
   }
   
-  private Point2D middle(Point2D a, Point2D b) {
-    double x0, x1, y0 ,y1 ;
-    x0 = a.getX() ;
-    x1 = b.getX();
-    y0 = a.getY() ;
-    y1 = b.getY() ;    
-    return new Point2D.Double((x0+x1)/2, (y0+y1)/2) ;
-  }
   
-  private Point2D getMiddleOfSensor () {       
-    return middle(myCar.vertex(0), myCar.vertex(1)) ;
-  } 
-  
-  
-  private IDecision orientateToCheckDistance (Point2D middlePoint) {
-    if (myCar.vertex(0).distance(middlePoint) < myCar.vertex(1).distance(middlePoint)) {
-      return MyDecision.angleDecision(true,0,middlePoint.distance(getMiddleOfSensor())) ;
-    } else {
-      return MyDecision.angleDecision(false,0,middlePoint.distance(getMiddleOfSensor())) ;
-    }
-  }
-
-
 
   // PRE : collisionWithMe is empty
-  private IDecision freeDecision(ISensors sensors) {    
-    ArrayList<Integer> seenIds = new ArrayList<>() ;    
-    for (ISeenVertex v : sensors.seenVertices()) {
-      
-
+  private IDecision freeDecision(ISensors sensors) {
+    
     // TODO : implement the free will of the Driver
 
     return MyDecision.randomDecision();
@@ -384,7 +343,7 @@ public class Driver implements IDriver {
   IDecision advanceDirection3() {
     pendingDecisions.add(MyDecision.REDUCTION_SIDE_1);
     return MyDecision.GROWTH_SIDE_3;
-
+    
   }
 
   // 3-steps to make a quarter turn left
@@ -407,7 +366,7 @@ public class Driver implements IDriver {
   // Decision generator with hardcoded ones
   public static class MyDecision implements IDecision {
     public final static MyDecision IMMOBILE_DECISION = new MyDecision(false, 0, 0);
-
+    
 
     public final static MyDecision REDUCTION_SIDE_0 =
         new MyDecision(false, 0, GameProvider.MAX_SIDE_LENGHT);
@@ -417,8 +376,8 @@ public class Driver implements IDriver {
         new MyDecision(false, 2, -GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision REDUCTION_SIDE_3 =
         new MyDecision(false, 3, -GameProvider.MAX_SIDE_LENGHT);
-
-
+    
+    
     public final static MyDecision GROWTH_SIDE_0 =
         new MyDecision(false, 0, -GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision GROWTH_SIDE_1 =
@@ -476,29 +435,6 @@ public class Driver implements IDriver {
       return new MyDecision(r.nextBoolean(), r.nextInt(4),
           r.nextDouble() * GameProvider.MAX_SIDE_LENGHT);
     }
-
-    // PRE: left is -1 or 1
-    public static MyDecision angleDecision(boolean left ,int side, double length) {
-      int coeff = -1 ;
-      if (left) {
-        coeff = 1 ;        
-      }
-      return new MyDecision(true, side,
-          length*coeff);
-    }
-
-    public static MyDecision sideDecision(boolean increase, int side, double length) {
-      int coeff = -1 ;
-      if (increase) {
-        coeff = 1 ;
-      }
-      return new MyDecision(false, side, coeff*length) ;
-
-    }
-
-    public static MyDecision sideDecisionMax(boolean increase, int side) {
-      return sideDecision(increase, side, GameProvider.MAX_SIDE_LENGHT) ;
-    }
-
   }
+
 }
