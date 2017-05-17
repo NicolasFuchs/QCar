@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import qcar.g4.WorldManagerPhysicsHelper;
 
-public class WorldManagerPhysicsHelperTest {
+class WorldManagerPhysicsHelperTest {
 
   @Test
   public void testComputePMatrix() {

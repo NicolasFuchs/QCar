@@ -12,10 +12,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import qcar.IQCar;
-import qcar.IGameDescription;
-import qcar.IGameProvider;
-import qcar.IWorldManager;
+import qcar.*;
+import qcar.g4.Driver;
 import qcar.g4.Factory;
 import qcar.g4.QCar;
 import qcar.ui.*;
@@ -130,12 +128,17 @@ public class Main extends Application {
           }
         }
       });
+      
+      Driver d = new Driver() ;
+      d.giveQCar(wm.allQCars().get(0));
+      
       simulOneStep.setOnMouseClicked(new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent event) {
+          
           //wm.simulateOneStep(0);
-          for (IQCar car : wm.allQCars()) {
-            ((QCar)car).update(true, 0, 5);
+          for (IQCar car : wm.allQCars()) {            
+            ((QCar)car).update(d.testDecision());
           }
           pane.refreshView();
         }
