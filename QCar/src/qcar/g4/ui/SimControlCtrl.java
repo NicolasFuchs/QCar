@@ -1,25 +1,12 @@
 package qcar.g4.ui;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
-public class SimControlCtrl extends VBox {
-
-  @FXML
-  private ResourceBundle resources;
-
-  @FXML
-  private URL location;
-
-  @FXML
-  private HBox panelHeader;
+public class SimControlCtrl {
 
   @FXML
   private Button btnOneStep;
@@ -28,27 +15,36 @@ public class SimControlCtrl extends VBox {
   private ToggleButton btnPlay;
 
   @FXML
-  private ToggleButton btnPause;
-
-  @FXML
-  private ToggleButton btnStop;
+  private Button btnStop;
 
   @FXML
   private Slider sliderSpeed;
 
+  private SimulationCtrl refSim;
+
+
+
   @FXML
   void initialize() {
-    System.out.println("SimControlCtrl instancied");
   }
 
-  public SimControlCtrl(){
-    FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/simControl.fxml"));
-    loader.setController(this);
-    try{
-      loader.load();
-    } catch(Exception e){
-      e.printStackTrace();
-    }
+  @FXML
+  private void handleSimOneStepBtn(){
+    refSim.simulateOneStep(1000);
+  }
+
+  @FXML
+  private void handlePlayBtn(){
+
+  }
+
+  @FXML
+  private void handleStopBtn(){
+    refSim.endSimulation();
+  }
+
+  public void setParentCtrl(SimulationCtrl refSim){
+    this.refSim = refSim;
   }
 }
 

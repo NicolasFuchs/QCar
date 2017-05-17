@@ -97,7 +97,7 @@ public class QCar implements IQCar {
 
   @Override
   public String toString() {
-    return "QCar n°" + nature().qCarId();
+    return "QCar n°" + nature().qCarId() + " - (" + score + ")" ;
   }
   
 //  public static double distance(Point2D a, Point2D b) {

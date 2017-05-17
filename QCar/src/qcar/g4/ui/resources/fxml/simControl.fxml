@@ -8,17 +8,17 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="panelHeader" alignment="CENTER" prefHeight="81.0" prefWidth="834.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<HBox fx:id="panelHeader" alignment="CENTER" prefHeight="81.0" prefWidth="834.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="qcar.g4.ui.SimControlCtrl">
    <children>
       <Label text="QCar Simulation">
          <font>
             <Font size="24.0" />
          </font>
          <HBox.margin>
-            <Insets right="200.0" />
+            <Insets right="230.0" />
          </HBox.margin>
       </Label>
-      <Button fx:id="btnOneStep" mnemonicParsing="false" text="One step">
+      <Button fx:id="btnOneStep" mnemonicParsing="false" onAction="#handleSimOneStepBtn" text="One step">
          <HBox.margin>
             <Insets right="20.0" />
          </HBox.margin>
@@ -28,16 +28,11 @@
             <Insets right="5.0" />
          </HBox.margin>
       </ToggleButton>
-      <ToggleButton fx:id="btnPause" mnemonicParsing="false" text="Pause">
-         <HBox.margin>
-            <Insets right="5.0" />
-         </HBox.margin>
-      </ToggleButton>
-      <ToggleButton fx:id="btnStop" mnemonicParsing="false" text="Stop">
+      <Button fx:id="btnStop" mnemonicParsing="false" onAction="#handleStopBtn" text="Stop">
          <HBox.margin>
             <Insets right="20.0" />
          </HBox.margin>
-      </ToggleButton>
+      </Button>
       <Slider fx:id="sliderSpeed" blockIncrement="1.0" majorTickUnit="1.0" max="3.0" minorTickCount="0" prefHeight="16.0" prefWidth="77.0" showTickMarks="true" snapToTicks="true" />
    </children>
 </HBox>

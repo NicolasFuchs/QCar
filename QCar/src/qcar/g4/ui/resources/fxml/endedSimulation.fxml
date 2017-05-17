@@ -8,8 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="424.0" prefWidth="375.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="424.0" prefWidth="375.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="qcar.g4.ui.EndedSimulationCtrl">
    <children>
       <Label text="Simulation finished !">
          <font>
@@ -38,12 +37,12 @@
       </VBox>
       <HBox alignment="CENTER" prefHeight="40.0" prefWidth="335.0">
          <children>
-            <Button fx:id="btnNewSim" mnemonicParsing="false" text="New Sim">
+            <Button fx:id="btnNewSim" mnemonicParsing="false" onAction="#handleNewSimBtn" text="New Sim">
                <HBox.margin>
                   <Insets right="20.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="btnExit" mnemonicParsing="false" text="Exit" />
+            <Button fx:id="btnExit" mnemonicParsing="false" onAction="#handleExitBtn" text="Exit" />
          </children>
       </HBox>
    </children>

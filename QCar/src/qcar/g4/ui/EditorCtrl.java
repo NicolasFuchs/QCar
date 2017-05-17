@@ -7,7 +7,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -15,10 +14,13 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import qcar.IDriver;
 import qcar.IFactory;
 import qcar.IGameDescription;
 import qcar.IGameProvider;
 import qcar.IQCar;
+import qcar.IWorldManager;
+import qcar.g4.Factory;
 
 public class EditorCtrl {
 
@@ -74,6 +76,7 @@ public class EditorCtrl {
 
   @FXML
   void initialize() {
+    setFactory(new Factory());
     btnPlay.setDisable(true);
     manualDriverIndex = NO_MANUAL_DRIVER;
     checkIsManual.setVisible(false);
@@ -82,15 +85,15 @@ public class EditorCtrl {
   @FXML
   private void handleBtnApply(){
     try{
-      int numberOfQCar = Integer.parseInt(txtDriverNum.getText());
-      nDrivers = numberOfQCar;
+      nDrivers = Integer.parseInt(txtDriverNum.getText());
       int selectedStyle = (Integer) comboStyle.getSelectionModel().getSelectedItem();
       gameProvider = fact.newGameProvider(selectedStyle);
-      gameDescription = gameProvider.nextGame(numberOfQCar);
+      gameDescription = gameProvider.nextGame(nDrivers);
       ObservableList<IQCar> obQCars = FXCollections.observableList(gameDescription.allQCar());
       listQCar.setItems(obQCars);
+      emptyFields();
       btnPlay.setDisable(false);
-      System.out.println("Apply for : " + numberOfQCar + " QCars !");
+      System.out.println("Apply for : " + nDrivers + " QCars !");
     } catch (NumberFormatException e) {
       System.out.println("Please enter a valid number of QCars");
     }
@@ -103,7 +106,16 @@ public class EditorCtrl {
       Scene scene = new Scene(loader.load());
       SimulationCtrl ctrl = loader.getController();
       stage.hide();
-      ctrl.setParams(fact, gameProvider, gameDescription, nDrivers, manualDriverIndex);
+
+      IWorldManager wm  = fact.newWorldManager();
+
+      List<IDriver> driverList = new ArrayList<>();
+      for(int i = 0; i < nDrivers; i++)
+        driverList.add(fact.newSmartDriver());
+
+      wm.openNewSimulation(gameDescription, driverList);
+
+      ctrl.setWM(wm, manualDriverIndex);
       ctrl.setStage(stage);
       stage.setTitle("Simulation");
       stage.setScene(scene);
@@ -155,6 +167,19 @@ public class EditorCtrl {
 
   public void setStage(Stage stage){
     this.stage = stage;
+  }
+
+  private void emptyFields(){
+    txtQCarId.clear();
+    txtMaxSide.clear();
+    txtMinArea.clear();
+    checkDriven.setSelected(false);
+    checkParking.setSelected(false);
+    checkSide.setSelected(false);
+    checkVertex.setSelected(false);
+    checkIsManual.setSelected(false);
+    manualDriverIndex = NO_MANUAL_DRIVER;
+    checkIsManual.setVisible(false);
   }
 
 }

@@ -1,22 +1,13 @@
 package qcar.g4.ui;
 
 
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.ToggleGroup;
 
-public class ManualDrivingCtrl extends VBox {
-
-  @FXML
-  private ResourceBundle resources;
-
-  @FXML
-  private URL location;
+public class ManualDrivingCtrl {
 
   @FXML
   private RadioButton radioSide0;
@@ -42,20 +33,30 @@ public class ManualDrivingCtrl extends VBox {
   @FXML
   private Button btnMove;
 
+  private ToggleGroup sides;
+  private ToggleGroup movement;
+
+  private SimulationCtrl refSim;
+
   @FXML
   void initialize() {
-    assert radioSide0 != null : "fx:id=\"radioSide0\" was not injected: check your FXML file 'manualDriving.fxml'.";
-    assert radioSide1 != null : "fx:id=\"radioSide1\" was not injected: check your FXML file 'manualDriving.fxml'.";
-    assert radioSide2 != null : "fx:id=\"radioSide2\" was not injected: check your FXML file 'manualDriving.fxml'.";
-    assert radioSide3 != null : "fx:id=\"radioSide3\" was not injected: check your FXML file 'manualDriving.fxml'.";
-    assert radioRotation != null : "fx:id=\"radioRotation\" was not injected: check your FXML file 'manualDriving.fxml'.";
-    assert radioTranslation != null : "fx:id=\"radioTranslation\" was not injected: check your FXML file 'manualDriving.fxml'.";
-    assert sliderSpan != null : "fx:id=\"sliderSpan\" was not injected: check your FXML file 'manualDriving.fxml'.";
-    assert btnMove != null : "fx:id=\"btnMove\" was not injected: check your FXML file 'manualDriving.fxml'.";
+    sides = new ToggleGroup();
+    movement = new ToggleGroup();
 
+    radioRotation.setToggleGroup(movement);
+    radioTranslation.setToggleGroup(movement);
+
+    radioSide0.setToggleGroup(sides);
+    radioSide1.setToggleGroup(sides);
+    radioSide2.setToggleGroup(sides);
+    radioSide3.setToggleGroup(sides);
   }
 
   public ManualDrivingCtrl(){
+  }
+
+  public void setParentCtrl(SimulationCtrl refSim){
+    this.refSim = refSim;
   }
 }
 
