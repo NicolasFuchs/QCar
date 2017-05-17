@@ -36,7 +36,7 @@ public class SimulationCtrl {
   private Pane headerPane;
 
   @FXML
-  private ListView<?> lstLeaderboard;
+  private ListView<IQCar> lstLeaderboard;
 
   @FXML
   private Pane paneConsole;

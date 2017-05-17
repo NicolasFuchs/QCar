@@ -31,6 +31,7 @@ public class SimControlCtrl {
   @FXML
   private void handleSimOneStepBtn(){
     refSim.simulateOneStep(1000);
+    System.out.println("Simulate one step pressed!");
   }
 
   @FXML
