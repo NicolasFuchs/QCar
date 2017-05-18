@@ -1,37 +1,47 @@
 package qcar.g4;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.awt.geom.Point2D;
 
 import qcar.*;
 
 public class Driver implements IDriver {
-  List<IDecision> pendingDecisions; // a list of decisions to be executed, for movement who require
-                                    // multiple steps
-  List<ISensors> memory;
+  // a list of decisions to be executed, for movement who require multiple steps
+  List<IDecision> pendingDecisions;
+  // Random object to take some choices randomly
   Random r = new Random();
+  // the playerChannel used to reach the world manager
   IPlayerChannel pc;
+  // to end the thread
   volatile boolean finished = false;
 
+  // the driver thread by itself, at each steps take a decision in function of the sensors
   Thread driverThread = new Thread() {
-
     public void run() {
       while (!finished) {
-        sensors = pc.play(takeDecision(sensors));
+        sensors = pc.play(takeDecision());
       }
     }
   };
 
   ISensors sensors;
-  QCar myCar;
+  IQCar myCar;
+  // codes used for historic of collisions
   int previousVertexCode = -1;
   int previousSideCode = -1;
+
+  // attributes for the current Target of the driver
+  int targetId = -1;
+  boolean isTargetParking = false;
 
   @Override
   public void startDriverThread(IPlayerChannel pc) {
     this.pc = pc;
     sensors = pc.play(MyDecision.IMMOBILE_DECISION);
+    myCar = sensors.mySelf();
     pendingDecisions = new ArrayList<IDecision>();
     driverThread.start();
   }
@@ -45,35 +55,146 @@ public class Driver implements IDriver {
       e.printStackTrace();
     }
   }
-  
-  
+
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TEST
+
+  public IDecision testDecision() {
+    int side = 0;
+    boolean left = true;
+    return MyDecision.sideDecisionMax(left, side);
+  }
+
+  public void giveQCar(IQCar iqCar) {
+    myCar = iqCar;
+  }
+  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
 
   // method called by the driver thread to take one decision
-  private IDecision takeDecision(ISensors sensors) {
-
+  private IDecision takeDecision() {
     if (!pendingDecisions.isEmpty()) {
       return pendingDecisions.remove(0);
     }
-
     if (sensors != null) {
       if (sensors.collisionsWithMe().isEmpty()) {
-        return freeDecision(sensors);
+        if (targetId == -1) {
+          return acquireTarget();
+        } else {
+          return followTargetDecision();
+        }
+
       } else {
         return collisionDecision(sensors.collisionsWithMe());
       }
     }
-    return null;
+    return MyDecision.IMMOBILE_DECISION;
   }
-  
-  
+
+  // ----------------------------------------
+
+  private IDecision followTargetDecision() {
+    pendingDecisions.add(advanceDirection0());
+    return orientateTowardTargetAcquired();
+  }
+
+  // ----------------------------------------
+
+  private IDecision orientateTo(Point2D vertexProjection) {
+    if (myCar.vertex(0).distance(vertexProjection) < myCar.vertex(1).distance(vertexProjection)) {
+      return MyDecision.angleDecision(true, 0, vertexProjection.distance(getMiddleOfSensor()));
+    } else {
+      return MyDecision.angleDecision(false, 0, vertexProjection.distance(getMiddleOfSensor()));
+    }
+  }
+
+  // ----------------------------------------
+
+  private IDecision orientateTowardTargetAcquired() {
+    Point2D[] target = new Point2D[4];
+    int i = 0;
+    for (ISeenVertex vertex : sensors.seenVertices()) {
+      if (vertex.vertexId() == targetId) {
+        target[i] = vertex.projectionLocation();
+        if (vertex.nature().isParkingTarget()) {
+          isTargetParking = true;
+          i++;
+        } else {
+          if (vertex.offersBonus()) {
+            target[0] = vertex.projectionLocation();
+            break;
+          }
+        }
+      }
+    }
+    if (i != 0) {
+      // Decision to orientate in direction of the target
+      // if this is a parking, target the center else target the 1st point found with bonus
+      if (isTargetParking) {
+        return orientateTo(middle(target));
+      } else {
+        return orientateTo(target[0]);
+      }
+    } else {
+      targetId = -1;
+      if (!pendingDecisions.isEmpty()) {
+        return pendingDecisions.remove(0);
+      }
+      return randomQuarterTurn();
+    }
+  }
+
+  // ----------------------------------------
 
   // PRE : collisionWithMe is empty
-  private IDecision freeDecision(ISensors sensors) {
-    
-    // TODO : implement the free will of the Driver
-
-    return MyDecision.randomDecision();
+  private IDecision acquireTarget() {
+    // mapping from an ID to a list of seen vertexes
+    HashMap<Integer, ArrayList<ISeenVertex>> vertexesFromSameId = new HashMap<>();
+    // listing of interesting vertexes and gathering all vertexes from a certain ID
+    for (ISeenVertex v : sensors.seenVertices()) {
+      int id = v.vertexId();
+      // create the entry in the map in not present
+      if (!vertexesFromSameId.containsKey(id)) {
+        ArrayList<ISeenVertex> vertexes = new ArrayList<>();
+        vertexesFromSameId.put(id, vertexes);
+      }
+      // add the vertex to the list of the same id
+      vertexesFromSameId.get(id).add(v);
+    }
+    if (!vertexesFromSameId.isEmpty()) {
+      int max = 0;
+      int bestId = -1;
+      for (int id : vertexesFromSameId.keySet()) {
+        int points = 0;
+        for (ISeenVertex vertex : vertexesFromSameId.get(id)) {
+          if (vertex.offersBonus()) {
+            points++;
+          }
+        }
+        if (points > max) {
+          bestId = id;
+          max = points;
+        }
+      }
+      targetId = bestId;
+      return orientateTowardTargetAcquired();
+    } else {
+      // if there is no interresting vertexes, we make a quarter turn left or right randomly choosen
+      return randomQuarterTurn();
+    }
   }
+
+  // ----------------------------------------
+
+  // return randomly the decision to take a quarterTurn left or right (in 3 steps)
+  private IDecision randomQuarterTurn() {
+    if (r.nextBoolean()) {
+      return quarterTurnLeft();
+    }
+    return quarterTurnRight();
+  }
+
+  // ----------------------------------------
 
   // PRE : collisionWithMe is not empty
   private IDecision collisionDecision(List<ICollision> collisionsWithMe) {
@@ -89,12 +210,13 @@ public class Driver implements IDriver {
     return decisionFromCodes(vertexCode, sideCode);
   }
 
+  // ----------------------------------------
+
   // called from collisionDecision
-  // TODO : When collisions will be implemented, test if the reactions are correct
+  // TODO : simplify !
   private IDecision decisionFromCodes(int vertexCode, int sideCode) {
     MyDecision decision = MyDecision.IMMOBILE_DECISION;
     if (vertexCode != 0) {
-
       switch (vertexCode) {
         case 15: // all vertices touch something -> try to reduce my size
           decision = new MyDecision(false, r.nextInt(4), -GameProvider.MAX_SIDE_LENGHT);
@@ -174,7 +296,6 @@ public class Driver implements IDriver {
           decision = MyDecision.ANGLE_POS_SIDE_3;
           break;
       }
-
       previousVertexCode = vertexCode;
       return decision;
     } else {
@@ -216,7 +337,6 @@ public class Driver implements IDriver {
             previousSideCode = -1;
             return decision;
           }
-
         case 10: // sides 0 and 2 touch something
           if (myCar.sideOffersBonus(1)) {// try to gain distance from collisions
             if (r.nextBoolean()) {
@@ -232,8 +352,6 @@ public class Driver implements IDriver {
             }
           }
           break;
-
-
         case 9: // sides 0 and 3 touch something
           if (r.nextBoolean()) {
             decision = MyDecision.ANGLE_POS_SIDE_1;
@@ -321,67 +439,87 @@ public class Driver implements IDriver {
     }
   }
 
+  // ----------------------------------------
+
   // 2-steps to make an advance in direction 0 (down)
-  IDecision advanceDirection0() {
+  private IDecision advanceDirection0() {
     pendingDecisions.add(MyDecision.REDUCTION_SIDE_2);
     return MyDecision.GROWTH_SIDE_0;
   }
 
+  // ----------------------------------------
+
   // 2-steps to make an advance in direction 1 (right)
-  IDecision advanceDirection1() {
+  private IDecision advanceDirection1() {
     pendingDecisions.add(MyDecision.REDUCTION_SIDE_3);
     return MyDecision.GROWTH_SIDE_1;
   }
 
   // 2-steps to make an advance in direction 2 (up)
-  IDecision advanceDirection2() {
+  private IDecision advanceDirection2() {
     pendingDecisions.add(MyDecision.REDUCTION_SIDE_0);
     return MyDecision.GROWTH_SIDE_2;
   }
 
   // 2-steps to make an advance in direction 3 (left)
-  IDecision advanceDirection3() {
+  private IDecision advanceDirection3() {
     pendingDecisions.add(MyDecision.REDUCTION_SIDE_1);
     return MyDecision.GROWTH_SIDE_3;
-    
   }
 
   // 3-steps to make a quarter turn left
-  // TODO : CORRECTION, this is not correct
-  IDecision quarterTurnLeft() {
+  private IDecision quarterTurnLeft() {
     pendingDecisions.add(MyDecision.ANGLE_POS_SIDE_1);
     pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_2);
     return MyDecision.ANGLE_POS_SIDE_3;
   }
 
   // 3-steps to make a quarter turn right
-  //TODO : CORRECTION, this is not correct
-  IDecision quarterTurnRight() {
+  private IDecision quarterTurnRight() {
     pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_3);
     pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_2);
     return MyDecision.ANGLE_NEG_SIDE_1;
   }
+  
+  
+  
+  private Point2D middle(Point2D... points) {
+    double x = 0, y = 0;
+    for (Point2D p : points) {
+      x += p.getX();
+      y += p.getY();
+    }
+    return new Point2D.Double(x / points.length, y / points.length);
+  }
 
+  // ----------------------------------------
+
+  private Point2D getMiddleOfSensor() {
+    return middle(myCar.vertex(0), myCar.vertex(1));
+  }
+
+  // ----------------------------------------
+  // ----------------------------------------
+  // ----------------------------------------
 
   // Decision generator with hardcoded ones
   public static class MyDecision implements IDecision {
     public final static MyDecision IMMOBILE_DECISION = new MyDecision(false, 0, 0);
-    
 
     public final static MyDecision REDUCTION_SIDE_0 =
-        new MyDecision(false, 0, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 0, -GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision REDUCTION_SIDE_1 =
-        new MyDecision(false, 1, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 1, -GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision REDUCTION_SIDE_2 =
         new MyDecision(false, 2, -GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision REDUCTION_SIDE_3 =
         new MyDecision(false, 3, -GameProvider.MAX_SIDE_LENGHT);
-    
-    
+
+
     public final static MyDecision GROWTH_SIDE_0 =
-        new MyDecision(false, 0, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 0, GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision GROWTH_SIDE_1 =
-        new MyDecision(false, 1, -GameProvider.MAX_SIDE_LENGHT);    
+        new MyDecision(false, 1, GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision GROWTH_SIDE_2 =
         new MyDecision(false, 2, GameProvider.MAX_SIDE_LENGHT);
     public final static MyDecision GROWTH_SIDE_3 =
@@ -435,6 +573,32 @@ public class Driver implements IDriver {
       return new MyDecision(r.nextBoolean(), r.nextInt(4),
           r.nextDouble() * GameProvider.MAX_SIDE_LENGHT);
     }
+
+    // PRE: left is -1 or 1
+    public static MyDecision angleDecision(boolean left, int side, double length) {
+      int coeff = -1;
+      if (left) {
+        coeff = 1;
+      }
+      return new MyDecision(true, side, length * coeff);
+    }
+
+    public static MyDecision sideDecision(boolean increase, int side, double length) {
+      int coeff = -1;
+      if (increase) {
+        coeff = 1;
+      }
+      return new MyDecision(false, side, coeff * length);
+    }
+
+    public static MyDecision sideDecisionMax(boolean increase, int side) {
+      return sideDecision(increase, side, GameProvider.MAX_SIDE_LENGHT);
+    }
   }
 
+  // ----------------------------------------
+  // ----------------------------------------
+  // ----------------------------------------
+
+  
 }

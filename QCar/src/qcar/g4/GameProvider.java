@@ -11,7 +11,7 @@ public class GameProvider implements IGameProvider {
 
   public static final int MAX_QCARS = 256;
   public static final Random R = new Random();
-  public static final double SPAWN_PROBABILITY = 0.3;
+  public static final double SPAWN_PROBABILITY = 0.9;
   public static final int PARALLELOGRAM_SCALE = 20;
   
   public static final double MIN_AREA = 1.3;
@@ -24,15 +24,20 @@ public class GameProvider implements IGameProvider {
     ArrayList<IQCar> cars = new ArrayList<IQCar>();
     
     int drivers = 0;
-    for (int i = 0; i < MAX_QCARS; i++) {
+    //for (int i = 0; i < 2; i++) {
       
-      if (R.nextDouble() > SPAWN_PROBABILITY) {
+     // if (R.nextDouble() > SPAWN_PROBABILITY) {
         QCarNature nature = randomNature(drivers++, nbOfDrivers);
         QCar car = new QCar(nature, randomAlignedPositions(nature));
         cars.add(car);
+<<<<<<< HEAD
       }
+=======
+        //System.out.println(car);
+     // }
+>>>>>>> refs/remotes/origin/develop_pilot_2
       
-    }
+   // }
     
     return new GameDescription(cars);
   }
