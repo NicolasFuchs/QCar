@@ -20,7 +20,7 @@ public class Driver implements IDriver {
 
     public void run() {
       while (!finished) {
-        sensors = pc.play(takeDecision(sensors));
+        sensors = pc.play(takeDecision());
       }
     }
   };
@@ -29,7 +29,8 @@ public class Driver implements IDriver {
   IQCar myCar;
   int previousVertexCode = -1;
   int previousSideCode = -1;
-  boolean targetAquired = false ;
+  int targetId = -1;
+  boolean isTargetParking = false;
 
   @Override
   public void startDriverThread(IPlayerChannel pc) {
@@ -67,17 +68,19 @@ public class Driver implements IDriver {
 
 
   // method called by the driver thread to take one decision
-  private IDecision takeDecision(ISensors sensors) {
+  private IDecision takeDecision() {
     if (!pendingDecisions.isEmpty()) {
       return pendingDecisions.remove(0);
     }
 
     if (sensors != null) {
       if (sensors.collisionsWithMe().isEmpty()) {
-        if (!targetAquired) {
-          return lookingForTarget(sensors);
-        } 
-          return followTargetDecision() ;
+        if (targetId == -1) {
+          return acquireTarget();
+        } else {
+          return followTargetDecision();
+        }
+        
       } else {
         return collisionDecision(sensors.collisionsWithMe());
       }
@@ -86,14 +89,13 @@ public class Driver implements IDriver {
   }
 
   private IDecision followTargetDecision() {
-    // TODO Auto-generated method stub
-    return null;
+    pendingDecisions.add(advanceDirection0()) ;
+    return orientateTowardTargetAcquired();
   }
 
- 
 
 
-  private IDecision orientateToCheckDistance(Point2D vertexProjection) {
+  private IDecision orientateTo(Point2D vertexProjection) {
     if (myCar.vertex(0).distance(vertexProjection) < myCar.vertex(1).distance(vertexProjection)) {
       return MyDecision.angleDecision(true, 0, vertexProjection.distance(getMiddleOfSensor()));
     } else {
@@ -101,16 +103,40 @@ public class Driver implements IDriver {
     }
   }
 
+  private IDecision orientateTowardTargetAcquired() {
+    Point2D[] target = new Point2D[4];
+    int i = 0;
+    for (ISeenVertex vertex : sensors.seenVertices()) {
+      if (vertex.vertexId() == targetId) {
+        target[i] = vertex.projectionLocation();
+        if (vertex.nature().isParkingTarget()) {
+          isTargetParking = true;
+          i++;
+        } else {
+          if (vertex.offersBonus()) {
+            target[0] = vertex.projectionLocation();
+            break;
+          }
+        }
+      }
+    }
+    // Decision to orientate in direction of the target
+    // if this is a parking, target the center else target the 1st point found with bonus
+    if (isTargetParking) {
+      return orientateTo(middle(target));
+    } else {
+      return orientateTo(target[0]);
+    }
 
+  }
 
   // PRE : collisionWithMe is empty
-  private IDecision lookingForTarget(ISensors sensors) {   
+  private IDecision acquireTarget() {
     // mapping from an ID to a list of seen vertexes
     HashMap<Integer, ArrayList<ISeenVertex>> vertexesFromSameId = new HashMap<>();
-
     // listing of interesting vertexes and gathering all vertexes from a certain ID
     for (ISeenVertex v : sensors.seenVertices()) {
-      int id = v.vertexId() ;       
+      int id = v.vertexId();
       // create the entry in the map in not present
       if (!vertexesFromSameId.containsKey(id)) {
         ArrayList<ISeenVertex> vertexes = new ArrayList<>();
@@ -119,37 +145,30 @@ public class Driver implements IDriver {
       // add the vertex to the list of the same id
       vertexesFromSameId.get(id).add(v);
     }
-
     if (!vertexesFromSameId.isEmpty()) {
-      int max = 0 ;
-      int bestId = -1 ;
+      int max = 0;
+      int bestId = -1;
       for (int id : vertexesFromSameId.keySet()) {
-        int points = 0 ;
+        int points = 0;
         for (ISeenVertex vertex : vertexesFromSameId.get(id)) {
           if (vertex.offersBonus()) {
-            points++ ;
+            points++;
           }
-        }        
-        if (points > max) {
-          bestId = id ; max = points ;
         }
-      }  
-      
-      Point2D[] target = new Point2D[max] ;
-      int i = 0 ;
-      for(ISeenVertex vertex : vertexesFromSameId.get(bestId)) {
-        target[i] = vertex.projectionLocation() ;
-        i++ ;
-      }      
-      return orientateToCheckDistance(middle(target)) ;
-      
+        if (points > max) {
+          bestId = id;
+          max = points;
+        }
+      }
+      targetId = bestId ;
+      return orientateTowardTargetAcquired() ;
     } else {
       // if there is no interresting vertexes, we make a quarter turn left or right randomly choosen
       if (r.nextBoolean()) {
-        return quarterTurnLeft() ;
-      } 
-      return quarterTurnRight() ;      
-    }    
+        return quarterTurnLeft();
+      }
+      return quarterTurnRight();
+    }
   }
 
   // PRE : collisionWithMe is not empty
@@ -536,16 +555,16 @@ public class Driver implements IDriver {
     }
 
   }
-  
-  private Point2D middle(Point2D ... points) {    
-    double x = 0, y =0;
+
+  private Point2D middle(Point2D... points) {
+    double x = 0, y = 0;
     for (Point2D p : points) {
-      x+=p.getX() ;
-      y+=p.getY() ;
-    }    
+      x += p.getX();
+      y += p.getY();
+    }
     return new Point2D.Double(x / points.length, y / points.length);
-  } 
-  
+  }
+
 
   private Point2D getMiddleOfSensor() {
     return middle(myCar.vertex(0), myCar.vertex(1));
