@@ -136,12 +136,9 @@ public class WorldManager implements IWorldManager {
     double minY = Double.MAX_VALUE;
     double maxX = Double.MAX_VALUE*-1;
     double maxY = Double.MAX_VALUE*-1;
-
-
     for(Point2D candidate : allPoints){
       double x = candidate.getX();
       double y = candidate.getY();
-
       if(minY > y)
         minY = y;
       if(minX > x)
@@ -151,7 +148,6 @@ public class WorldManager implements IWorldManager {
       if(maxX < x)
         maxX = x;
     }
-    //System.out.printf("Bounding box: %d, %d, %d, %d", minX, minY, maxX-minX, maxY-minY);
     return new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
   }
 
