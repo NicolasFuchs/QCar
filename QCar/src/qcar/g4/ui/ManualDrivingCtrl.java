@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleGroup;
+import qcar.g4.Decision;
 
 public class ManualDrivingCtrl {
 
@@ -35,7 +36,6 @@ public class ManualDrivingCtrl {
 
   private ToggleGroup sides;
   private ToggleGroup movement;
-
   private SimulationCtrl refSim;
 
   @FXML
@@ -57,6 +57,15 @@ public class ManualDrivingCtrl {
 
   public void setParentCtrl(SimulationCtrl refSim){
     this.refSim = refSim;
+  }
+
+  @FXML
+  private void handleMoveButton(){
+    int sideId;
+    boolean isAngledMovement;
+    double requestedTranslation;
+
+
   }
 }
 

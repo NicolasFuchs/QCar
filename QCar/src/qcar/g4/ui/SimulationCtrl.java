@@ -20,6 +20,7 @@ import qcar.IWorldManager;
 import qcar.ui.QCarAnimationPane;
 import simviou.AnimationPane;
 import simviou.LogPanel;
+import simviou.ObservationPolicy;
 import simviou.UIOperationsWithDefaults;
 import simviou.ViewPort;
 
@@ -65,13 +66,13 @@ public class SimulationCtrl {
       e.printStackTrace();
     }
 
-    viewPort = new ViewPort(0, 100, 0, 100, 610, 350, true);
+    Rectangle2D r = wm.boundingBox();
+    viewPort = new ViewPort((int) r.getMinY(), (int) r.getMaxY(), (int) r.getMinX(), (int) r.getMaxX(), 610, 350, true);
 
     UIOperationsWithDefaults uiOp = new UIOperationsWithDefaults() {
       @Override
       public Rectangle2D worldBoundingBox() {
-        double minX = 0, minY = 0, width = 200, height = 200;
-        return new Rectangle2D(minX,minY,width,height);
+        return wm.boundingBox();
       }
       @Override
       public AnimationPane newAnimationPane(ViewPort vPort) {
@@ -80,6 +81,10 @@ public class SimulationCtrl {
       @Override
       public boolean isActive(int z) {
         return true;
+      }
+      @Override
+      public ObservationPolicy observationPolicy(){
+        return ObservationPolicy.WORLD_BOUNDARY;
       }
     };
 
@@ -138,5 +143,9 @@ public class SimulationCtrl {
     } catch(IOException e){
       e.printStackTrace();
     }
+  }
+
+  @FXML
+  private void handleListQCarClick(){
   }
 }
