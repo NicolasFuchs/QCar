@@ -15,129 +15,92 @@ public class GameProvider implements IGameProvider {
   public static final int PARALLELOGRAM_SCALE = 20;
   
   public static final double MIN_AREA = 1.3;
-  public static final double MAX_SIDE_LENGHT = 7.4;
+  public static final double MAX_SIDE_LENGTH = 7.4;
 
   private GameDescription.GameStyles game;
-  private boolean[][] occupationMap;
-  private double tol;
-  
-  // Create constructor for game styles
-  // take enum from GameDescritpion as input and load wanted datas in GameProvider instance
-  // game => int!!
-  // faire correspondre les sytle en int avec enum de gameDescription
-  // Attention au placement des QCARS, chevauchement! (solution de la grille, séparer le monde en carrés de tailles == MAX du QCAR possible?)
-  // 
-  // les QCARs driven sont en premiers index (piloté par IA ou manuel)
-  // 
+  private boolean[][] map;
+  private double tol = 0.01 * MAX_SIDE_LENGTH; // Buffer for grid, avoid having a grid with the exact size of a QCar
   
   public GameProvider(GameDescription.GameStyles game){
     
-    ArrayList<IQCar> cars = new ArrayList<IQCar>();
     this.game = game;
-    
   }
   
   @Override
   public IGameDescription nextGame(int nbOfDrivers) {
     
-    ArrayList<IQCar> cars = new ArrayList<IQCar>();
-    Point2D[] gameArena;
-    
-    
-    
+    ArrayList<IQCar> cars = new ArrayList<>();    
+    int gridSide = (int)Math.sqrt(nbOfDrivers);
+    map = new boolean[gridSide][gridSide];
     
     switch (game){
-      case STANDARD: cars = standardStyle(nbOfDrivers);
-        break;
-      case PARKINGS: cars = parkingsStyle(nbOfDrivers, 2);
-        break;
-      case DEBUG: boolean noBorders = true;
-                  double tol = MAX_SIDE_LENGHT * 0.01;
-                  cars = debugStyle(noBorders, tol);
-        break;
-
-      case WITHOUT_BORDERS:;
-      break;
-
-      // Bounding box is a QCAR without bonus, parking and driver
-      case WITH_BORDERS:;
-      break;
-
       
-      case NO_PARKINGS:;
-      break;
+      case STANDARD_WITH_BORDERS: cars = standardStyle(nbOfDrivers);
+                                  cars.add(obtainBorders());
+                                  break;
+      case PARKINGS_WITH_BORDERS: cars = parkingsStyle(nbOfDrivers, 2);
+                                  cars.add(obtainBorders());
+                                  break;
+      case DEBUG_WITH_BORDERS: cars = debugStyle();
+                               cars.add(obtainBorders());
+                               break;
+      case NO_PARKINGS_WITH_BORDERS: noParkings(nbOfDrivers);
+                                     cars.add(obtainBorders());
+                                     break;
 
-        
-      default:;    
+      case STANDARD_WITHOUT_BORDERS: cars = standardStyle(nbOfDrivers);
+                                     break;
+      case PARKINGS_WITHOUT_BORDERS: cars = parkingsStyle(nbOfDrivers, 2);
+                                     break;
+      case DEBUG_WITHOUT_BORDERS: cars = debugStyle();
+                                  break;
+      case NO_PARKINGS_WITHOUT_BORDERS: noParkings(nbOfDrivers);
+                                        break;
+
+      default: break;    
     }
     
-    /*
-    int drivers = 0;
-    for (int i = 0; i < MAX_QCARS; i++) {
-      
-      if (R.nextDouble() > SPAWN_PROBABILITY) {
-        QCarNature nature = randomNature(drivers++, nbOfDrivers);
-        QCar car = new QCar(nature, randomAlignedPositions(nature));
-        cars.add(car);
-        //System.out.println(car);
-      }
-      
-    }
-    */
     return new GameDescription(cars);
-  }
-  
-  private ArrayList<IQCar> withBorder(int nbOfDrivers, Point2D[] borderVertices){
-    
-    ArrayList<IQCar> cars = new ArrayList<IQCar>();
-    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGHT, MIN_AREA);
-    
-    int totalDriven = 0, totalParkings = 0;
-    int totalCars = nbOfDrivers ;
-    QCar car;
-    
-    for(int i = 0; i<nbOfDrivers; i++){
-      car = new QCar(driven, randomAlignedPositions(driven, occupationMap, false, tol));
-      cars.add(car);
-    }
-
-    
-    return cars;
   }
   
   private ArrayList<IQCar> noParkings(int nbOfDrivers){
     
-    ArrayList<IQCar> cars = new ArrayList<IQCar>();
-    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGHT, MIN_AREA);
+    ArrayList<IQCar> cars = new ArrayList<>();
+    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
     QCar car;
-  
+    Point2D[] vertices ;
+    
     for(int i = 0; i<nbOfDrivers; i++){
-      car = new QCar(driven, randomAlignedPositions(driven, occupationMap, true, tol));
+      vertices = randomAlignedPositions(driven); 
+      allocateVertices(vertices);
+      car = new QCar(driven, vertices);
       cars.add(car);
     }
     
     return cars;
   }
   
-  // corrected for QCAR order
   private ArrayList<IQCar> parkingsStyle(int nbOfDrivers, int multiplier){
     
-    ArrayList<IQCar> cars = new ArrayList<IQCar>();
-    QCarNature parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGHT, MIN_AREA);
-    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGHT, MIN_AREA);
+    ArrayList<IQCar> cars = new ArrayList<>();
+    QCarNature parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
+    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
     
-    boolean noBorders = true;
-    int totalDriven = 0, totalParkings = 0;
+    Point2D[] vertices ;
     int parkings = nbOfDrivers * multiplier;
     int totalCars = nbOfDrivers + parkings;
     QCar car;
     
     for(int i = 0; i<nbOfDrivers; i++){
-      car = new QCar(driven, randomAlignedPositions(driven, occupationMap, noBorders, tol));
+      vertices = randomAlignedPositions(driven); 
+      allocateVertices(vertices);
+      car = new QCar(driven, vertices);
       cars.add(car);
     }
     for(int i = nbOfDrivers; i<totalCars; i++){
-      car = new QCar(parking, randomAlignedPositions(parking, occupationMap, noBorders, tol));
+      vertices = randomAlignedPositions(parking); 
+      allocateVertices(vertices);
+      car = new QCar(parking, vertices);
       cars.add(car);
     }
     
@@ -145,37 +108,50 @@ public class GameProvider implements IGameProvider {
   }
   
   private ArrayList<IQCar> standardStyle(int nbOfDrivers){
-    ArrayList<IQCar> cars = new ArrayList<IQCar>();
     
-    int drivers = 0;
-    for (int i = 0; i < MAX_QCARS; i++) {
-      
-      if (R.nextDouble() > SPAWN_PROBABILITY) {
-        QCarNature nature = randomNature(drivers++, nbOfDrivers);
-        QCar car = new QCar(nature, randomAlignedPositions(nature, occupationMap, true, tol));
-        cars.add(car);
-        //System.out.println(car);
-      }
+    ArrayList<IQCar> cars = new ArrayList<>();
+    QCarNature parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
+    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
+    
+    Point2D[] vertices ;
+    QCar car;
+   
+    int wantedQCars = (nbOfDrivers>MAX_QCARS) ? MAX_QCARS : nbOfDrivers;
+    
+    for(int i = 0; i<wantedQCars; i++){
+      vertices = randomAlignedPositions(driven); 
+      allocateVertices(vertices);
+      car = new QCar(driven, vertices);
+      cars.add(car);
+    }
+    for(int i = wantedQCars; i<MAX_QCARS; i++){
+      vertices = randomAlignedPositions(parking); 
+      allocateVertices(vertices);
+      car = new QCar(parking, vertices);
+      cars.add(car);
     }
     return cars;  
   }
   
-  private ArrayList<IQCar> debugStyle(boolean noBorders, double tol){
+  private ArrayList<IQCar> debugStyle(){
     
-    ArrayList<IQCar> cars = new ArrayList<IQCar>();
-    QCarNature nature = new QCarNature(true, false, true, true, MAX_SIDE_LENGHT, MIN_AREA);
-    QCar car = new QCar(nature, randomAlignedPositions(nature, occupationMap, noBorders, tol));
+    ArrayList<IQCar> cars = new ArrayList<>();
+    QCarNature nature = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
+    Point2D[] vertices = randomAlignedPositions(nature); 
+    allocateVertices(vertices);
+    QCar car = new QCar(nature, vertices);
     cars.add(car);
     return cars;
   }
   
+  // Used for tests only
   private QCarNature randomNature (int currDrivers, int wantedDrivers) {
     
     boolean driven = currDrivers < wantedDrivers ? true : false;
     boolean parkingTarget = driven ? false : R.nextBoolean();
     boolean vertexTarget = R.nextBoolean();
     boolean sideTarget = R.nextBoolean();
-    double maxSideLenght = MAX_SIDE_LENGHT;
+    double maxSideLenght = MAX_SIDE_LENGTH;
     double minArea = MIN_AREA;
     
     QCarNature nature = new QCarNature(driven, parkingTarget, vertexTarget, sideTarget, maxSideLenght, minArea);
@@ -183,79 +159,107 @@ public class GameProvider implements IGameProvider {
     return nature;
   }
   
-  private Point2D[] randomAlignedPositions(QCarNature nature, boolean[][] occupationMap, boolean dynamicReallocation, double tol) {
+  private Point2D[] randomAlignedPositions(QCarNature nature) {
     
     Point2D[] points = new Point2D[4];
     do{
-    double verticalSideLenght = R.nextDouble()*PARALLELOGRAM_SCALE;
-    verticalSideLenght = verticalSideLenght > nature.maxSideLength() ? verticalSideLenght % nature.maxSideLength() : verticalSideLenght;
-    
-    double horizontalSideLenght = R.nextDouble()*PARALLELOGRAM_SCALE;
-    horizontalSideLenght = horizontalSideLenght > nature.maxSideLength() ? horizontalSideLenght % nature.maxSideLength() : horizontalSideLenght;
+      double verticalSideLenght = R.nextDouble()*PARALLELOGRAM_SCALE;
+      verticalSideLenght = verticalSideLenght > nature.maxSideLength() ? verticalSideLenght % nature.maxSideLength() : verticalSideLenght;
 
-    boolean offsetVertical = R.nextBoolean();
-    int positionFactor = R.nextInt(500);
-    double offset = R.nextDouble()*(offsetVertical ? verticalSideLenght : horizontalSideLenght);
-    
-    double posX = R.nextDouble()*positionFactor;
-    double posY = R.nextDouble()*positionFactor;
-    points[1] = new Point2D.Double(posX, posY);
+      double horizontalSideLenght = R.nextDouble()*PARALLELOGRAM_SCALE;
+      horizontalSideLenght = horizontalSideLenght > nature.maxSideLength() ? horizontalSideLenght % nature.maxSideLength() : horizontalSideLenght;
 
-    if (offsetVertical) {
-      posY = posY-verticalSideLenght;
-      points[0] = new Point2D.Double(posX, posY);
-      posY = posY - offset;
-      posX = posX - Math.sqrt(Math.abs((horizontalSideLenght*horizontalSideLenght)-(offset*offset)));
-      points[3] = new Point2D.Double(posX, posY);
-      posY = posY + verticalSideLenght;
-      points[2] = new Point2D.Double(posX, posY);
-    } else {
-      posX = posX-horizontalSideLenght;
-      points[2] = new Point2D.Double(posX, posY);
-      posX = posX - offset;
-      posY = posY - Math.sqrt(Math.abs((verticalSideLenght*verticalSideLenght)-(offset*offset)));
-      points[3] = new Point2D.Double(posX, posY);
-      posX = posX + horizontalSideLenght;
-      points[0] = new Point2D.Double(posX, posY);
-    }
-    }while(!checkEmplacementOnArena(points, occupationMap, tol, dynamicReallocation));
-    
-    
+      boolean offsetVertical = R.nextBoolean();
+      int positionFactor = R.nextInt(500);
+      double offset = R.nextDouble()*(offsetVertical ? verticalSideLenght : horizontalSideLenght);
+
+      double posX = R.nextDouble()*positionFactor;
+      double posY = R.nextDouble()*positionFactor;
+      points[1] = new Point2D.Double(posX, posY);
+
+      if (offsetVertical) {
+        posY = posY-verticalSideLenght;
+        points[0] = new Point2D.Double(posX, posY);
+        posY = posY - offset;
+        posX = posX - Math.sqrt(Math.abs((horizontalSideLenght*horizontalSideLenght)-(offset*offset)));
+        points[3] = new Point2D.Double(posX, posY);
+        posY = posY + verticalSideLenght;
+        points[2] = new Point2D.Double(posX, posY);
+      } else {
+        posX = posX-horizontalSideLenght;
+        points[2] = new Point2D.Double(posX, posY);
+        posX = posX - offset;
+        posY = posY - Math.sqrt(Math.abs((verticalSideLenght*verticalSideLenght)-(offset*offset)));
+        points[3] = new Point2D.Double(posX, posY);
+        posX = posX + horizontalSideLenght;
+        points[0] = new Point2D.Double(posX, posY);
+      }
+    }while(!checkEmplacementOnArena(points));
+
     return points;
   }
   
   // check occupation of this position
   // occupationMap = game map divided in an grid of square with side length equals to the max side length of a QCar
   //                 + buffer (tolerance on one side)
-  private boolean checkEmplacementOnArena(Point2D[] vertices, boolean[][] occupationMap, double tol, boolean dynamicReallocation){
+  private boolean checkEmplacementOnArena(Point2D[] vertices){
     
-    double side = MAX_SIDE_LENGHT + 2*tol;
+    double side = MAX_SIDE_LENGTH + 2*tol;
     for(int i = 0; i<vertices.length; i++){
       double x=vertices[i].getX(), y = vertices[i].getY();
       int occupX = (int)(x/side), occupY = (int)(y/side);
-      if(dynamicReallocation &&(occupX>= occupationMap.length || occupY >= occupationMap[0].length))
-        occupationMap = augmentMapSize(occupationMap, occupX, occupY);
+      if(occupX>= map.length || occupY >= map[0].length)
+        map = augmentMapSize(occupX, occupY);
       else return false;
-      if(occupationMap[occupX][occupY]) return false;
+      if(map[occupX][occupY]) return false;
     }
-    
     return true;
   }
   
   // Dynamic augmentation of game map grid, in function of emplacement of checked area of grid
-  private boolean[][] augmentMapSize(boolean[][] occupationMap, int occupX, int occupY){
+  private boolean[][] augmentMapSize(int occupX, int occupY){
     boolean[][] newMap;
-    if(occupX >= occupationMap.length && occupY >= occupationMap[0].length)
+    if(occupX >= map.length && occupY >= map[0].length)
       newMap = new boolean[occupX+1][occupY+1];
-    else if(occupX >= occupationMap.length && occupY < occupationMap[0].length)
-      newMap = new boolean[occupX+1][occupationMap[0].length];
+    else if(occupX >= map.length && occupY < map[0].length)
+      newMap = new boolean[occupX+1][map[0].length];
     else
-      newMap = new boolean[occupationMap.length][occupY+1];
-    for(int x = 0; x<occupationMap.length; x++){
-      for(int y = 0; y<occupationMap[x].length; y++) newMap[x][y] = occupationMap[x][y]; 
+      newMap = new boolean[map.length][occupY+1];
+    for(int x = 0; x<map.length; x++){
+      for(int y = 0; y<map[x].length; y++) newMap[x][y] = map[x][y]; 
     }
-    
     return newMap;
   }
   
+  // Return a QCar with the coordinates of each corners of the map that contains all QCars
+  private QCar obtainBorders(){
+    
+    int side = Math.max(map.length, map[0].length);
+    double sideX = map.length * (MAX_SIDE_LENGTH + tol *2);
+    double sideY = map[0].length * (MAX_SIDE_LENGTH + tol *2);
+    double maxSideLength = side * (MAX_SIDE_LENGTH + tol *2);
+    QCarNature nature = new QCarNature(false, false, false, false, maxSideLength, sideX * sideY);
+
+    Point2D[] borderVertices = {
+        new Point2D.Double(0, 0),
+        new Point2D.Double(sideX, 0),
+        new Point2D.Double(sideX, sideY),
+        new Point2D.Double(0, sideY)
+    };
+    
+    return new QCar(nature, borderVertices);
+  }
+  
+  // Update the map in function of the coordinates of the vertices
+  private void allocateVertices(Point2D[] vertices){
+    double x, y, side;
+    int boolX, boolY;
+    
+    for(int i=0; i<vertices.length; i++){
+      x = vertices[i].getX(); y = vertices[i].getY();
+      side = (MAX_SIDE_LENGTH + tol *2);
+      boolX = (int)(x/side); boolY = (int)(y/side);
+      map[boolX][boolY] = true;
+    }
+  }
 }
