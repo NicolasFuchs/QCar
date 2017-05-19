@@ -3,6 +3,8 @@ package qcar.g4;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.BitSet;
+
+import qcar.IDecision;
 import qcar.IQCar;
 import qcar.IQCarNature;
 
@@ -51,6 +53,10 @@ public class QCar implements IQCar {
     }
   }
   
+  public void update(IDecision decision) {
+    update(decision.isAngleMovement(), decision.sideId(), decision.requestedTranslation()) ;
+  }
+  
   @Override
   public Point2D vertex(int vertexId) {
     if(vertexId >= 0 && vertexId < vertices.length)
@@ -66,7 +72,8 @@ public class QCar implements IQCar {
 
   @Override
   public boolean isAlive() {
-    return !bonuses.isEmpty();
+    return !bonuses.isEmpty() || (!nature().isDriven() && !nature().isParkingTarget()
+        && !nature().isSideTarget() && !nature().isVertexTarget());
   }
 
   @Override
@@ -97,29 +104,7 @@ public class QCar implements IQCar {
 
   @Override
   public String toString() {
-    StringBuilder bld = new StringBuilder();
-    
-    if (vertices[0].getX() == vertices[1].getX()) { //offsetVertical
-      bld.append("          -----*\n");
-      bld.append("     -----     |\n");
-      bld.append("*-----         |\n");
-      bld.append("|              |\n");
-      bld.append("|              |\n");
-      bld.append("|         -----*\n");
-      bld.append("|    -----      \n");
-      bld.append("*-----           \n\n\n");
-    } else {
-      bld.append("*--------------*\n");
-      bld.append(" |              |\n");
-      bld.append("   |              |\n");
-      bld.append("     |              |\n");
-      bld.append("      *--------------*\n");
-    }
-    bld.append(Arrays.toString(vertices)+"\n");
-    bld.append(nature);
-    bld.append("\n\n");
-    
-    return bld.toString();
+    return "QCar n°" + nature().qCarId() + " - (" + score + ")" ;
   }
   
 //  public static double distance(Point2D a, Point2D b) {

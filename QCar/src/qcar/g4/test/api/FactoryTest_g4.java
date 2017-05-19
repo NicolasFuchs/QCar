@@ -6,9 +6,14 @@ import java.util.List;
 import org.junit.Test;
 import qcar.*;
 
-public class FactoryTest extends ApiTest {
+/*
+    This class tests the api implementation of the Factory
+    Author: group 4
+ */
+
+public class FactoryTest_g4 extends ApiTest {
   
-  public FactoryTest(IFactory fact, IFactory aux) {
+  public FactoryTest_g4(IFactory fact, IFactory aux) {
     super(fact, aux);
   }
   

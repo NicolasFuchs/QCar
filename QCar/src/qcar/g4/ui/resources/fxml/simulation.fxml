@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="borderPane" prefHeight="590.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="qcar.g4.ui.SimulationCtrl">
+   <top>
+      <Pane fx:id="headerPane" BorderPane.alignment="CENTER" />
+   </top>
+   <left>
+      <VBox prefHeight="373.0" prefWidth="176.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Leaderboard :" />
+            <ListView fx:id="lstLeaderboard" prefHeight="503.0" prefWidth="161.0" />
+         </children>
+         <BorderPane.margin>
+            <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+         </BorderPane.margin>
+      </VBox>
+   </left>
+   <bottom>
+      <VBox prefHeight="138.0" prefWidth="834.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Console :" />
+            <Pane fx:id="paneConsole" prefHeight="200.0" prefWidth="200.0" />
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" />
+         </padding>
+      </VBox>
+   </bottom>
+   <center>
+      <Pane fx:id="paneQCar" prefHeight="360.0" prefWidth="590.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="10.0" left="10.0" right="20.0" top="10.0" />
+         </BorderPane.margin>
+      </Pane>
+   </center>
+</BorderPane>

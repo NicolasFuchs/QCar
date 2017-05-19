@@ -26,6 +26,8 @@ public class WorldManager implements IWorldManager {
   private List<? extends IDriver> players;
   private ArrayList<PlayerChannel> playerChannels;
 
+  private ArrayList<Point2D> allPoints;
+
   /*
   *   Observers management
   */
@@ -63,6 +65,12 @@ public class WorldManager implements IWorldManager {
     }
 
     updateWorldState(); // update the world for the initial configuration
+
+    for(IQCar q : qcars){
+      for(int i = 0; i < 4; i++) {
+        allPoints.add(q.vertex(i));
+      }
+    }
 
     for(int i = 0; i < players.size(); i++) {
       //players.get(i).startDriverThread(playerChannels.get(i));
@@ -123,7 +131,24 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public Rectangle2D boundingBox() {
-    return boundingBox;
+    // todo go throught the qcar list and find the furthest apart points
+    double minX = Double.MAX_VALUE;
+    double minY = Double.MAX_VALUE;
+    double maxX = Double.MAX_VALUE*-1;
+    double maxY = Double.MAX_VALUE*-1;
+    for(Point2D candidate : allPoints){
+      double x = candidate.getX();
+      double y = candidate.getY();
+      if(minY > y)
+        minY = y;
+      if(minX > x)
+        minX = x;
+      if(maxY < y)
+        maxY = y;
+      if(maxX < x)
+        maxX = x;
+    }
+    return new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
   }
 
   @Override
@@ -152,6 +177,7 @@ public class WorldManager implements IWorldManager {
     this.distanceSensors = new ArrayList<Line2D>();
     this.collisions = new ArrayList<ICollision>();
     this.playerChannels = new ArrayList<PlayerChannel>();
+    this.allPoints = new ArrayList<Point2D>();
   }
 
   // ======== Private methods =======================================
