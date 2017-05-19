@@ -6,7 +6,7 @@ import qcar.IGameProvider;
 import qcar.IWorldManager;
 
 public class Factory implements IFactory{
-
+  
   @Override
   public int numberOfStyles() {
     return GameDescription.GameStyles.values().length;
@@ -14,7 +14,7 @@ public class Factory implements IFactory{
 
   @Override
   public IGameProvider newGameProvider(int style) {
-    return new GameProvider();
+    return new GameProvider(GameDescription.GameStyles.values()[style]);
   }
 
   @Override

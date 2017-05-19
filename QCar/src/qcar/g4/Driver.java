@@ -219,7 +219,7 @@ public class Driver implements IDriver {
     if (vertexCode != 0) {
       switch (vertexCode) {
         case 15: // all vertices touch something -> try to reduce my size
-          decision = new MyDecision(false, r.nextInt(4), -GameProvider.MAX_SIDE_LENGHT);
+          decision = new MyDecision(false, r.nextInt(4), -GameProvider.MAX_SIDE_LENGTH);
           break;
         case 14: // all vertices excepted the 3rd touch something
           decision = MyDecision.ANGLE_NEG_SIDE_3;
@@ -301,7 +301,7 @@ public class Driver implements IDriver {
     } else {
       switch (sideCode) {
         case 15: // all sides touch something -> try to reduce my size
-          decision = new MyDecision(false, r.nextInt(4), -GameProvider.MAX_SIDE_LENGHT);
+          decision = new MyDecision(false, r.nextInt(4), -GameProvider.MAX_SIDE_LENGTH);
           break;
         case 14: // all sides excepted the 3rd touch something
           if (previousSideCode != sideCode) {
@@ -507,41 +507,41 @@ public class Driver implements IDriver {
     public final static MyDecision IMMOBILE_DECISION = new MyDecision(false, 0, 0);
 
     public final static MyDecision REDUCTION_SIDE_0 =
-        new MyDecision(false, 0, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 0, -GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision REDUCTION_SIDE_1 =
-        new MyDecision(false, 1, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 1, -GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision REDUCTION_SIDE_2 =
-        new MyDecision(false, 2, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 2, -GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision REDUCTION_SIDE_3 =
-        new MyDecision(false, 3, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 3, -GameProvider.MAX_SIDE_LENGTH);
 
 
     public final static MyDecision GROWTH_SIDE_0 =
-        new MyDecision(false, 0, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 0, GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision GROWTH_SIDE_1 =
-        new MyDecision(false, 1, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 1, GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision GROWTH_SIDE_2 =
-        new MyDecision(false, 2, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 2, GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision GROWTH_SIDE_3 =
-        new MyDecision(false, 3, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(false, 3, GameProvider.MAX_SIDE_LENGTH);
 
     public final static MyDecision ANGLE_POS_SIDE_0 =
-        new MyDecision(true, 0, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(true, 0, GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision ANGLE_POS_SIDE_1 =
-        new MyDecision(true, 1, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(true, 1, GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision ANGLE_POS_SIDE_2 =
-        new MyDecision(true, 2, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(true, 2, GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision ANGLE_POS_SIDE_3 =
-        new MyDecision(true, 3, GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(true, 3, GameProvider.MAX_SIDE_LENGTH);
 
     public final static MyDecision ANGLE_NEG_SIDE_0 =
-        new MyDecision(true, 0, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(true, 0, -GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision ANGLE_NEG_SIDE_1 =
-        new MyDecision(true, 1, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(true, 1, -GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision ANGLE_NEG_SIDE_2 =
-        new MyDecision(true, 2, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(true, 2, -GameProvider.MAX_SIDE_LENGTH);
     public final static MyDecision ANGLE_NEG_SIDE_3 =
-        new MyDecision(true, 3, -GameProvider.MAX_SIDE_LENGHT);
+        new MyDecision(true, 3, -GameProvider.MAX_SIDE_LENGTH);
 
     private boolean isAngleMovement;
     private int sideId;
@@ -571,7 +571,7 @@ public class Driver implements IDriver {
 
     public static MyDecision randomDecision() {
       return new MyDecision(r.nextBoolean(), r.nextInt(4),
-          r.nextDouble() * GameProvider.MAX_SIDE_LENGHT);
+          r.nextDouble() * GameProvider.MAX_SIDE_LENGTH);
     }
 
     // PRE: left is -1 or 1
@@ -592,7 +592,7 @@ public class Driver implements IDriver {
     }
 
     public static MyDecision sideDecisionMax(boolean increase, int side) {
-      return sideDecision(increase, side, GameProvider.MAX_SIDE_LENGHT);
+      return sideDecision(increase, side, GameProvider.MAX_SIDE_LENGTH);
     }
   }
 
