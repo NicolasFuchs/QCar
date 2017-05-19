@@ -72,7 +72,8 @@ public class QCar implements IQCar {
 
   @Override
   public boolean isAlive() {
-    return !bonuses.isEmpty();
+    return !bonuses.isEmpty() || (!nature().isDriven() && !nature().isParkingTarget()
+        && !nature().isSideTarget() && !nature().isVertexTarget());
   }
 
   @Override
