@@ -75,4 +75,8 @@ public class QCarNature implements IQCarNature {
     
     return bld.toString();
   }
+  
+  public static void resetIDs(){
+    ID_COUNTER=0;
+  }
 }

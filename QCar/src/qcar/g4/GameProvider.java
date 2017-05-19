@@ -32,29 +32,30 @@ public class GameProvider implements IGameProvider {
     ArrayList<IQCar> cars = new ArrayList<>();    
     int gridSide = (int)Math.sqrt(nbOfDrivers);
     map = new boolean[gridSide][gridSide];
+    QCarNature.resetIDs();
     
     switch (game){
       
-      case STANDARD_WITH_BORDERS: cars = standardStyle(nbOfDrivers);
+      case STANDARD_WITH_BORDERS: cars = standardStyle(nbOfDrivers); // 0
                                   cars.add(obtainBorders());
                                   break;
-      case PARKINGS_WITH_BORDERS: cars = parkingsStyle(nbOfDrivers, 2);
+      case PARKINGS_WITH_BORDERS: cars = parkingsStyle(nbOfDrivers, 2); // 1
                                   cars.add(obtainBorders());
                                   break;
-      case DEBUG_WITH_BORDERS: cars = debugStyle();
+      case DEBUG_WITH_BORDERS: cars = debugStyle(); // 2
                                cars.add(obtainBorders());
                                break;
-      case NO_PARKINGS_WITH_BORDERS: noParkings(nbOfDrivers);
+      case NO_PARKINGS_WITH_BORDERS: cars = noParkings(nbOfDrivers); // 3
                                      cars.add(obtainBorders());
                                      break;
 
-      case STANDARD_WITHOUT_BORDERS: cars = standardStyle(nbOfDrivers);
+      case STANDARD_WITHOUT_BORDERS: cars = standardStyle(nbOfDrivers); // 4
                                      break;
-      case PARKINGS_WITHOUT_BORDERS: cars = parkingsStyle(nbOfDrivers, 2);
+      case PARKINGS_WITHOUT_BORDERS: cars = parkingsStyle(nbOfDrivers, 2); // 5
                                      break;
-      case DEBUG_WITHOUT_BORDERS: cars = debugStyle();
+      case DEBUG_WITHOUT_BORDERS: cars = debugStyle(); // 6
                                   break;
-      case NO_PARKINGS_WITHOUT_BORDERS: noParkings(nbOfDrivers);
+      case NO_PARKINGS_WITHOUT_BORDERS: cars = noParkings(nbOfDrivers); // 7
                                         break;
 
       default: break;    
@@ -66,11 +67,12 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> noParkings(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
+    QCarNature driven;
     QCar car;
-    Point2D[] vertices ;
+    Point2D[] vertices;
     
     for(int i = 0; i<nbOfDrivers; i++){
+      driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(driven); 
       allocateVertices(vertices);
       car = new QCar(driven, vertices);
@@ -83,8 +85,7 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> parkingsStyle(int nbOfDrivers, int multiplier){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
-    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
+    QCarNature parking, driven;
     
     Point2D[] vertices ;
     int parkings = nbOfDrivers * multiplier;
@@ -92,12 +93,14 @@ public class GameProvider implements IGameProvider {
     QCar car;
     
     for(int i = 0; i<nbOfDrivers; i++){
+      driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(driven); 
       allocateVertices(vertices);
       car = new QCar(driven, vertices);
       cars.add(car);
     }
     for(int i = nbOfDrivers; i<totalCars; i++){
+      parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(parking); 
       allocateVertices(vertices);
       car = new QCar(parking, vertices);
@@ -110,8 +113,7 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> standardStyle(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
-    QCarNature driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
+    QCarNature parking, driven;
     
     Point2D[] vertices ;
     QCar car;
@@ -119,12 +121,15 @@ public class GameProvider implements IGameProvider {
     int wantedQCars = (nbOfDrivers>MAX_QCARS) ? MAX_QCARS : nbOfDrivers;
     
     for(int i = 0; i<wantedQCars; i++){
+      
+      driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(driven); 
       allocateVertices(vertices);
       car = new QCar(driven, vertices);
       cars.add(car);
     }
     for(int i = wantedQCars; i<MAX_QCARS; i++){
+      parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(parking); 
       allocateVertices(vertices);
       car = new QCar(parking, vertices);
@@ -208,9 +213,7 @@ public class GameProvider implements IGameProvider {
     for(int i = 0; i<vertices.length; i++){
       double x=vertices[i].getX(), y = vertices[i].getY();
       int occupX = (int)(x/side), occupY = (int)(y/side);
-      if(occupX>= map.length || occupY >= map[0].length)
-        map = augmentMapSize(occupX, occupY);
-      else return false;
+      if(occupX>= map.length || occupY >= map[0].length) map = augmentMapSize(occupX, occupY);
       if(map[occupX][occupY]) return false;
     }
     return true;
@@ -262,4 +265,17 @@ public class GameProvider implements IGameProvider {
       map[boolX][boolY] = true;
     }
   }
+  
+  private void printQCarsList(ArrayList<IQCar> cars){
+    System.out.println("QCars List : ---------------");
+    for(IQCar car: cars){
+      System.out.println(car.toString());
+      System.out.println(car.nature().toString());
+      System.out.println();
+    }
+    System.out.println("----------------------------");
+  }
+  
 }
+
+  
