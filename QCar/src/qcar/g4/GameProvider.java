@@ -32,29 +32,30 @@ public class GameProvider implements IGameProvider {
     ArrayList<IQCar> cars = new ArrayList<>();    
     int gridSide = (int)Math.sqrt(nbOfDrivers);
     map = new boolean[gridSide][gridSide];
+    QCarNature.resetIDs();
     
     switch (game){
       
-      case STANDARD_WITH_BORDERS: cars = standardStyle(nbOfDrivers);
+      case STANDARD_WITH_BORDERS: cars = standardStyle(nbOfDrivers); // 0
                                   cars.add(obtainBorders());
                                   break;
-      case PARKINGS_WITH_BORDERS: cars = parkingsStyle(nbOfDrivers, 2);
+      case PARKINGS_WITH_BORDERS: cars = parkingsStyle(nbOfDrivers, 2); // 1
                                   cars.add(obtainBorders());
                                   break;
-      case DEBUG_WITH_BORDERS: cars = debugStyle();
+      case DEBUG_WITH_BORDERS: cars = debugStyle(); // 2
                                cars.add(obtainBorders());
                                break;
-      case NO_PARKINGS_WITH_BORDERS: noParkings(nbOfDrivers);
+      case NO_PARKINGS_WITH_BORDERS: cars = noParkings(nbOfDrivers); // 3
                                      cars.add(obtainBorders());
                                      break;
 
-      case STANDARD_WITHOUT_BORDERS: cars = standardStyle(nbOfDrivers);
+      case STANDARD_WITHOUT_BORDERS: cars = standardStyle(nbOfDrivers); // 4
                                      break;
-      case PARKINGS_WITHOUT_BORDERS: cars = parkingsStyle(nbOfDrivers, 2);
+      case PARKINGS_WITHOUT_BORDERS: cars = parkingsStyle(nbOfDrivers, 2); // 5
                                      break;
-      case DEBUG_WITHOUT_BORDERS: cars = debugStyle();
+      case DEBUG_WITHOUT_BORDERS: cars = debugStyle(); // 6
                                   break;
-      case NO_PARKINGS_WITHOUT_BORDERS: noParkings(nbOfDrivers);
+      case NO_PARKINGS_WITHOUT_BORDERS: cars = noParkings(nbOfDrivers); // 7
                                         break;
 
       default: break;    
@@ -68,7 +69,7 @@ public class GameProvider implements IGameProvider {
     ArrayList<IQCar> cars = new ArrayList<>();
     QCarNature driven;
     QCar car;
-    Point2D[] vertices ;
+    Point2D[] vertices;
     
     for(int i = 0; i<nbOfDrivers; i++){
       driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
@@ -264,4 +265,17 @@ public class GameProvider implements IGameProvider {
       map[boolX][boolY] = true;
     }
   }
+  
+  private void printQCarsList(ArrayList<IQCar> cars){
+    System.out.println("QCars List : ---------------");
+    for(IQCar car: cars){
+      System.out.println(car.toString());
+      System.out.println(car.nature().toString());
+      System.out.println();
+    }
+    System.out.println("----------------------------");
+  }
+  
 }
+
+  
