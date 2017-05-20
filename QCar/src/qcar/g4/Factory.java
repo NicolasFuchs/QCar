@@ -5,7 +5,7 @@ import qcar.IFactory;
 import qcar.IGameProvider;
 import qcar.IWorldManager;
 
-public class Factory implements IFactory{
+public class Factory implements IFactory {
 
   @Override
   public int numberOfStyles() {

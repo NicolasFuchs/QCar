@@ -1,7 +1,6 @@
 package qcar.g4;
 
 import java.awt.geom.Point2D;
-
 import qcar.ICollision;
 
 public class Collision implements ICollision {
@@ -20,7 +19,7 @@ public class Collision implements ICollision {
    * @param hitSideOrVertexId
    * @param isAgainstVertex
    */
-  private Collision(Point2D position, int hittingQCarId, int hittingSideOrVertexId, int hitQCarId, int hitSideOrVertexId, boolean isAgainstVertex) {
+  public Collision(Point2D position, int hittingQCarId, int hittingSideOrVertexId, int hitQCarId, int hitSideOrVertexId, boolean isAgainstVertex) {
     this.position = position;
     this.hittingQCarId = hittingQCarId;
     this.hittingSideOrVertexId = hittingSideOrVertexId;

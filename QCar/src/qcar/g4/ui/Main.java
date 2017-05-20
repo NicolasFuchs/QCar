@@ -12,12 +12,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import qcar.IQCar;
 import qcar.IGameDescription;
 import qcar.IGameProvider;
 import qcar.IWorldManager;
 import qcar.g4.Factory;
-import qcar.g4.QCar;
 import qcar.ui.*;
 import simviou.*;
 
@@ -33,10 +31,10 @@ public class Main extends Application {
     stage.setWidth(1500);
     stage.setHeight(750);
 
-    int wX0 = 0;      // top left corner x world area
-    int wY0 = 0;      // top left corner y world area
-    int wX1 = 100;       // bottom right corner x world area
-    int wY1 = 100;       // bottom right corner y world area
+    int wX0 = -15;      // top left corner x world area
+    int wY0 = -15;      // top left corner y world area
+    int wX1 = 15;       // bottom right corner x world area
+    int wY1 = 15;       // bottom right corner y world area
     int sWidth = 750;   // screen area x-axis
     int sHeight = 500;  // screen area y-axis
     boolean keepRatio = true;
@@ -56,6 +54,10 @@ public class Main extends Application {
       public boolean isActive(int z) {
         return true;
       }
+      @Override
+      public ObservationPolicy observationPolicy() {
+        return ObservationPolicy.ZOOMABLE_ZONE;
+      }
     };
     
     Factory fac = new Factory();
@@ -68,7 +70,6 @@ public class Main extends Application {
     try {
       FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("resources/fxml/view.fxml"));
       GridPane fxmlpane = (GridPane) fxmlloader.load();
-      
       QCarAnimationPane pane = new QCarAnimationPane(v,Color.WHITE,uiOp,wm);
       ImageView arrow_top = (ImageView) fxmlloader.getNamespace().get("arrow_top");
       ImageView arrow_right = (ImageView) fxmlloader.getNamespace().get("arrow_right");
@@ -133,11 +134,14 @@ public class Main extends Application {
       simulOneStep.setOnMouseClicked(new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent event) {
-          //wm.simulateOneStep(0);
-          for (IQCar car : wm.allQCars()) {
-            ((QCar)car).update(true, 0, 5);
-          }
-          pane.refreshView();
+          Runnable r = new Runnable() {
+            @Override
+            public void run() {
+              wm.simulateOneStep(0);
+            }
+          };
+          Thread t = new Thread(r);
+          t.start();
         }
       });
       
