@@ -57,9 +57,13 @@ public class WorldManager implements IWorldManager {
 //    qcars.add(new QCar(new QCarNature(true, false, true, true, 50, 1), vertices1));
 //    Point2D[] vertices2 = {new Point2D.Double(5, 6), new Point2D.Double(7, 8), new Point2D.Double(4, 10), new Point2D.Double(2, 8)};
 //    qcars.add(new QCar(new QCarNature(false, false, true, true, 50, 1), vertices2));
-    Point2D[] vertices1 = {new Point2D.Double(0, 0), new Point2D.Double(4, 0), new Point2D.Double(4, 4), new Point2D.Double(0, 4)};
+//    Point2D[] vertices1 = {new Point2D.Double(0, 0), new Point2D.Double(4, 0), new Point2D.Double(4, 4), new Point2D.Double(0, 4)};
+//    qcars.add(new QCar(new QCarNature(true, false, true, true, 50, 1), vertices1));
+//    Point2D[] vertices2 = {new Point2D.Double(0, 6), new Point2D.Double(4, 6), new Point2D.Double(4, 10), new Point2D.Double(0, 10)};
+//    qcars.add(new QCar(new QCarNature(false, false, true, true, 50, 1), vertices2));
+    Point2D[] vertices1 = {new Point2D.Double(0, 0), new Point2D.Double(4, 0), new Point2D.Double(6, 4), new Point2D.Double(2, 4)};
     qcars.add(new QCar(new QCarNature(true, false, true, true, 50, 1), vertices1));
-    Point2D[] vertices2 = {new Point2D.Double(0, 6), new Point2D.Double(4, 6), new Point2D.Double(4, 10), new Point2D.Double(0, 10)};
+    Point2D[] vertices2 = {new Point2D.Double(8, 2), new Point2D.Double(10, 2), new Point2D.Double(10, 6), new Point2D.Double(8, 6)};
     qcars.add(new QCar(new QCarNature(false, false, true, true, 50, 1), vertices2));
     //qcars = description.allQCar();
     this.players = players;
@@ -200,7 +204,7 @@ public class WorldManager implements IWorldManager {
         Update the state of the world according to the latest changes
    */
   private void updateWorldState() {
-    List<IDecision> allDecisions = new ArrayList<>(); allDecisions.add(new Decision(false, 2, 1));
+    List<IDecision> allDecisions = new ArrayList<>(); allDecisions.add(new Decision(true, 2, -1));
     List<IQCar> drivenQCars = new ArrayList<>();
     for (int q = 0; q < allQCars().size(); q++) {
       if (allQCars().get(q).nature().isDriven()) {
