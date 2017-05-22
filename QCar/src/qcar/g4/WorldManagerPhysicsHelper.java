@@ -17,13 +17,30 @@ public class WorldManagerPhysicsHelper {
   private static HashMap<Integer, ArrayList<ICollision>> driversColCache;
 
   public static ISensors computeSensor(IQCar drivenQCar, List<IQCar> allQCars) {
-
+    ISensors sensors = new Sensors(drivenQCar, null, null);
+    Point2D eye = new Point2D.Double((drivenQCar.vertex(2).getX()+drivenQCar.vertex(2).getX())/2, (drivenQCar.vertex(2).getY()+drivenQCar.vertex(2).getY())/2);
+    Line2D A1 = new Line2D.Double(drivenQCar.vertex(0), eye); Line2D A2 = new Line2D.Double(drivenQCar.vertex(1), eye);
+    double[][] IMatrix = invertMatrix(computePMatrix(A1, A2));
+    boolean hidden = false;
     for (int i = 0; i < allQCars.size(); i++) {
       if (drivenQCar.nature().qCarId() == allQCars.get(i).nature().qCarId()) continue;
-      
+      for (int j = 0; j < 4; j++) {
+        Point2D PointInA = pointBaseXYToBaseA12(allQCars.get(i).vertex(j), eye, IMatrix);
+        if (PointInA.getX() >= 0 && PointInA.getY() >= 0) {
+          for (int k = 0; k < allQCars.size(); k++) {
+            for (int l = 0; l < 4; l++) {
+              if (findIntersection(new Line2D.Double(allQCars.get(i).vertex(j), eye), new Line2D.Double(allQCars.get(k).vertex(l), allQCars.get(k).vertex((l+1)%4))) != null) {
+                hidden = true;
+                break;
+              }
+            }
+            if (hidden) break;
+          }
+          if (!hidden) sensors.seenVertices().add(new SeenVertex(j, (QCarNature)allQCars.get(i).nature()));
+        }
+      }
     }
-
-    ISensors sensors = new Sensors(drivenQCar, null, null);
+    sensors.collisionsWithMe().addAll(driversColCache.get(drivenQCar.nature().qCarId()));
     return sensors;
   }
 
