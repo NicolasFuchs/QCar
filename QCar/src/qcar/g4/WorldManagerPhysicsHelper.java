@@ -32,6 +32,7 @@ public class WorldManagerPhysicsHelper {
 
   public static List<ISensors> computeSensor(IQCar drivenQCar, List<IQCar> allQCars) {
     //TODO define the kind of list we receive as parameter, implement
+    
     return null;
   }
 
