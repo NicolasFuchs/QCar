@@ -34,12 +34,15 @@ public class PlayerChannel implements IPlayerChannel {
 
   public void sendSensors(ISensors sensors){
     this.sensors = sensors;
+  }
+
+  public void release(){
     sem.release();
   }
 
-  public PlayerChannel(){
+  public PlayerChannel(ISensors sensors){
+    this.sensors = sensors;
     sem = new Semaphore(0);
-    mutex = new Semaphore(1);
   }
   
 }
