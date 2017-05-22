@@ -11,6 +11,9 @@ import qcar.ISensors;
 
 public class WorldManagerPhysicsHelper {
 
+  // Stores the collisions with each driver
+  private static ArrayList<ICollision>[] driversColCache = null;
+
   public static void main(String[] args) {
     Point2D[] vertices1 = {new Point2D.Double(0, 0), new Point2D.Double(4, 2), new Point2D.Double(1, 6), new Point2D.Double(-3, 4)};
     Point2D[] vertices2 = {new Point2D.Double(5, 6), new Point2D.Double(7, 8), new Point2D.Double(4, 10), new Point2D.Double(2, 8)};
@@ -30,16 +33,23 @@ public class WorldManagerPhysicsHelper {
     System.out.println("Collision point  -->  X : " + colList.get(0).position().getX() + " Y : " + colList.get(0).position().getY());
   }
 
-  public static List<ISensors> computeSensor(IQCar drivenQCar, List<IQCar> allQCars) {
-    //TODO define the kind of list we receive as parameter, implement
-    
-    return null;
+  public static ISensors computeSensor(IQCar drivenQCar, List<IQCar> allQCars) {
+
+
+
+    ISensors sensors = new Sensors(drivenQCar, null, null);
+    return sensors;
   }
 
   // La d�cision allDecision.get(i) s'applique au Qcar dirig� drivenQCars.get(i)
   public static List<ICollision> computeCollisions(List<IQCar> drivenQCars, List<IDecision> allDecisions, List<IQCar> allQCars) {
+    //FIXME collisions with QCars.isAlive == false!!!
     if (drivenQCars.size() != allDecisions.size()) return null; // Incoh�rence si les tailles de drivenQCars et allDecisions sont diff�rentes
     if (drivenQCars == null || allDecisions == null || allQCars == null) return null;
+    driversColCache = new ArrayList[drivenQCars.size()];
+    for (int i = 0; i < driversColCache.length; i++) {
+      driversColCache[i] = new ArrayList<>();
+    }
     List<ICollision> colList = new ArrayList<>();
     for (int i = 0; i < drivenQCars.size(); i++) {
       IQCar car = drivenQCars.get(i);
