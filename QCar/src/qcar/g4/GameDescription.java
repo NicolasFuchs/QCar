@@ -8,8 +8,16 @@ import qcar.IQCar;
 
 public class GameDescription implements IGameDescription{
   
+  // correspondance avec style de factory -- enum est class à part avec se8
   public enum GameStyles {
-    WITHOUT_BORDERS, WITH_BORDERS
+    STANDARD_WITH_BORDERS, 
+    PARKINGS_WITH_BORDERS, 
+    DEBUG_WITH_BORDERS, 
+    NO_PARKINGS_WITH_BORDERS, 
+    STANDARD_WITHOUT_BORDERS, 
+    PARKINGS_WITHOUT_BORDERS, 
+    DEBUG_WITHOUT_BORDERS, 
+    NO_PARKINGS_WITHOUT_BORDERS
   }
   
   private ArrayList<IQCar> cars;

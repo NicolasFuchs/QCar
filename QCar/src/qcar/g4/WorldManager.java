@@ -18,6 +18,7 @@ public class WorldManager implements IWorldManager {
   private boolean isWarOver;
   private Rectangle2D boundingBox;
 
+  private List<IQCar> drivenQCars;
   private List<IQCar> qcars;                        // contains all the qcars
   private List<Line2D> photoSensors;
   private List<Line2D> distanceSensors;
@@ -26,6 +27,8 @@ public class WorldManager implements IWorldManager {
 
   private List<? extends IDriver> players;
   private ArrayList<PlayerChannel> playerChannels;
+
+  private ArrayList<Point2D> allPoints;
 
   /*
   *   Observers management
@@ -52,20 +55,9 @@ public class WorldManager implements IWorldManager {
   */
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
-    qcars = new ArrayList<>();
-//    Point2D[] vertices1 = {new Point2D.Double(0, 0), new Point2D.Double(4, 2), new Point2D.Double(1, 6), new Point2D.Double(-3, 4)};
-//    qcars.add(new QCar(new QCarNature(true, false, true, true, 50, 1), vertices1));
-//    Point2D[] vertices2 = {new Point2D.Double(5, 6), new Point2D.Double(7, 8), new Point2D.Double(4, 10), new Point2D.Double(2, 8)};
-//    qcars.add(new QCar(new QCarNature(false, false, true, true, 50, 1), vertices2));
-//    Point2D[] vertices1 = {new Point2D.Double(0, 0), new Point2D.Double(4, 0), new Point2D.Double(4, 4), new Point2D.Double(0, 4)};
-//    qcars.add(new QCar(new QCarNature(true, false, true, true, 50, 1), vertices1));
-//    Point2D[] vertices2 = {new Point2D.Double(0, 6), new Point2D.Double(4, 6), new Point2D.Double(4, 10), new Point2D.Double(0, 10)};
-//    qcars.add(new QCar(new QCarNature(false, false, true, true, 50, 1), vertices2));
-    Point2D[] vertices1 = {new Point2D.Double(0, 0), new Point2D.Double(4, 0), new Point2D.Double(6, 4), new Point2D.Double(2, 4)};
-    qcars.add(new QCar(new QCarNature(true, false, true, true, 50, 1), vertices1));
-    Point2D[] vertices2 = {new Point2D.Double(8, 2), new Point2D.Double(10, 2), new Point2D.Double(10, 6), new Point2D.Double(8, 6)};
-    qcars.add(new QCar(new QCarNature(false, false, true, true, 50, 1), vertices2));
-    //qcars = description.allQCar();
+
+    drivenQCars = new ArrayList<>();
+    qcars = description.allQCar();
     this.players = players;
     this.isSimulationRunning = true;
     this.step = 0;
@@ -76,6 +68,15 @@ public class WorldManager implements IWorldManager {
     }
 
     //updateWorldState(); // update the world for the initial configuration
+
+    for(IQCar q : qcars){
+      if (q.nature().isDriven()) {
+        drivenQCars.add(q);
+      }
+      for(int i = 0; i < 4; i++) {
+        allPoints.add(q.vertex(i));
+      }
+    }
 
     for(int i = 0; i < players.size(); i++) {
       //players.get(i).startDriverThread(playerChannels.get(i));
@@ -105,11 +106,10 @@ public class WorldManager implements IWorldManager {
      */
 
     step++;
-//    for (IQCar car : allQCars()) {
-//      updateMove(car, false, 2, 5);
-//    }
-//    notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
-    updateWorldState();
+    // notifyAllWorldObserver(0);
+
+    //TODO uncomment the next line and send all decisions
+    //updateWorldState();
   }
 
   @Override
@@ -140,8 +140,24 @@ public class WorldManager implements IWorldManager {
 
   @Override
   public Rectangle2D boundingBox() {
-    boundingBox = new Rectangle2D(-20,-20,20,20);
-    return boundingBox;
+    // todo go throught the qcar list and find the furthest apart points
+    double minX = Double.MAX_VALUE;
+    double minY = Double.MAX_VALUE;
+    double maxX = Double.MAX_VALUE*-1;
+    double maxY = Double.MAX_VALUE*-1;
+    for(Point2D candidate : allPoints){
+      double x = candidate.getX();
+      double y = candidate.getY();
+      if(minY > y)
+        minY = y;
+      if(minX > x)
+        minX = x;
+      if(maxY < y)
+        maxY = y;
+      if(maxX < x)
+        maxX = x;
+    }
+    return new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
   }
 
   @Override
@@ -170,6 +186,7 @@ public class WorldManager implements IWorldManager {
     this.distanceSensors = new ArrayList<Line2D>();
     this.collisions = new ArrayList<ICollision>();
     this.playerChannels = new ArrayList<PlayerChannel>();
+    this.allPoints = new ArrayList<Point2D>();
   }
 
   // ======== Private methods =======================================
@@ -199,25 +216,18 @@ public class WorldManager implements IWorldManager {
     }
     notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
   }
-  
+
   /*
         Update the state of the world according to the latest changes
    */
-  private void updateWorldState() {
-    List<IDecision> allDecisions = new ArrayList<>(); allDecisions.add(new Decision(true, 2, -1));
-    List<IQCar> drivenQCars = new ArrayList<>();
-    for (int q = 0; q < allQCars().size(); q++) {
-      if (allQCars().get(q).nature().isDriven()) {
-        drivenQCars.add(allQCars().get(q));
-      }
-    }
+  private void updateWorldState(List<IDecision> allDecisions) {
     collisions = WorldManagerPhysicsHelper.computeCollisions(drivenQCars, allDecisions, allQCars());
     for (int q = 0; q < drivenQCars.size(); q++) {
       try {
         Thread.sleep(3000);
         double requestedTranslation = allDecisions.get(q).requestedTranslation();
         if (!collisions.isEmpty()) {
-        ICollision collision = collisions.get(q);
+          ICollision collision = collisions.get(q);
           if (collision != null) {
             requestedTranslation = Math.signum(requestedTranslation)*Math.sqrt(Math.pow(collision.position().getX()-allQCars().get(q).vertex(collision.hittingSideOrVertexId()).getX(), 2)+Math.pow(collision.position().getY()-allQCars().get(q).vertex(collision.hittingSideOrVertexId()).getY(), 2));
             notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
@@ -229,6 +239,4 @@ public class WorldManager implements IWorldManager {
       }
     }
   }
-
-
 }
