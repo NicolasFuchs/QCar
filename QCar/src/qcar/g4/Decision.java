@@ -14,7 +14,7 @@ public class Decision implements IDecision {
    * @param sideId
    * @param requestedTranslation
    */
-  private Decision(boolean isAngleMovement, int sideId, double requestedTranslation) {
+  public Decision(boolean isAngleMovement, int sideId, double requestedTranslation) {
     this.isAngleMovement = isAngleMovement;
     this.sideId = sideId;
     this.requestedTranslation = requestedTranslation;
