@@ -1,5 +1,6 @@
 package qcar.g4.ui;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.Comparator;
 import javafx.collections.FXCollections;
@@ -69,24 +70,7 @@ public class SimulationCtrl {
     Rectangle2D r = wm.boundingBox();
     viewPort = new ViewPort((int) r.getMinY(), (int) r.getMaxY(), (int) r.getMinX(), (int) r.getMaxX(), 610, 350, true);
 
-    UIOperationsWithDefaults uiOp = new UIOperationsWithDefaults() {
-      @Override
-      public Rectangle2D worldBoundingBox() {
-        return wm.boundingBox();
-      }
-      @Override
-      public AnimationPane newAnimationPane(ViewPort vPort) {
-        return null;
-      }
-      @Override
-      public boolean isActive(int z) {
-        return true;
-      }
-      @Override
-      public ObservationPolicy observationPolicy(){
-        return ObservationPolicy.WORLD_BOUNDARY;
-      }
-    };
+    UIOp uiOp = new UIOp(wm, logPanel);
 
     world = new QCarAnimationPane(viewPort, Color.WHITE, uiOp, worldManager);
     paneQCar.getChildren().add(world);
@@ -147,5 +131,27 @@ public class SimulationCtrl {
 
   @FXML
   private void handleListQCarClick(){
+    IQCar clickedQcar = lstLeaderboard.getSelectionModel().getSelectedItem();
+    double x0 = Double.MAX_VALUE;
+    double y0 = Double.MAX_VALUE;
+    double x1 = Double.MAX_VALUE * -1;
+    double y1 = Double.MAX_VALUE * -1;
+    double offset = clickedQcar.nature().maxSideLength();
+    for(int i = 0; i < 4; i++){
+      Point2D p = clickedQcar.vertex(i);
+      if(x0 > p.getX())
+        x0 = p.getX();
+      if(y0 > p.getY())
+        y0 = p.getY();
+      if(x1 < p.getX())
+        x1 = p.getX();
+      if(y1 < p.getY())
+        y1 = p.getY();
+    }
+    x0 -= offset;
+    y0 -= offset;
+    x1 += offset;
+    y1 += offset;
+    viewPort.setNewWorldRegion(x0, x1, y0, y1); // unsure about that, need a way to refresh the view
   }
 }
