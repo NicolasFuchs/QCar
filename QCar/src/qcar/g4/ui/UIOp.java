@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javafx.geometry.Rectangle2D;
+import javafx.scene.paint.Color;
 import qcar.IWorldManager;
 import simviou.Action;
 import simviou.AnimationPane;
@@ -23,6 +24,7 @@ public class UIOp implements UIOperations {
 
   private IWorldManager wm;
   private LogPanel logPanel;
+  private SimulatorMode simMode;
 
   @Override
   public Rectangle2D worldBoundingBox() {
@@ -58,7 +60,7 @@ public class UIOp implements UIOperations {
 
   @Override
   public SimulatorMode simulatorMode() {
-    return SimulatorMode.STEP_BY_STEP;
+    return simMode;
   }
 
   @Override
@@ -86,6 +88,14 @@ public class UIOp implements UIOperations {
   public UIOp(IWorldManager wm, LogPanel logPanel){
     this.wm = wm;
     this.logPanel = logPanel;
+    this.simMode = SimulatorMode.STEP_BY_STEP;
+  }
+
+  public void toggleSimMode(){
+    if(simMode == SimulatorMode.STEP_BY_STEP)
+      simMode = SimulatorMode.ANIMATION_RUNNING;
+    else
+      simMode = SimulatorMode.STEP_BY_STEP;
   }
 
 }

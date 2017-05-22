@@ -22,6 +22,7 @@ import qcar.ui.QCarAnimationPane;
 import simviou.AnimationPane;
 import simviou.LogPanel;
 import simviou.ObservationPolicy;
+import simviou.UIOperations;
 import simviou.UIOperationsWithDefaults;
 import simviou.ViewPort;
 
@@ -33,6 +34,7 @@ public class SimulationCtrl {
   private ViewPort viewPort;
   private QCarAnimationPane world;
   private LogPanel logPanel;
+  private UIOp uiOp;
 
   @FXML
   private Pane headerPane;
@@ -70,7 +72,7 @@ public class SimulationCtrl {
     Rectangle2D r = wm.boundingBox();
     viewPort = new ViewPort((int) r.getMinY(), (int) r.getMaxY(), (int) r.getMinX(), (int) r.getMaxX(), 610, 350, true);
 
-    UIOp uiOp = new UIOp(wm, logPanel);
+    uiOp = new UIOp(wm, logPanel);
 
     world = new QCarAnimationPane(viewPort, Color.WHITE, uiOp, worldManager);
     paneQCar.getChildren().add(world);
