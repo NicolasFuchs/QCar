@@ -126,18 +126,6 @@ public class WorldManagerPhysicsHelper {
     Line2D[] res = new Line2D[3]; Point2D p1,p2; int sideId = decision.sideId(); double requestedTranslation = decision.requestedTranslation();
     double shiftX = A2.getX2()-A2.getX1(); double shiftY = A2.getY2()-A2.getY1();
     if (decision.isAngleMovement()) {
-//      p1 = car.vertex(sideId); p2 = car.vertex((sideId+1)%4);
-//      if (p1.getX() >= p2.getX()) res[0] = new Line2D.Double(p2.getX()+shiftX, p2.getY()+shiftY, p1.getX()+shiftX, p1.getY()+shiftY);
-//      else res[0] = new Line2D.Double(p1.getX()+shiftX, p1.getY()+shiftY, p2.getX()+shiftX, p2.getY()+shiftY);
-//      if (((sideId == 0 || sideId == 3) && requestedTranslation > 0) || ((sideId == 1 || sideId == 2) && requestedTranslation < 0)) {
-//        p1 = car.vertex(sideId); p2 = car.vertex((sideId+3)%4);
-//        if (p1.getX()+shiftX >= p2.getX()) res[1] = new Line2D.Double(p2.getX()+shiftX, p2.getY()+shiftY, p1.getX()+shiftX, p1.getY()+shiftY);
-//        else res[1] = new Line2D.Double(p1.getX()+shiftX, p1.getY()+shiftY, p2.getX()+shiftX, p2.getY()+shiftY);     
-//      } else {
-//        p1 = car.vertex((sideId+1)%4); p2 = car.vertex((sideId+2)%4);
-//        if (p1.getX()+shiftX >= p2.getX()) res[1] = new Line2D.Double(p2.getX()+shiftX, p2.getY()+shiftY, p1.getX()+shiftX, p1.getY()+shiftY);
-//        else res[1] = new Line2D.Double(p1.getX()+shiftX, p1.getY()+shiftY, p2.getX()+shiftX, p2.getY()+shiftY);
-//      }
       if (((sideId == 0 || sideId == 3) && requestedTranslation > 0) || ((sideId == 1 || sideId == 2) && requestedTranslation < 0)) {
         p1 = car.vertex(sideId); p2 = car.vertex((sideId+1)%4);
         if (p1.getX()+shiftX >= p2.getX()) res[0] = new Line2D.Double(p1.getX(), p1.getY(), p1.getX()+shiftX, p1.getY()+shiftY);
