@@ -35,9 +35,9 @@ public class WorldManagerPhysicsHelper {
     return null;
   }
 
-  // La décision allDecision.get(i) s'applique au Qcar dirigé drivenQCars.get(i)
+  // La dï¿½cision allDecision.get(i) s'applique au Qcar dirigï¿½ drivenQCars.get(i)
   public static List<ICollision> computeCollisions(List<IQCar> drivenQCars, List<IDecision> allDecisions, List<IQCar> allQCars) {
-    if (drivenQCars.size() != allDecisions.size()) return null; // Incohérence si les tailles de drivenQCars et allDecisions sont différentes
+    if (drivenQCars.size() != allDecisions.size()) return null; // Incohï¿½rence si les tailles de drivenQCars et allDecisions sont diffï¿½rentes
     if (drivenQCars == null || allDecisions == null || allQCars == null) return null;
     List<ICollision> colList = new ArrayList<>();
     for (int i = 0; i < drivenQCars.size(); i++) {
@@ -47,9 +47,9 @@ public class WorldManagerPhysicsHelper {
       double requestedTranslation = decision.requestedTranslation();
       boolean isAngleMovement = decision.isAngleMovement();
       Point2D[] vertices = {car.vertex(0), car.vertex(1), car.vertex(2), car.vertex(3)};
-      if (requestedTranslation == 0 || (!isAngleMovement && (((sideId == 0 || sideId == 1) && requestedTranslation > 0) || ((sideId == 2 || sideId == 3) && requestedTranslation < 0)))) continue; // Aucune collision générée car mouvemenent interne au QCar
+      if (requestedTranslation == 0 || (!isAngleMovement && (((sideId == 0 || sideId == 1) && requestedTranslation > 0) || ((sideId == 2 || sideId == 3) && requestedTranslation < 0)))) continue; // Aucune collision gï¿½nï¿½rï¿½e car mouvemenent interne au QCar
       Line2D[] A1A2 = findAxes(decision, car);
-      double A2_coor = Double.MAX_VALUE;    // La collision "finale" est celle dont la coordonnée A2 est la plus petite
+      double A2_coor = Double.MAX_VALUE;    // La collision "finale" est celle dont la coordonnï¿½e A2 est la plus petite
       colList.add(null);
       Line2D[] areaLines = findLines(decision, car, A1A2[1]);
       double[][] IMatrix = invertMatrix(computePMatrix(A1A2[0],A1A2[1]));
@@ -59,7 +59,7 @@ public class WorldManagerPhysicsHelper {
         IQCar hitCar = allQCars.get(j);
         for (int k = 0; k < 4; k++) {
           Point2D PointInA = pointBaseXYToBaseA12(allQCars.get(j).vertex(k), origin, IMatrix);
-          if (PointInA.getX() >= 0 && PointInA.getX() <= 1 && PointInA.getY() >= 0 && PointInA.getY() <= 1) { // cas où le point est dans la zone balayée (y compris les limites)
+          if (PointInA.getX() >= 0 && PointInA.getX() <= 1 && PointInA.getY() >= 0 && PointInA.getY() <= 1) { // cas oï¿½ le point est dans la zone balayï¿½e (y compris les limites)
             if (PointInA.getY() <= A2_coor) {
               colList.remove(colList.size()-1);
               int hittingID = CollisionID(vertices, PointInA, origin, sideId, isAngleMovement);
@@ -89,7 +89,7 @@ public class WorldManagerPhysicsHelper {
     return colList;
   }
   
-  // retourne l'ID du vertex/side du QCar dirigé impliqué dans la collision
+  // retourne l'ID du vertex/side du QCar dirigï¿½ impliquï¿½ dans la collision
   private static int CollisionID(Point2D[] vertices, Point2D PointInA, Point2D origin, int sideID, boolean isAngleMovement) {
     if (isAngleMovement) {
       if (PointInA.getX() == 0 && vertices[sideID] != origin) return sideID+1;
@@ -120,7 +120,7 @@ public class WorldManagerPhysicsHelper {
     return res;
   }
 
-  // retourne 2 (angleMovement) ou 3 (!angleMovement) limites délimitant l'aire balayée par le mouvement
+  // retourne 2 (angleMovement) ou 3 (!angleMovement) limites dï¿½limitant l'aire balayï¿½e par le mouvement
   private static Line2D[] findLines(IDecision decision, IQCar car, Line2D A2) {
     Line2D[] res = new Line2D[3]; Point2D p1,p2; int sideId = decision.sideId(); double requestedTranslation = decision.requestedTranslation();
     double shiftX = A2.getX2()-A2.getX1(); double shiftY = A2.getY2()-A2.getY1();
@@ -166,18 +166,18 @@ public class WorldManagerPhysicsHelper {
     return res;
   }
 
-  // retourne un Point si une intersection est trouvée, sinon null
+  // retourne un Point si une intersection est trouvï¿½e, sinon null
   // Si les droites se chevauchent, l'intersection se trouvera sur l'un des deux Points du hittingQCar
   private static Point2D findIntersection(Line2D seg1, Line2D seg2) {
     if (seg1.intersectsLine(seg2)) {
-      // 2 droites constantes croisées
+      // 2 droites constantes croisï¿½es
       if (seg1.getX1() == seg1.getX2() && seg2.getY1() == seg2.getY2()) {   // cas d'une ligne horizontale et d'une ligne verticale
         return new Point2D.Double(seg1.getX1(), seg2.getY1());
       }
       if (seg1.getY1() == seg1.getY2() && seg2.getX1() == seg2.getX2()) {   // cas d'une ligne verticale et d'une ligne horizontale
         return new Point2D.Double(seg2.getX1(), seg1.getY1());
       }
-      // 2 droites constantes superposées
+      // 2 droites constantes superposï¿½es
       if (seg1.getX1() == seg1.getX2() && seg2.getX1() == seg2.getX2() && seg1.getX1() == seg2.getX1()) { // constantes verticales
 //        if (seg1.getY1() <= Math.max(seg2.getY1(), seg2.getY2()) && seg1.getY1() >= Math.min(seg2.getY1(), seg2.getY2())) return new Point2D.Double(seg1.getX1(),seg1.getY1());
 //        if (seg1.getY2() <= Math.max(seg2.getY1(), seg2.getY2()) && seg1.getY2() >= Math.min(seg2.getY1(), seg2.getY2())) return new Point2D.Double(seg1.getX2(),seg1.getY2());
@@ -248,7 +248,7 @@ public class WorldManagerPhysicsHelper {
   //    return origin_A;
   //  }
 
-  private static Point2D computePointFrom0XYToBaseA12(Point2D point_XY, double[][] p_1Matrix) {
+  public static Point2D computePointFrom0XYToBaseA12(Point2D point_XY, double[][] p_1Matrix) {
     double x = (p_1Matrix[0][0]*point_XY.getX()) + (p_1Matrix[1][0]*point_XY.getY());
     double y = (p_1Matrix[0][1]*point_XY.getX()) + (p_1Matrix[1][1]*point_XY.getY());
     Point2D origin_A = new Point2D.Double(x, y);
