@@ -64,7 +64,7 @@ public class WorldManager implements IWorldManager {
 
     // create a channel for each player
     for(int i  = 0; i < players.size(); i++){
-      playerChannels.add(new PlayerChannel());
+      // playerChannels.add(new PlayerChannel());
     }
 
     //updateWorldState(); // update the world for the initial configuration
