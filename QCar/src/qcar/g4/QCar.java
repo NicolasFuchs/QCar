@@ -110,5 +110,20 @@ public class QCar implements IQCar {
 //  public static double distance(Point2D a, Point2D b) {
 //    return Math.sqrt(Math.sqrt(Math.abs(b.getX())-Math.abs(a.getX()) + Math.abs(b.getY())-Math.abs(a.getY())));
 //  }
+
+  // wm qcar constructor
+  public QCar(IQCar qcar){
+    for(int i = 0; i < 4; i++)
+      vertices[i] = qcar.vertex(i);
+    this.nature = qcar.nature();
+    this.score = 0;
+    bonuses.clear(0, 9);
+    if(nature.isVertexTarget())
+      bonuses.set(0, 4, true);
+    if(nature.isSideTarget())
+      bonuses.set(4, 8, true);
+    if(nature.isParkingTarget())
+      bonuses.set(8);
+  }
   
 }

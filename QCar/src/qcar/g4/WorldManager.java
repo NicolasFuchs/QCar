@@ -56,18 +56,15 @@ public class WorldManager implements IWorldManager {
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
 
-    drivenQCars = new ArrayList<>();
-    qcars = description.allQCar();
-    this.players = players;
     this.isSimulationRunning = true;
     this.step = 0;
+    drivenQCars = new ArrayList<>();
+    this.players = players;
 
-    // create a channel for each player
-    for(int i  = 0; i < players.size(); i++){
-      // playerChannels.add(new PlayerChannel());
+    for(IQCar q : description.allQCar()) {
+      QCar myQCar = new QCar(q);
+      qcars.add(myQCar);
     }
-
-    //updateWorldState(); // update the world for the initial configuration
 
     for(IQCar q : qcars){
       if (q.nature().isDriven()) {
@@ -78,14 +75,7 @@ public class WorldManager implements IWorldManager {
       }
     }
 
-    for(int i = 0; i < players.size(); i++) {
-      //players.get(i).startDriverThread(playerChannels.get(i));
-    }
-
-    for(int i = 0; i < players.size(); i++) {
-      playerChannels.get(i).sendSensors(null);
-    }
-
+    // TODO generate sensors, create player channel, pass the sensors and launch player threads
   }
 
   @Override
@@ -116,11 +106,9 @@ public class WorldManager implements IWorldManager {
   public void closeSimulation() {
 
     // stop each player's thread and release them from the chan
-    for(int i = 0; i < players.size(); i++) {
-      players.get(i).stopDriverThread();
-      playerChannels.get(i).sendSensors(null);
-    }
-
+//    for(int i = 0; i < players.size(); i++) {
+//      players.get(i).stopDriverThread();
+//    }
     isSimulationRunning = false;
   }
 
@@ -181,12 +169,13 @@ public class WorldManager implements IWorldManager {
   }
 
   public WorldManager(){
-    this.observers = new ArrayList<WorldChangeObserver>();
-    this.photoSensors = new ArrayList<Line2D>();
-    this.distanceSensors = new ArrayList<Line2D>();
-    this.collisions = new ArrayList<ICollision>();
-    this.playerChannels = new ArrayList<PlayerChannel>();
-    this.allPoints = new ArrayList<Point2D>();
+    this.observers = new ArrayList<>();
+    this.photoSensors = new ArrayList<>();
+    this.distanceSensors = new ArrayList<>();
+    this.collisions = new ArrayList<>();
+    this.playerChannels = new ArrayList<>();
+    this.allPoints = new ArrayList<>();
+    this.qcars = new ArrayList<>();
   }
 
   // ======== Private methods =======================================

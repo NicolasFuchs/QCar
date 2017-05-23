@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
+import qcar.IQCar;
 
 public class SimControlCtrl {
 
@@ -21,7 +22,6 @@ public class SimControlCtrl {
   private Slider sliderSpeed;
 
   private SimulationCtrl refSim;
-
 
 
   @FXML
@@ -43,6 +43,7 @@ public class SimControlCtrl {
   private void handleStopBtn(){
     refSim.endSimulation();
   }
+
 
   public void setParentCtrl(SimulationCtrl refSim){
     this.refSim = refSim;

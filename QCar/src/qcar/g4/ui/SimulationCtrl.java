@@ -116,6 +116,7 @@ public class SimulationCtrl {
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/manualDriving.fxml"));
     HBox header = loader.load();
     ManualDrivingCtrl ctrl = (ManualDrivingCtrl) loader.getController();
+    ctrl.setManualQcar(worldManager.allQCars().get(manualCarIndex));
     ctrl.setParentCtrl(this);
     return header;
   }
