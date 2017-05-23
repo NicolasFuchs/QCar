@@ -8,11 +8,13 @@ public class Sensors implements ISensors {
   QCar mySelf;
   List<ISeenVertex> seenVert;
   List<ICollision> colWithMe;
+  IDistanceSensor distanceSensor;
   
-  public Sensors(IQCar myself, List<ISeenVertex> sv, List<ICollision> cwm) {
+  public Sensors(IQCar myself, List<ISeenVertex> sv, List<ICollision> cwm, IDistanceSensor distanceSensor) {
     this.mySelf = (QCar)myself;
     this.seenVert = sv;
     this.colWithMe = cwm;
+    this.distanceSensor = distanceSensor;
   }
 
   @Override
@@ -32,8 +34,7 @@ public class Sensors implements ISensors {
 
   @Override
   public IDistanceSensor distanceSensor() {
-    // TODO Auto-generated method stub
-    return null;
+    return distanceSensor;
   }
 
 }

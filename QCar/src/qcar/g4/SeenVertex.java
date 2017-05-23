@@ -12,15 +12,17 @@ public class SeenVertex implements ISeenVertex {
   private QCarNature nature;
   private int vertexId;
   private boolean offersBonus;
+  private Point2D projectionLocation;
 
-  public SeenVertex(int vertexId, QCarNature nature){
+  public SeenVertex(int vertexId, QCarNature nature, boolean offersBonus, Point2D projectionLocation){
     this.nature = nature;
     this.vertexId = vertexId;
+    this.offersBonus = offersBonus;
+    this.projectionLocation = projectionLocation;
   }
 
   @Override
   public IQCarNature nature() {
-    // TODO Auto-generated method stub
     return this.mySelf.nature();
   }
 
@@ -36,8 +38,7 @@ public class SeenVertex implements ISeenVertex {
 
   @Override
   public Point2D projectionLocation() {
-    // TODO Auto-generated method stub
-    return null;
+    return projectionLocation;
   }
 
 }
