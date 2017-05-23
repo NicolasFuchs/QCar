@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import qcar.IDecision;
 import qcar.IQCar;
 import qcar.IWorldManager;
+import qcar.g4.ManualDriver;
 import qcar.ui.QCarAnimationPane;
 import simviou.AnimationPane;
 import simviou.LogPanel;
@@ -29,7 +30,7 @@ import simviou.ViewPort;
 public class SimulationCtrl {
 
   private IWorldManager worldManager;
-  private int manualCarIndex;
+  private ManualDriver manualDriver;
   private Stage stage;
   private ViewPort viewPort;
   private QCarAnimationPane world;
@@ -57,13 +58,13 @@ public class SimulationCtrl {
   /**
    * This method get all the objects needed for the simulation from the previous view
    */
-  public void setWM(IWorldManager wm, int manualCarIndex){
+  public void setWM(IWorldManager wm, ManualDriver manualDriver){
 
     worldManager = wm;
-    this.manualCarIndex = manualCarIndex;
+    this.manualDriver = manualDriver;
 
     try{
-      HBox header = (manualCarIndex == -1) ? getSimControl() : getManualControl();
+      HBox header = (manualDriver == null) ? getSimControl() : getManualControl();
       headerPane.getChildren().add(header);
     } catch (Exception e){
       e.printStackTrace();
@@ -102,7 +103,7 @@ public class SimulationCtrl {
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/manualDriving.fxml"));
     HBox header = loader.load();
     ManualDrivingCtrl ctrl = (ManualDrivingCtrl) loader.getController();
-    ctrl.setManualQcar(worldManager.allQCars().get(manualCarIndex));
+    ctrl.setManualQcar(worldManager.allQCars().get(manualDriver.getQcarIndex()));
     ctrl.setParentCtrl(this);
     return header;
   }

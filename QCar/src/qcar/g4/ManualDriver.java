@@ -4,12 +4,10 @@ import qcar.IDecision;
 import qcar.IDriver;
 import qcar.IPlayerChannel;
 
-/**
- * Created by Karim on 22.05.17.
- */
 public class ManualDriver implements IDriver {
 
-  IPlayerChannel pc;
+  private IPlayerChannel pc;
+  private int qcarIndex;
 
   @Override
   public void startDriverThread(IPlayerChannel iPlayerChannel) {
@@ -23,5 +21,13 @@ public class ManualDriver implements IDriver {
 
   public void sendDecision(IDecision decision){
     pc.play(decision);
+  }
+
+  public ManualDriver(int qcarIndex){
+    this.qcarIndex = qcarIndex;
+  }
+
+  public int getQcarIndex(){
+    return qcarIndex;
   }
 }

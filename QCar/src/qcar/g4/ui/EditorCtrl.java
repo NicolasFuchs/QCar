@@ -21,6 +21,7 @@ import qcar.IGameProvider;
 import qcar.IQCar;
 import qcar.IWorldManager;
 import qcar.g4.Factory;
+import qcar.g4.ManualDriver;
 
 public class EditorCtrl {
 
@@ -110,12 +111,20 @@ public class EditorCtrl {
       IWorldManager wm  = fact.newWorldManager();
 
       List<IDriver> driverList = new ArrayList<>();
+
+      ManualDriver manualDriver = null;
+
       for(int i = 0; i < nDrivers; i++)
-        driverList.add(fact.newSmartDriver());
+        if (i == manualDriverIndex){
+          manualDriver = new ManualDriver(manualDriverIndex);
+          driverList.add(manualDriver);
+        }
+        else
+          driverList.add(fact.newSmartDriver());
 
       wm.openNewSimulation(gameDescription, driverList);
 
-      ctrl.setWM(wm, manualDriverIndex);
+      ctrl.setWM(wm, manualDriver);
       ctrl.setStage(stage);
       stage.setTitle("Simulation");
       stage.setScene(scene);
@@ -127,6 +136,8 @@ public class EditorCtrl {
 
   @FXML
   private void handleListSelection() {
+    if(listQCar.getSelectionModel().isEmpty()) return;
+
     IQCar qcar = listQCar.getSelectionModel().getSelectedItem();
 
     txtQCarId.setText(Integer.toString(qcar.nature().qCarId()));

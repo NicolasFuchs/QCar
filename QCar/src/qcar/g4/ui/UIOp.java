@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javafx.geometry.Rectangle2D;
-import javafx.scene.paint.Color;
 import qcar.IWorldManager;
 import simviou.Action;
 import simviou.AnimationPane;
@@ -73,7 +72,7 @@ public class UIOp implements UIOperations {
   }
 
   @Override
-  public boolean mute() { return false; }
+  public boolean mute() { return true; }
 
   @Override
   public Map<KeyCommand, Action> keyActionMap(MouseMode mouseMode) {
