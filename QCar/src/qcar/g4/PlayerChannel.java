@@ -10,16 +10,8 @@ public class PlayerChannel implements IPlayerChannel {
   private IDecision decision ;
   private ISensors sensors ;
   private Semaphore sem;
-  private Semaphore mutex;
 
-  /*
-    1 : reçoit une décision du Driver
-    2 : envoie la décision au WorldManager (il la récupère)
-    3 : BLOCK : attend les senseurs du WorldManager
-    (le world manager setSensors) + unlock
-    4 : envoie les senseurs au Driver
-   */
-
+  // TODO: determine if we need a mutex or not
 
   @Override
   public ISensors play(IDecision decision) {
