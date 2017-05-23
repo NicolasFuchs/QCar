@@ -16,7 +16,6 @@ public class ManualDriver implements IDriver {
 
   @Override
   public void stopDriverThread() {
-
   }
 
   public void sendDecision(IDecision decision){

@@ -10,10 +10,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Popup;
+import javafx.stage.PopupBuilder;
+import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import qcar.IDecision;
 import qcar.IQCar;
@@ -120,9 +126,12 @@ public class SimulationCtrl {
       }
     };
     new Thread(r).start();
+    isSimulationOver();
   }
 
   public void simulateOneStep(IDecision manualDecision){
+    manualDriver.sendDecision(manualDecision);
+    simulateOneStep(1000);
   }
 
   public void endSimulation(){
@@ -162,6 +171,19 @@ public class SimulationCtrl {
     y0 -= offset;
     x1 += offset;
     y1 += offset;
-    viewPort.setNewWorldRegion(x0, x1, y0, y1); // unsure about that, need a way to refresh the view
+    viewPort.setNewWorldRegion(x0, x1, y0, y1);
+    // TODO: Find a way to refresh the view after click
+    // TODO: go back to the original view
+  }
+
+  private void isSimulationOver(){
+    if(worldManager.isWarOver()){
+      Alert alert = new Alert(AlertType.INFORMATION);
+      alert.setTitle("Simulation finished");
+      alert.setHeaderText(null);
+      alert.setContentText("The war is over!");
+      alert.showAndWait();
+      endSimulation();
+    }
   }
 }
