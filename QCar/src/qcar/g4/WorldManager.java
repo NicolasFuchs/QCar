@@ -4,6 +4,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
 import javafx.geometry.Rectangle2D;
 import qcar.*;
 import qcar.ui.QCarAnimationPane;
@@ -109,7 +111,14 @@ public class WorldManager implements IWorldManager {
     // notifyAllWorldObserver(0);
 
     //TODO uncomment the next line and send all decisions
-    //updateWorldState();
+    List<IDecision> decisions = new ArrayList<>();
+    Random random = new Random();
+    for (int i = 0; i < drivenQCars.size(); i++) {
+//      decisions.add(new Decision(random.nextBoolean(), random.nextInt(4), (random.nextBoolean()?1:-1)*random.nextInt(5)));
+      decisions.add(new Decision(false,2,50));
+
+    }
+    updateWorldState(decisions);
   }
 
   @Override
@@ -224,15 +233,20 @@ public class WorldManager implements IWorldManager {
     collisions = WorldManagerPhysicsHelper.computeCollisions(drivenQCars, allDecisions, allQCars());
     for (int q = 0; q < drivenQCars.size(); q++) {
       try {
-        Thread.sleep(3000);
+        //Thread.sleep(2000);
         double requestedTranslation = allDecisions.get(q).requestedTranslation();
-        if (!collisions.isEmpty()) {
-          ICollision collision = collisions.get(q);
+        //if (!collisions.isEmpty()) {
+          ICollision collision = null;
+          for (int i = 0; i < collisions.size(); i++) {
+            if (collisions.get(i).hittingQCarId() == drivenQCars.get(q).nature().qCarId()) collision = collisions.get(i);
+          }
+          //ICollision collision = collisions.get(q);
+          //if (collision.hittingQCarId() == drivenQCars.get(q).nature().qCarId()) {
           if (collision != null) {
             requestedTranslation = Math.signum(requestedTranslation)*Math.sqrt(Math.pow(collision.position().getX()-allQCars().get(q).vertex(collision.hittingSideOrVertexId()).getX(), 2)+Math.pow(collision.position().getY()-allQCars().get(q).vertex(collision.hittingSideOrVertexId()).getY(), 2));
             notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
           }
-        }
+        //}
         updateMove(drivenQCars.get(q), allDecisions.get(q).isAngleMovement(), allDecisions.get(q).sideId(), requestedTranslation);
       } catch (Exception e) {
         e.printStackTrace();

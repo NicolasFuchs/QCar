@@ -84,7 +84,8 @@ public class SimulationCtrl {
       }
       @Override
       public ObservationPolicy observationPolicy(){
-        return ObservationPolicy.WORLD_BOUNDARY;
+        //return ObservationPolicy.WORLD_BOUNDARY;
+        return ObservationPolicy.ZOOMABLE_ZONE;
       }
     };
 
