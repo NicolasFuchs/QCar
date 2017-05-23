@@ -23,7 +23,7 @@ public class SeenVertex implements ISeenVertex {
 
   @Override
   public IQCarNature nature() {
-    return this.mySelf.nature();
+    return nature;
   }
 
   @Override
