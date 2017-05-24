@@ -280,6 +280,7 @@ public class WorldManager implements IWorldManager {
       double shiftY = endPoint.getY()-origin.getY();
       car.vertex(sideId).setLocation(car.vertex(sideId).getX()+shiftX, car.vertex(sideId).getY()+shiftY);
       car.vertex((sideId+1)%4).setLocation(car.vertex((sideId+1)%4).getX()+shiftX, car.vertex((sideId+1)%4).getY()+shiftY);
+      collisions.add(collision);
       notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
     }
     notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
@@ -295,7 +296,7 @@ public class WorldManager implements IWorldManager {
          for (int i = 0; i < collisions.size(); i++) {
            if (collisions.get(i).hittingQCarId() == drivenQCars.get(q).nature().qCarId()) collision = collisions.get(i);
          }
-         //if (requestedTranslation < Math.pow(10, -5)) requestedTranslation = 0;  // tolerance : Math.pow(10, -2)
+         if (requestedTranslation < Math.pow(10, -2)) requestedTranslation = 0;  // tolerance : Math.pow(10, -2)
          updateMove(drivenQCars.get(q), allDecisions.get(q).isAngleMovement(), requestedTranslation, allDecisions.get(q).sideId(), collision);
        } catch (Exception e) {
          e.printStackTrace();

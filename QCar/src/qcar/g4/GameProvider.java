@@ -9,7 +9,7 @@ import qcar.IQCar;
 
 public class GameProvider implements IGameProvider {
 
-  public static final int MAX_QCARS = 5;
+  public static final int MAX_QCARS = 1;
   public static final Random R = new Random();
   public static final double SPAWN_PROBABILITY = 0.3;
   public static final int PARALLELOGRAM_SCALE = 20;
@@ -37,7 +37,9 @@ public class GameProvider implements IGameProvider {
     switch (game){
       
       case STANDARD_WITH_BORDERS: cars = standardStyle(nbOfDrivers); // 0
-                                  cars.add(obtainBorders());
+                                  Point2D[] vertices = {new Point2D.Double(0,0), new Point2D.Double(100,0), new Point2D.Double(100,100), new Point2D.Double(0,100)};
+                                  cars.add(new QCar(new QCarNature(false, false, false, false, 200, 10), vertices));
+                                  //cars.add(obtainBorders());
                                   break;
       case PARKINGS_WITH_BORDERS: cars = parkingsStyle(nbOfDrivers, 2); // 1
                                   cars.add(obtainBorders());
