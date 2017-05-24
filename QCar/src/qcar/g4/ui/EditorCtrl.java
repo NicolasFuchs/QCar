@@ -129,18 +129,17 @@ public class EditorCtrl {
       stage.hide();
 
       IWorldManager wm  = fact.newWorldManager();
-
       List<IDriver> driverList = new ArrayList<>();
-
       ManualDriver manualDriver = null;
 
-      for(int i = 0; i < nDrivers; i++)
-        if (i == manualDriverIndex){
+      for(int i = 0; i < nDrivers; i++) {
+        if (i == manualDriverIndex) {
           manualDriver = new ManualDriver(manualDriverIndex);
           driverList.add(manualDriver);
-        }
-        else
+        } else {
           driverList.add(fact.newSmartDriver());
+        }
+      }
 
       wm.openNewSimulation(gameDescription, driverList);
 

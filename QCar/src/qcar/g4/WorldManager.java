@@ -59,16 +59,13 @@ public class WorldManager implements IWorldManager {
   */
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
-
-    drivenQCars = new ArrayList<>();
-    qcars = description.allQCar();
     
     // add a specific QCar for testing
-    qcars.remove(0);
-    QCarNature nature = new QCarNature(true, false, true, true, 10000, 0);
-    Point2D[] vertices = {new Point2D.Double(52,84),new Point2D.Double(52,90),new Point2D.Double(23,42),new Point2D.Double(23,36)};
-    QCar problem = new QCar(nature, vertices);
-    qcars.add(0,problem);
+    //qcars.remove(0);
+    //QCarNature nature = new QCarNature(true, false, true, true, 10000, 0);
+    //Point2D[] vertices = {new Point2D.Double(52,84),new Point2D.Double(52,90),new Point2D.Double(23,42),new Point2D.Double(23,36)};
+    //QCar problem = new QCar(nature, vertices);
+    //qcars.add(0,problem);
     
     this.players = players;
 
