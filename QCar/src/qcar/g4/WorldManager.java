@@ -64,10 +64,10 @@ public class WorldManager implements IWorldManager {
     this.isSimulationRunning = true;
     this.step = 0;
 
-    // create a channel for each player
-    for(int i  = 0; i < players.size(); i++){
-      playerChannels.add(new PlayerChannel());
-    }
+//    // create a channel for each player
+//    for(int i  = 0; i < players.size(); i++){
+//      playerChannels.add(new PlayerChannel());
+//    }
 
     //updateWorldState(); // update the world for the initial configuration
 
@@ -84,8 +84,18 @@ public class WorldManager implements IWorldManager {
       //players.get(i).startDriverThread(playerChannels.get(i));
     }
 
-    for(int i = 0; i < players.size(); i++) {
-      playerChannels.get(i).sendSensors(null);
+//    for(int i = 0; i < players.size(); i++) {
+//      playerChannels.get(i).sendSensors(null);
+//    }
+
+    List<ISensors> sensors = new ArrayList<>();
+    for (IQCar driver : drivenQCars) {
+      sensors.set(driver.nature().qCarId(), WorldManagerPhysicsHelper.computeSensor(driver, qcars));
+    }
+
+    // create a channel for each player
+    for(int i  = 0; i < players.size(); i++){
+      playerChannels.add(new PlayerChannel(sensors.get(i)));
     }
 
   }

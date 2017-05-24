@@ -1,8 +1,9 @@
 package qcar.g4;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Random;
+import java.awt.geom.Rectangle2D;
+import java.util.*;
+
 import qcar.IGameDescription;
 import qcar.IGameProvider;
 import qcar.IQCar;
@@ -275,6 +276,43 @@ public class GameProvider implements IGameProvider {
     }
     System.out.println("----------------------------");
   }
+
+//  private class GridProvider {
+//
+//    private int totalCars;
+//    private Rectangle2D[][] positions;
+//    private int lines, cols;
+//    private int currLine, currCol;
+//
+//    public GridProvider(int totalCars) {
+//      this.totalCars = totalCars;
+//      initPositions();
+//      computeGridForCars();
+//    }
+//
+//    private void initPositions() {
+//      lines = (int) Math.sqrt(totalCars);
+//      cols = lines;
+//      if (totalCars%cols < 0) {
+//        if(R.nextBoolean()) lines++; else cols++;
+//      }
+//      positions = new Rectangle2D.Double[lines][cols];
+//    }
+//
+//    private void computeGridForCars() {
+//      Collections.shuffle(cars, R);
+//
+//      currLine=0; currCol=0;
+//      for (IQCar car : cars) {
+//        rectangleForCarAt(car);
+//      }
+//    }
+//
+//    private void rectangleForCarAt(IQCar iqCar) {
+//
+//    }
+//
+//  }
   
 }
 
