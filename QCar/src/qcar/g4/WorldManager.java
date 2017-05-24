@@ -75,6 +75,7 @@ public class WorldManager implements IWorldManager {
       }
     }
 
+    
     // TODO generate sensors, create player channel, pass the sensors and launch player threads
   }
 

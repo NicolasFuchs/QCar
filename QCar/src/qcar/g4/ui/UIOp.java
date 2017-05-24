@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javafx.geometry.Rectangle2D;
+import javafx.scene.paint.Color;
 import qcar.IWorldManager;
+import qcar.ui.QCarAnimationPane;
 import simviou.Action;
 import simviou.AnimationPane;
 import simviou.KeyCommand;
@@ -35,7 +37,7 @@ public class UIOp implements UIOperations {
   public AnimationPane newAnimationPane(ViewPort vPort) {
     // This one is not reasonable (could cause NullPointerException)
     System.out.print("newAnimationPane called");
-    return null;
+    return new QCarAnimationPane(vPort, Color.WHITE, this, wm);
   }
 
   //------------------------------------------------------------------
@@ -64,7 +66,7 @@ public class UIOp implements UIOperations {
 
   @Override
   public void zoneSelected(double fromX, double fromY,
-      double toX,   double toY) { }
+      double toX,   double toY) {}
 
   @Override
   public String toolTipText(double atX, double atY, MouseMode mouseMode) {
@@ -72,7 +74,7 @@ public class UIOp implements UIOperations {
   }
 
   @Override
-  public boolean mute() { return true; }
+  public boolean mute() { return false; }
 
   @Override
   public Map<KeyCommand, Action> keyActionMap(MouseMode mouseMode) {
@@ -90,8 +92,8 @@ public class UIOp implements UIOperations {
     this.simMode = SimulatorMode.STEP_BY_STEP;
   }
 
-  public void toggleSimMode(){
-    if(simMode == SimulatorMode.STEP_BY_STEP)
+  public void setAnimationRunning(boolean isAnimationRunning){
+    if(isAnimationRunning)
       simMode = SimulatorMode.ANIMATION_RUNNING;
     else
       simMode = SimulatorMode.STEP_BY_STEP;

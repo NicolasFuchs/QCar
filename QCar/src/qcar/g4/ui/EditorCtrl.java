@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -92,10 +93,29 @@ public class EditorCtrl {
       gameDescription = gameProvider.nextGame(nDrivers);
       ObservableList<IQCar> obQCars = FXCollections.observableList(gameDescription.allQCar());
       listQCar.setItems(obQCars);
+      listQCar.setCellFactory(param -> new ListCell<IQCar>() {
+        @Override
+        protected void updateItem(IQCar item, boolean empty) {
+          super.updateItem(item, empty);
+          if(empty){
+            setText(null);
+          } else {
+            String builder = "Qcar n°" + item.nature().qCarId();
+            if(item.nature().isDriven())
+              builder += " - driven";
+            if (item.nature().isParkingTarget())
+              builder += " - parking";
+            if (!item.nature().isDriven() && !item.nature().isParkingTarget()
+                && !item.nature().isSideTarget() && !item.nature().isVertexTarget())
+              builder += " - static";
+            setText(builder);
+          }
+        }
+      });
       emptyFields();
       btnPlay.setDisable(false);
       System.out.println("Apply for : " + nDrivers + " QCars !");
-    } catch (NumberFormatException e) {
+    } catch (Exception e) {
       System.out.println("Please enter a valid number of QCars");
     }
   }

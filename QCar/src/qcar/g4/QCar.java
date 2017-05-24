@@ -104,7 +104,14 @@ public class QCar implements IQCar {
 
   @Override
   public String toString() {
-    return "QCar n°" + nature().qCarId() + " - (" + score + ")" ;
+    String builder = "Qcar n°" + nature().qCarId();
+    if(nature().isParkingTarget())
+      builder += " - parking";
+    if(!nature().isDriven() && !nature().isParkingTarget()
+        && !nature().isSideTarget() && !nature().isVertexTarget())
+      builder += " - static";
+    builder += " (" + score + ")";
+    return builder;
   }
   
 //  public static double distance(Point2D a, Point2D b) {

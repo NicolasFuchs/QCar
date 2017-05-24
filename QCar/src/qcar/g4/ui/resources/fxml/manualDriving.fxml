@@ -16,7 +16,7 @@
             <Font size="24.0" />
          </font>
          <HBox.margin>
-            <Insets right="75.0" />
+            <Insets right="50.0" />
          </HBox.margin>
       </Label>
       <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="4.0">
@@ -60,8 +60,9 @@
       </VBox>
       <Button fx:id="btnMove" mnemonicParsing="false" text="Move">
          <HBox.margin>
-            <Insets right="20.0" />
+            <Insets right="10.0" />
          </HBox.margin>
       </Button>
+      <Button fx:id="btnStop" mnemonicParsing="false" onAction="#handleStopBtn" text="Stop" />
    </children>
 </HBox>
