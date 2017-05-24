@@ -9,7 +9,6 @@ public class Main extends Application {
 
   private EditorCtrl ctrl;
 
-
   @Override
   public void start(Stage stage) {
     try{

@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -21,6 +22,7 @@ import qcar.IGameProvider;
 import qcar.IQCar;
 import qcar.IWorldManager;
 import qcar.g4.Factory;
+import qcar.g4.ManualDriver;
 
 public class EditorCtrl {
 
@@ -91,10 +93,29 @@ public class EditorCtrl {
       gameDescription = gameProvider.nextGame(nDrivers);
       ObservableList<IQCar> obQCars = FXCollections.observableList(gameDescription.allQCar());
       listQCar.setItems(obQCars);
+      listQCar.setCellFactory(param -> new ListCell<IQCar>() {
+        @Override
+        protected void updateItem(IQCar item, boolean empty) {
+          super.updateItem(item, empty);
+          if(empty){
+            setText(null);
+          } else {
+            String builder = "Qcar n°" + item.nature().qCarId();
+            if(item.nature().isDriven())
+              builder += " - driven";
+            if (item.nature().isParkingTarget())
+              builder += " - parking";
+            if (!item.nature().isDriven() && !item.nature().isParkingTarget()
+                && !item.nature().isSideTarget() && !item.nature().isVertexTarget())
+              builder += " - static";
+            setText(builder);
+          }
+        }
+      });
       emptyFields();
       btnPlay.setDisable(false);
       System.out.println("Apply for : " + nDrivers + " QCars !");
-    } catch (NumberFormatException e) {
+    } catch (Exception e) {
       System.out.println("Please enter a valid number of QCars");
     }
   }
@@ -108,14 +129,21 @@ public class EditorCtrl {
       stage.hide();
 
       IWorldManager wm  = fact.newWorldManager();
-
       List<IDriver> driverList = new ArrayList<>();
-      for(int i = 0; i < nDrivers; i++)
-        driverList.add(fact.newSmartDriver());
+      ManualDriver manualDriver = null;
+
+      for(int i = 0; i < nDrivers; i++) {
+        if (i == manualDriverIndex) {
+          manualDriver = new ManualDriver(manualDriverIndex);
+          driverList.add(manualDriver);
+        } else {
+          driverList.add(fact.newSmartDriver());
+        }
+      }
 
       wm.openNewSimulation(gameDescription, driverList);
 
-      ctrl.setWM(wm, manualDriverIndex);
+      ctrl.setWM(wm, manualDriver);
       ctrl.setStage(stage);
       stage.setTitle("Simulation");
       stage.setScene(scene);
@@ -127,6 +155,8 @@ public class EditorCtrl {
 
   @FXML
   private void handleListSelection() {
+    if(listQCar.getSelectionModel().isEmpty()) return;
+
     IQCar qcar = listQCar.getSelectionModel().getSelectedItem();
 
     txtQCarId.setText(Integer.toString(qcar.nature().qCarId()));

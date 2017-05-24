@@ -1,37 +1,52 @@
 package qcar.g4.ui;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Popup;
+import javafx.stage.PopupBuilder;
+import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
+import qcar.ICollision;
 import qcar.IDecision;
 import qcar.IQCar;
 import qcar.IWorldManager;
+import qcar.g4.ManualDriver;
 import qcar.ui.QCarAnimationPane;
 import simviou.AnimationPane;
 import simviou.LogPanel;
 import simviou.ObservationPolicy;
+import simviou.UIOperations;
 import simviou.UIOperationsWithDefaults;
 import simviou.ViewPort;
 
 public class SimulationCtrl {
 
   private IWorldManager worldManager;
-  private int manualCarIndex;
+  private ManualDriver manualDriver;
   private Stage stage;
   private ViewPort viewPort;
   private QCarAnimationPane world;
   private LogPanel logPanel;
+  private UIOp uiOp;
+  private SimControlCtrl headerCtrl;
 
   @FXML
   private Pane headerPane;
@@ -47,20 +62,19 @@ public class SimulationCtrl {
 
   @FXML
   void initialize() {
-
   }
 
 
   /**
    * This method get all the objects needed for the simulation from the previous view
    */
-  public void setWM(IWorldManager wm, int manualCarIndex){
+  public void setWM(IWorldManager wm, ManualDriver manualDriver){
 
     worldManager = wm;
-    this.manualCarIndex = manualCarIndex;
+    this.manualDriver = manualDriver;
 
     try{
-      HBox header = (manualCarIndex == -1) ? getSimControl() : getManualControl();
+      HBox header = (manualDriver == null) ? getSimControl() : getManualControl();
       headerPane.getChildren().add(header);
     } catch (Exception e){
       e.printStackTrace();
@@ -69,24 +83,7 @@ public class SimulationCtrl {
     Rectangle2D r = wm.boundingBox();
     viewPort = new ViewPort((int) r.getMinY(), (int) r.getMaxY(), (int) r.getMinX(), (int) r.getMaxX(), 610, 350, true);
 
-    UIOperationsWithDefaults uiOp = new UIOperationsWithDefaults() {
-      @Override
-      public Rectangle2D worldBoundingBox() {
-        return wm.boundingBox();
-      }
-      @Override
-      public AnimationPane newAnimationPane(ViewPort vPort) {
-        return null;
-      }
-      @Override
-      public boolean isActive(int z) {
-        return true;
-      }
-      @Override
-      public ObservationPolicy observationPolicy(){
-        return ObservationPolicy.WORLD_BOUNDARY;
-      }
-    };
+    uiOp = new UIOp(wm, logPanel);
 
     world = new QCarAnimationPane(viewPort, Color.WHITE, uiOp, worldManager);
     paneQCar.getChildren().add(world);
@@ -94,7 +91,13 @@ public class SimulationCtrl {
     logPanel = new LogPanel(805, 100);
     paneConsole.getChildren().add(logPanel);
 
-    ObservableList<IQCar> obQCars = FXCollections.observableList(worldManager.allQCars());
+    ArrayList<IQCar> pilotedQcars = new ArrayList<>();
+
+    for(IQCar q : wm.allQCars())
+      if(q.nature().isDriven())
+        pilotedQcars.add(q);
+
+    ObservableList<IQCar> obQCars = FXCollections.observableList(pilotedQcars);
     SortedList sortedQCars = obQCars.sorted(
         Comparator.<IQCar>comparingInt(p1 -> p1.score()).thenComparing(p2 ->p2.score()));
     lstLeaderboard.setItems(sortedQCars);
@@ -107,8 +110,8 @@ public class SimulationCtrl {
   private HBox getSimControl() throws IOException{
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/simControl.fxml"));
     HBox header = loader.load();
-    SimControlCtrl ctrl = loader.getController();
-    ctrl.setParentCtrl(this);
+    headerCtrl = loader.getController();
+    headerCtrl.setParentCtrl(this, worldManager);
     return header;
   }
 
@@ -116,25 +119,20 @@ public class SimulationCtrl {
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/manualDriving.fxml"));
     HBox header = loader.load();
     ManualDrivingCtrl ctrl = (ManualDrivingCtrl) loader.getController();
+    ctrl.setManualQcar(worldManager.allQCars().get(manualDriver.getQcarIndex()));
     ctrl.setParentCtrl(this);
     return header;
   }
 
-  public void simulateOneStep(){
-
-  }
-
   public void simulateOneStep(long ms){
-    Runnable r = new Runnable() {
-      @Override
-      public void run() {
-        worldManager.simulateOneStep(ms);
-      }
-    };
-    new Thread(r).start();
+    worldManager.simulateOneStep(ms);
+    log();
+    isSimulationOver();
   }
 
   public void simulateOneStep(IDecision manualDecision){
+    manualDriver.sendDecision(manualDecision);
+    simulateOneStep(1000);
   }
 
   public void endSimulation(){
@@ -151,7 +149,62 @@ public class SimulationCtrl {
     }
   }
 
+  private void log(){
+    String builder = "Step " + worldManager.stepNumber();
+    if(worldManager.allNewCollisions().size() == 0)
+      builder += " : no collision detected";
+    else {
+      builder += " : ";
+      for(ICollision col : worldManager.allNewCollisions())
+        builder += "\t QCar n°" + col.hittingQCarId() + " has hit QCar n°" + col.hitQCarId() + "\n";
+    }
+    logPanel.addEntry(builder);
+  }
+
+  public void changeSimMode(boolean isAnimationRunning){
+    uiOp.setAnimationRunning(isAnimationRunning);
+  }
+
+  private void isSimulationOver(){
+    if(worldManager.isWarOver()){
+      Alert alert = new Alert(AlertType.INFORMATION);
+      alert.setTitle("Simulation finished");
+      alert.setHeaderText(null);
+      alert.setContentText("The war is over!");
+      alert.showAndWait();
+      endSimulation();
+    }
+  }
+
   @FXML
   private void handleListQCarClick(){
+//    IQCar clickedQcar = lstLeaderboard.getSelectionModel().getSelectedItem();
+//    double x0 = Double.MAX_VALUE;
+//    double y0 = Double.MAX_VALUE;
+//    double x1 = Double.MAX_VALUE * -1;
+//    double y1 = Double.MAX_VALUE * -1;
+//    double offset = clickedQcar.nature().maxSideLength();
+//    for(int i = 0; i < 4; i++){
+//      Point2D p = clickedQcar.vertex(i);
+//      if(x0 > p.getX())
+//        x0 = p.getX();
+//      if(y0 > p.getY())
+//        y0 = p.getY();
+//      if(x1 < p.getX())
+//        x1 = p.getX();
+//      if(y1 < p.getY())
+//        y1 = p.getY();
+//    }
+//    x0 -= offset;
+//    y0 -= offset;
+//    x1 += offset;
+//    y1 += offset;
+//
+//    viewPort.setNewWorldRegion(x0, x1, y0, y1);
+//    System.out.println("Zone selected x0="+x0+" x1="+x1+" y0="+y0+" y1="+y1);
+//    world.redrawAll();
+//    // TODO: Find a way to refresh the view after click
+//    // TODO: go back to the original view
   }
+
 }
