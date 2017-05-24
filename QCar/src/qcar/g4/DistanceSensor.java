@@ -8,18 +8,14 @@ import qcar.IQCarNature;
 public class DistanceSensor implements IDistanceSensor {
   
   private boolean isSomethingDetected ;
+  private boolean sideOffersBonus ;
   private QCarNature sensedSideNature ;
   private int sideId ;
   private Point2D rayEnd ;
-  
-  /**
-   * @param isSomethingDetected
-   * @param sensedSideNature
-   * @param sideId
-   * @param rayEnd
-   */
-  public DistanceSensor(boolean isSomethingDetected, QCarNature sensedSideNature, int sideId, Point2D rayEnd) {
+
+  public DistanceSensor(boolean isSomethingDetected, boolean sideOffersBonus, QCarNature sensedSideNature, int sideId, Point2D rayEnd) {
     this.isSomethingDetected = isSomethingDetected;
+    this.sideOffersBonus = sideOffersBonus;
     this.sensedSideNature = sensedSideNature;
     this.sideId = sideId;
     this.rayEnd = rayEnd;
@@ -27,32 +23,27 @@ public class DistanceSensor implements IDistanceSensor {
 
   @Override
   public boolean isSomethingDetected() {
-    // TODO Auto-generated method stub
-    return false;
+    return isSomethingDetected;
   }
 
   @Override
   public IQCarNature sensedSideNature() {
-    // TODO Auto-generated method stub
-    return null;
+    return sensedSideNature;
   }
 
   @Override
   public int sideId() {
-    // TODO Auto-generated method stub
-    return 0;
+    return sideId;
   }
 
   @Override
   public Point2D rayEnd() {
-    // TODO Auto-generated method stub
-    return null;
+    return rayEnd;
   }
 
   @Override
   public boolean sideOffersBonus() {
-    // TODO Auto-generated method stub
-    return false;
+    return sideOffersBonus;
   }
 
 }
