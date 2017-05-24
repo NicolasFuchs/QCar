@@ -125,7 +125,13 @@ public class SimulationCtrl {
   }
 
   public void simulateOneStep(long ms){
-    worldManager.simulateOneStep(ms);
+    Runnable r = new Runnable() {
+      @Override
+      public void run() {
+        worldManager.simulateOneStep(ms);
+      }
+    };
+    new Thread(r).start();
   }
 
   public void simulateOneStep(IDecision manualDecision){

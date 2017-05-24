@@ -41,7 +41,7 @@ public class WorldManagerPhysicsHelperTest {
     Point2D origin_AExpected = new Point2D.Double(1, 8);
     Point2D origin_XY = new Point2D.Double(2, 6);
     
-    Point2D origin_A = WorldManagerPhysicsHelper.computeOriginXYToBaseA12(origin_XY, p_1Matrix);
+    Point2D origin_A = WorldManagerPhysicsHelper.computePointFrom0XYToBaseA12(origin_XY, p_1Matrix);
     
     assertEquals(origin_AExpected.getX(), origin_A.getX(), 0.0001);
     assertEquals(origin_AExpected.getY(), origin_A.getY(), 0.0001);
@@ -54,7 +54,7 @@ public class WorldManagerPhysicsHelperTest {
     Point2D p_XY = new Point2D.Double(3, 8);
     Point2D p_AExpected = new Point2D.Double(0.5, 3);
     
-    Point2D p_A = WorldManagerPhysicsHelper.pointBaseXYToBaseA12(p_XY, p_1Matrix, origin_A);
+    Point2D p_A = WorldManagerPhysicsHelper.pointBaseXYToBaseA12(p_XY, origin_A, p_1Matrix);
     
     assertEquals(p_AExpected.getX(), p_A.getX(), 0.0001);
     assertEquals(p_AExpected.getY(), p_A.getY(), 0.0001);
