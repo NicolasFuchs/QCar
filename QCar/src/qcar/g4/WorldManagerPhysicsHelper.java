@@ -82,7 +82,7 @@ public class WorldManagerPhysicsHelper {
       Line2D[] areaLines = findLines(decision, car, A1A2[1]);
       double[][] IMatrix = invertMatrix(computePMatrix(A1A2[0],A1A2[1]));
       Point2D origin = (!isAngleMovement || ((sideId == 0 || sideId == 3) && requestedTranslation < 0) || ((sideId == 1 || sideId == 2) && requestedTranslation > 0)) ? car.vertex((sideId+1)%4) : car.vertex(sideId);
-      Point2D PointInA = null;
+      Point2D PointInA = null, thePointInA = null;
       for (int j = 0; j < allQCars.size(); j++) {
         if (car == allQCars.get(j)) continue;
         IQCar hitCar = allQCars.get(j);
@@ -93,6 +93,7 @@ public class WorldManagerPhysicsHelper {
             if (PointInA.getY() < A2_coor) {
               int hittingID = collisionID(vertices, PointInA, origin, sideId, isAngleMovement);
               col = new Collision(hitCar.vertex(k), car.nature().qCarId(), hittingID, hitCar.nature().qCarId(), k, true);
+              thePointInA = PointInA;
               A2_coor = PointInA.getY();
               
             }
@@ -107,6 +108,7 @@ public class WorldManagerPhysicsHelper {
                 if (PointInA.getY() < A2_coor) {
                   int hittingID = collisionID(vertices, PointInA, origin, sideId, isAngleMovement);
                   col = new Collision(intersectionPoint, car.nature().qCarId(), hittingID, hitCar.nature().qCarId(), k, false);
+                  thePointInA = PointInA;
                   A2_coor = PointInA.getY();
                 }
               }
@@ -117,8 +119,8 @@ public class WorldManagerPhysicsHelper {
       if (col != null) {
         colList.add(col);
         driversColCache.get(col.hitQCarId()).add(col);
-        double[] projection = {(A1A2[0].getX2()-A1A2[0].getX1())*PointInA.getX(), (A1A2[0].getY2()-A1A2[0].getY1())*PointInA.getX()};
-        collisionOrigins.put(col, new Point2D.Double(col.position().getX()-projection[0], col.position().getY()-projection[1]));  // Problem
+        double[] projection = {(A1A2[0].getX2()-A1A2[0].getX1())*thePointInA.getX(), (A1A2[0].getY2()-A1A2[0].getY1())*thePointInA.getX()};
+        collisionOrigins.put(col, new Point2D.Double(col.position().getX()-projection[0], col.position().getY()-projection[1]));
       }
     }
     return colList;
@@ -151,7 +153,8 @@ public class WorldManagerPhysicsHelper {
     }
     double divider = Math.abs(decision.requestedTranslation())/Math.sqrt(Math.pow(p4.getX()-p3.getX(),2) + Math.pow(p4.getY()-p3.getY(),2));
     res[0] = new Line2D.Double(new Point2D.Double(p2.getX(),p2.getY()), new Point2D.Double(p1.getX(),p1.getY()));                                   // a1
-    res[1] = new Line2D.Double(new Point2D.Double(p3.getX()*divider,p3.getY()*divider), new Point2D.Double(p4.getX()*divider,p4.getY()*divider));   // a2
+//    res[1] = new Line2D.Double(new Point2D.Double(p3.getX()*divider,p3.getY()*divider), new Point2D.Double(p4.getX()*divider,p4.getY()*divider));   // a2
+    res[1] = new Line2D.Double(new Point2D.Double(p4.getX(),p4.getY()), new Point2D.Double(p4.getX()+(p4.getX()-p3.getX())*divider,p4.getY()+(p4.getY()-p3.getY())*divider));   // a2
     return res;
   }
 

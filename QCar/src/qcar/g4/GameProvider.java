@@ -1,5 +1,6 @@
 package qcar.g4;
 
+import java.awt.geom.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,12 +10,18 @@ import qcar.IQCar;
 
 public class GameProvider implements IGameProvider {
 
-  public static final int MAX_QCARS = 5;
+  public static final int MAX_QCARS = 20;
+  public static final int POSITION_DISPERSION = 300;
   public static final Random R = new Random();
   public static final double SPAWN_PROBABILITY = 0.3;
   public static final int PARALLELOGRAM_SCALE = 20;
   
-  public static final double MIN_AREA = 1.3;
+  // to define the minimal side length of first side of QCar
+  // SIDE_LENGTH_RATIO * nature.maxSideLength = minimal side length
+  // ! Must be 0.0 < SIDE_LENGTH_RATIO < 1.0 !
+  public static final double SIDE_LENGTH_RATIO = 0.01;
+  
+  public static final double MIN_AREA = 15.3;
   public static final double MAX_SIDE_LENGTH = 7.4;
 
   private GameDescription.GameStyles game;
@@ -163,46 +170,124 @@ public class GameProvider implements IGameProvider {
     
     return nature;
   }
-  
+ 
   private Point2D[] randomAlignedPositions(QCarNature nature) {
-    
+
     Point2D[] points = new Point2D[4];
     do{
-      double verticalSideLenght = R.nextDouble()*PARALLELOGRAM_SCALE;
-      verticalSideLenght = verticalSideLenght > nature.maxSideLength() ? verticalSideLenght % nature.maxSideLength() : verticalSideLenght;
-
-      double horizontalSideLenght = R.nextDouble()*PARALLELOGRAM_SCALE;
-      horizontalSideLenght = horizontalSideLenght > nature.maxSideLength() ? horizontalSideLenght % nature.maxSideLength() : horizontalSideLenght;
-
-      boolean offsetVertical = R.nextBoolean();
-      int positionFactor = R.nextInt(500);
-      double offset = R.nextDouble()*(offsetVertical ? verticalSideLenght : horizontalSideLenght);
-
+      Point2D[] tmp = new Point2D[4];
+      
+      // Take random value for the position of the vertice 0 of the QCar
+      int positionFactor = R.nextInt(POSITION_DISPERSION);
       double posX = R.nextDouble()*positionFactor;
       double posY = R.nextDouble()*positionFactor;
-      points[1] = new Point2D.Double(posX, posY);
+      points[0] = new Point2D.Double(posX, posY);
 
-      if (offsetVertical) {
-        posY = posY-verticalSideLenght;
-        points[0] = new Point2D.Double(posX, posY);
-        posY = posY - offset;
-        posX = posX - Math.sqrt(Math.abs((horizontalSideLenght*horizontalSideLenght)-(offset*offset)));
-        points[3] = new Point2D.Double(posX, posY);
-        posY = posY + verticalSideLenght;
-        points[2] = new Point2D.Double(posX, posY);
-      } else {
-        posX = posX-horizontalSideLenght;
-        points[2] = new Point2D.Double(posX, posY);
-        posX = posX - offset;
-        posY = posY - Math.sqrt(Math.abs((verticalSideLenght*verticalSideLenght)-(offset*offset)));
-        points[3] = new Point2D.Double(posX, posY);
-        posX = posX + horizontalSideLenght;
-        points[0] = new Point2D.Double(posX, posY);
+      // Calculate a minimal length of first side of QCar to avoid side == 0.0 case
+      double minSideLength = SIDE_LENGTH_RATIO * nature.maxSideLength();
+
+      // Calculate a random value for the base side
+      double side1 = minSideLength + R.nextDouble()*(nature.maxSideLength()-minSideLength); 
+
+      // Minimal height of parallelogram to respect minArea
+      double minH = nature.minArea()/side1; 
+
+      // Calculate random second side of parallelogram in respect of maxSideLength and minArea
+      double side2 = minH + R.nextDouble() * Math.abs((nature.maxSideLength()-minH)); 
+
+      // Calculate the maximum possible offset to respect minArea
+      double maxOffset = Math.sqrt(Math.abs(side2*side2 - minH * minH)); 
+
+      // Choose a random offset within given parameters
+      double offset = R.nextDouble() * maxOffset;
+
+      // Calculate real height of parallelogram
+      double H = Math.sqrt(Math.abs(side2*side2 - offset*offset));
+
+      // Set offset orientation (true: offset is horizontal, false: offset is vertical)
+      boolean offsetHorizontal = R.nextBoolean();
+
+      // Set direction of offset
+      // offsetUp: for use when offset orientation is vertical
+      // true: orientation of offset is vertical upward, false: orientation of offset is vertical downward
+      // offsetRight: for use when offset orientation is horizontal
+      // true: orientation of offset is to the right, false: orientation of offset is to the left
+      boolean offsetUp = R.nextBoolean(), offsetRight = R.nextBoolean();
+
+      // Create parallelogram
+      if(offsetHorizontal){
+        points[1] = new Point2D.Double(posX+side1, posY);
+        if(offsetRight){
+          points[2] = new Point2D.Double(posX+side1+offset, posY+H);
+          points[3] = new Point2D.Double(posX+offset, posY+H);
+        }
+        else{
+          points[2] = new Point2D.Double(posX+side1-offset, posY+H);
+          points[3] = new Point2D.Double(posX-offset, posY+H);
+        }
       }
+      else{
+        points[3] = new Point2D.Double(posX, posY+side1);
+        if(offsetUp){
+          points[1] = new Point2D.Double(posX+H, posY+offset);
+          points[2] = new Point2D.Double(posX+H, posY+side1+offset);
+        }
+        else{
+          points[1] = new Point2D.Double(posX+H, posY-offset);
+          points[2] = new Point2D.Double(posX+H, posY+side1-offset);
+        }
+      }
+      
+      // Find the center of the current parallelogram, which is the center of rotation
+      double dX = Math.abs(points[2].getX()-points[0].getX());
+      double dY = Math.abs(points[2].getY()-points[0].getY());
+      dX = dX/2.0; dY = dY/2.0;
+      double rotationCenterX = points[0].getX()+dX;
+      double rotationCenterY = points[0].getY()+dY;
+      
+      // Define a random angle of rotation 0.0 >= angle > 2*PI
+      double angle = R.nextDouble()*2*Math.PI;
+      
+      // Create a rotation matrix and apply rotation
+      AffineTransform rotation = new AffineTransform();
+      rotation.rotate(angle, rotationCenterX, rotationCenterY);
+      rotation.transform(points, 0, tmp, 0, points.length);
+      points = tmp;
+
+      // Check if the parallelogram vertices coordinates are negativ or not
+      boolean hasNegativXCoordinates = false;
+      boolean hasNegativYCoordinates = false;
+      double negativXOffset = 0.0, negativYOffset = 0.0;
+      double X, Y, absolut;
+
+      for(Point2D pt: points){
+        X = pt.getX(); Y = pt.getY();
+        if(X<0) {
+          hasNegativXCoordinates = true;
+          absolut = Math.abs(X);
+          if(absolut>negativXOffset) negativXOffset = absolut;
+        }
+        if(Y<0){
+          hasNegativYCoordinates = true;
+          absolut = Math.abs(Y);
+          if(absolut>negativXOffset) negativYOffset = absolut;
+        }
+      }
+      
+      // If the parallelogram has negativ coordinates, make a translation to have
+      // only positiv coordinates
+      if(hasNegativXCoordinates || hasNegativYCoordinates){
+        tmp = new Point2D[4];
+        AffineTransform translation = new AffineTransform();
+        translation.translate(negativXOffset, negativYOffset);
+        rotation.transform(points, 0, tmp, 0, points.length);
+        points = tmp;
+      }
+
     }while(!checkEmplacementOnArena(points));
 
     return points;
-  }
+  }  
   
   // check occupation of this position
   // occupationMap = game map divided in an grid of square with side length equals to the max side length of a QCar
@@ -276,6 +361,9 @@ public class GameProvider implements IGameProvider {
     System.out.println("----------------------------");
   }
   
+
 }
+
+
 
   
