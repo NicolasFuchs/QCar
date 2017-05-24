@@ -4,17 +4,22 @@ import java.awt.geom.Line2D;
 import qcar.IDecision;
 import qcar.IQCar;
 
+/**
+ * This class represent a decision taken by a Driver
+ */
 public class Decision implements IDecision {
-
 
   private boolean isAngleMovement;
   private int sideId;
   private double requestedTranslation;
 
   /**
-   * @param isAngleMovement
-   * @param sideId
-   * @param requestedTranslation
+   * Constructor of Decision
+   * 
+   * @param isAngleMovement true if sideId remains on its supporting line (angles change)
+   * @param sideId side i contains points p(i) and p((i+1) mod 4)
+   * @param requestedTranslation the distance requested >0 means "to the left" or "forwards", when
+   *        standing on that side and facing the outside world
    */
   public Decision(boolean isAngleMovement, int sideId, double requestedTranslation) {
     this.isAngleMovement = isAngleMovement;
@@ -22,22 +27,36 @@ public class Decision implements IDecision {
     this.requestedTranslation = requestedTranslation;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isAngleMovement() {
     return isAngleMovement;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int sideId() {
     return sideId;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public double requestedTranslation() {
     return requestedTranslation;
   }
 
-  // vérifie et corrige la décision si elle ne respecte pas les contraintes de la nature du QCar
+  /** 
+   * Checks and correct the Decision if it doesn't respect the constraints given by the QCarNature   * 
+   * @param decision the decision to be checked
+   * @param qcar the QCar whom Driver requested the Decision
+   * 
+   */
   public static IDecision validDecision(IDecision decision, IQCar qcar) {
     if (decision.isAngleMovement()) {
       // détermine si la décision dépasse la longueur maximale du Qcar, et dans ce cas renvoie une
@@ -59,6 +78,12 @@ public class Decision implements IDecision {
     return decision;
   }
 
+  /**
+   * return the maximum double for an allowed Decision for a QCar and a side
+   * @param QCar the QCar concerned
+   * @param side the sideId of the concerned QCar
+   * @param isAngleMovement true if the request is an angle movement
+   */
   public static double maxAllowedTranslation(IQCar qcar, int side, boolean isAngleMovement) {
     double maxSideLength = qcar.nature().maxSideLength();
     if (isAngleMovement) {
@@ -82,6 +107,12 @@ public class Decision implements IDecision {
     }
   }
 
+  /**
+   * return the maximum negative double (minimum) for an allowed Decision for a QCar and a side
+   * @param QCar the QCar concerned
+   * @param side the sideId of the concerned QCar
+   * @param isAngleMovement true if the request is an angle movement
+   */
   public static double minAllowedTranslation(IQCar qcar, int side, boolean isAngleMovement) {
     double maxSideLength = qcar.nature().maxSideLength();
     double minArea = qcar.nature().minArea();
