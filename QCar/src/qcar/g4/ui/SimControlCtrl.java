@@ -3,6 +3,8 @@ package qcar.g4.ui;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
@@ -26,19 +28,28 @@ public class SimControlCtrl {
 
   private SimulationCtrl refSim;
   private IWorldManager refWM;
+  private boolean doOnce;
+
+
 
 
   @FXML
   void initialize() {
-    Service<Void> playService = new Service<Void>(){
+
+    final Service<Void> playService = new Service<Void>(){
       @Override
       protected Task<Void> createTask() {
         return new Task<Void>(){
           @Override
           protected Void call() throws Exception {
-            while(!isCancelled() && !refWM.isWarOver() && refWM.isSimulationOpened()) {
+            if(doOnce && !refWM.isWarOver() && refWM.isSimulationOpened()){
               refSim.simulateOneStep(300);
-              Thread.sleep(600);
+              doOnce = false;
+            } else {
+              while (!isCancelled() && !doOnce && !refWM.isWarOver() && refWM.isSimulationOpened()) {
+                refSim.simulateOneStep(300);
+                Thread.sleep(600);
+              }
             }
             return null;
           }
@@ -57,11 +68,17 @@ public class SimControlCtrl {
         refSim.changeSimMode(false);
       }
     });
-  }
 
-  @FXML
-  private void handleSimOneStepBtn(){
-    refSim.simulateOneStep(1000);
+    btnOneStep.setOnAction(new EventHandler<ActionEvent>() {
+      @Override public void handle(ActionEvent e) {
+        doOnce = true;
+        refSim.changeSimMode(false);
+        btnPlay.setSelected(false);
+        playService.cancel();
+        playService.reset();
+        playService.start();
+      }
+    });
   }
 
   @FXML
@@ -73,10 +90,6 @@ public class SimControlCtrl {
   public void setParentCtrl(SimulationCtrl refSim, IWorldManager wm){
     this.refSim = refSim;
     this.refWM = wm;
-  }
-
-  public boolean isPlayPressed(){
-    return btnPlay.isSelected();
   }
 }
 

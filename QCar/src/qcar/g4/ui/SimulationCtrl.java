@@ -176,35 +176,4 @@ public class SimulationCtrl {
     }
   }
 
-  @FXML
-  private void handleListQCarClick(){
-//    IQCar clickedQcar = lstLeaderboard.getSelectionModel().getSelectedItem();
-//    double x0 = Double.MAX_VALUE;
-//    double y0 = Double.MAX_VALUE;
-//    double x1 = Double.MAX_VALUE * -1;
-//    double y1 = Double.MAX_VALUE * -1;
-//    double offset = clickedQcar.nature().maxSideLength();
-//    for(int i = 0; i < 4; i++){
-//      Point2D p = clickedQcar.vertex(i);
-//      if(x0 > p.getX())
-//        x0 = p.getX();
-//      if(y0 > p.getY())
-//        y0 = p.getY();
-//      if(x1 < p.getX())
-//        x1 = p.getX();
-//      if(y1 < p.getY())
-//        y1 = p.getY();
-//    }
-//    x0 -= offset;
-//    y0 -= offset;
-//    x1 += offset;
-//    y1 += offset;
-//
-//    viewPort.setNewWorldRegion(x0, x1, y0, y1);
-//    System.out.println("Zone selected x0="+x0+" x1="+x1+" y0="+y0+" y1="+y1);
-//    world.redrawAll();
-//    // TODO: Find a way to refresh the view after click
-//    // TODO: go back to the original view
-  }
-
 }
