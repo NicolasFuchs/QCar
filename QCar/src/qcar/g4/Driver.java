@@ -455,11 +455,15 @@ public class Driver implements IDriver {
     return MyDecision.GROWTH_SIDE_1;
   }
 
+  // ----------------------------------------
+
   // 2-steps to make an advance in direction 2 (up)
   private IDecision advanceDirection2() {
     pendingDecisions.add(MyDecision.REDUCTION_SIDE_0);
     return MyDecision.GROWTH_SIDE_2;
   }
+
+  // ----------------------------------------
 
   // 2-steps to make an advance in direction 3 (left)
   private IDecision advanceDirection3() {
@@ -467,22 +471,33 @@ public class Driver implements IDriver {
     return MyDecision.GROWTH_SIDE_3;
   }
 
+  // ----------------------------------------
+
   // 3-steps to make a quarter turn left
   private IDecision quarterTurnLeft() {
-    pendingDecisions.add(MyDecision.ANGLE_POS_SIDE_1);
-    pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_2);
-    return MyDecision.ANGLE_POS_SIDE_3;
+    pendingDecisions.add(MyDecision.angleDecision(true, 1, getSideLength(1)));
+    pendingDecisions.add(MyDecision.angleDecision(true, 2, getSideLength(2)));
+    return MyDecision.angleDecision(true, 3, getSideLength(3));
   }
+
+  // ----------------------------------------
 
   // 3-steps to make a quarter turn right
   private IDecision quarterTurnRight() {
-    pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_3);
-    pendingDecisions.add(MyDecision.ANGLE_NEG_SIDE_2);
-    return MyDecision.ANGLE_NEG_SIDE_1;
+    pendingDecisions.add(MyDecision.angleDecision(false, 1, getSideLength(1)));
+    pendingDecisions.add(MyDecision.angleDecision(false, 2, getSideLength(2)));
+    return MyDecision.angleDecision(false, 3, getSideLength(3));
   }
+
+  // ----------------------------------------
   
-  
-  
+  private double getSideLength(int sideId) {    
+    return myCar.vertex(sideId).distance(myCar.vertex((sideId+1%4))) ;    
+  }
+
+  //----------------------------------------
+
+
   private Point2D middle(Point2D... points) {
     double x = 0, y = 0;
     for (Point2D p : points) {
@@ -600,5 +615,5 @@ public class Driver implements IDriver {
   // ----------------------------------------
   // ----------------------------------------
 
-  
+
 }
