@@ -67,6 +67,11 @@ public class ManualDrivingCtrl {
     this.refSim = refSim;
   }
 
+  @FXML
+  private void handleStopBtn(){
+    refSim.endSimulation();
+  }
+
   public void setMoveLimit(){
     // TODO calculate maxSpan and minSpan for every cases
     double maxSpan = 0;
