@@ -37,8 +37,10 @@ public class GameProviderTest_g2 extends ApiTest{
      int nSteps = 50;
      int numberOfStyles = this.auxiliaryFactory.numberOfStyles();
      for(int i = 0; i<numberOfStyles; i++){
+       System.out.println("Style "+i);
        this.gp = this.factoryUnderTest.newGameProvider(i);
        for(int j = 0; j<nSteps; j++){
+         System.out.println("Step " +j);
          assertNotNull(this.gp.nextGame(1+this.rdm.nextInt(50)));
        }
      }
