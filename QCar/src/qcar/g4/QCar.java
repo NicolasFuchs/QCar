@@ -57,6 +57,10 @@ public class QCar implements IQCar {
     update(decision.isAngleMovement(), decision.sideId(), decision.requestedTranslation()) ;
   }
   
+  public void incrementScore(){
+    score++;
+  }
+  
   @Override
   public Point2D vertex(int vertexId) {
     if(vertexId >= 0 && vertexId < vertices.length)
@@ -132,5 +136,6 @@ public class QCar implements IQCar {
     if(nature.isParkingTarget())
       bonuses.set(8);
   }
+  
   
 }
