@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import java.util.concurrent.Semaphore;
 import javafx.geometry.Rectangle2D;
 import qcar.*;
 import qcar.ui.QCarAnimationPane;
@@ -111,6 +112,7 @@ public class WorldManager implements IWorldManager {
 
     step++;
     // notifyAllWorldObserver(0);
+
 
     //TODO uncomment the next line and send all decisions
     List<IDecision> decisions = new ArrayList<>();
