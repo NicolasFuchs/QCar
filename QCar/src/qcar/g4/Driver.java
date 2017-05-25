@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import javax.swing.DefaultSingleSelectionModel;
-
 import java.awt.geom.Point2D;
 
 import qcar.*;
@@ -74,8 +72,8 @@ public class Driver implements IDriver {
   public void startDriverThread(IPlayerChannel pc) {
     System.out.println("Start driver thread called");
     this.pc = pc;
+    // THIS IS NOT DONE HERE, BUT IN THE THREAD
     // sensors = pc.play(MyDecision.IMMOBILE_DECISION);
-
     // myCar = sensors.mySelf();
     pendingDecisions = new ArrayList<IDecision>();
     driverThread.start();
@@ -96,27 +94,28 @@ public class Driver implements IDriver {
    * 
    */
   private IDecision takeDecision() {
+    
     if (myCar != null) {
+      System.out.println("DIMENSIONS " + getSideLength(3));
+      System.out.println(getSideLength(2));
       if (!pendingDecisions.isEmpty()) {
         return pendingDecisions.remove(0);
-      }
+      }   
 
-      pendingDecisions.add(MyDecision.sideDecision(true, 0, getSideLength(1)));
-      return MyDecision.sideDecision(true, 2, getSideLength(1));
-    }
+      if (sensors != null) {
+        if (sensors.collisionsWithMe().isEmpty()) {
+          if (targetId == -1) {
+            return acquireTarget();
+          } else {
+            return followTargetDecision();
+          }
 
-    if (sensors != null) {
-      if (sensors.collisionsWithMe().isEmpty()) {
-        if (targetId == -1) {
-          return acquireTarget();
         } else {
-          return followTargetDecision();
+          return collisionDecision(sensors.collisionsWithMe());
         }
-
-      } else {
-        return collisionDecision(sensors.collisionsWithMe());
-      }
+      } 
     }
+
     return MyDecision.IMMOBILE_DECISION;
   }
 
@@ -520,9 +519,13 @@ public class Driver implements IDriver {
    * 3-steps to make a quarter turn left
    */
   private IDecision quarterTurnLeft() {
-    pendingDecisions.add(MyDecision.Side_1_to_left(getSideLength(1)));
-    pendingDecisions.add(MyDecision.Side_2_to_left(getSideLength(2)));
-    return MyDecision.Side_3_to_left(getSideLength(3));
+    System.out.println(getSideLength(3));
+    System.out.println(getSideLength(2));
+    System.out.println(getSideLength(1));
+    System.out.println(myCar.nature().maxSideLength()) ;
+    pendingDecisions.add(MyDecision.Side_3_to_left(10000));
+    pendingDecisions.add(MyDecision.Side_2_to_left(10000));
+    return MyDecision.Side_1_to_left(10000);
   }
 
   // ----------------------------------------
@@ -531,9 +534,9 @@ public class Driver implements IDriver {
    * 3-steps to make a quarter turn right
    */
   private IDecision quarterTurnRight() {
-    pendingDecisions.add(MyDecision.angleDecision(false, 1, getSideLength(1)));
-    pendingDecisions.add(MyDecision.angleDecision(false, 2, getSideLength(2)));
-    return MyDecision.angleDecision(false, 3, getSideLength(3));
+    pendingDecisions.add(MyDecision.Side_1_to_right(getSideLength(1)));
+    pendingDecisions.add(MyDecision.Side_2_to_right(getSideLength(2)));
+    return MyDecision.Side_3_to_right(getSideLength(3));
   }
 
   // ----------------------------------------
