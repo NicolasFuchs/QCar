@@ -142,7 +142,9 @@ public class SimulationCtrl {
    * End the current simulation and go to the leaderboard view.
    */
   public void endSimulation(){
+    System.out.println("sim closing");
     worldManager.closeSimulation();
+    System.out.println("sim closed");
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/endedSimulation.fxml"));
     try{
       Scene scene = new Scene(loader.load());

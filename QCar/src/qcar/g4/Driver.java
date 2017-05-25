@@ -36,7 +36,11 @@ public class Driver implements IDriver {
   Thread driverThread = new Thread() {
     public void run() {
       while (!finished) {
+        System.out.println("before play");
         sensors = pc.play(takeDecision());
+        if (myCar == null) {
+          myCar = sensors.mySelf();
+        }
       }
     }
   };
@@ -65,9 +69,10 @@ public class Driver implements IDriver {
    */
   @Override
   public void startDriverThread(IPlayerChannel pc) {
+    System.out.println("Start driver thread called");
     this.pc = pc;
-    sensors = pc.play(MyDecision.IMMOBILE_DECISION);
-    myCar = sensors.mySelf();
+    // sensors = pc.play(MyDecision.IMMOBILE_DECISION);
+    // myCar = sensors.mySelf();
     pendingDecisions = new ArrayList<IDecision>();
     driverThread.start();
   }
@@ -77,12 +82,7 @@ public class Driver implements IDriver {
    */
   @Override
   public void stopDriverThread() {
-    try {
       finished = true;
-      driverThread.join();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
   }
 
   /**
@@ -551,7 +551,7 @@ public class Driver implements IDriver {
    * @return the length of the requested side
    */
   private double getSideLength(int sideId) {
-    return myCar.vertex(sideId).distance(myCar.vertex((sideId + 1 % 4)));
+    return myCar.vertex(sideId).distance(myCar.vertex((sideId + 1) % 4));
   }
 
   // ----------------------------------------

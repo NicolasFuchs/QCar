@@ -75,8 +75,9 @@ public class ManualDrivingCtrl {
         return new Task<Void>(){
           @Override
           protected Void call() throws Exception {
-            System.out.println("move !");
+            System.out.println("Sim one step");
             refSim.simulateOneStep(getCurrentDecision());
+            System.out.println("Simulate on step done");
             return null;
           }
         };

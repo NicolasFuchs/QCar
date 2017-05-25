@@ -22,7 +22,7 @@ public class GameProvider implements IGameProvider {
   public static final double SIDE_LENGTH_RATIO = 0.01;
   
   public static final double MIN_AREA = 15.3;
-  public static final double MAX_SIDE_LENGTH = 7.4;
+  public static final double MAX_SIDE_LENGTH = 4.4;
 
   private GameDescription.GameStyles game;
   private boolean[][] map;

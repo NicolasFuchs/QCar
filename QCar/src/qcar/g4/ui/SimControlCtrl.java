@@ -37,7 +37,10 @@ public class SimControlCtrl {
           @Override
           protected Void call() throws Exception {
             if(doOnce && !refWM.isWarOver() && refWM.isSimulationOpened()){
+              btnOneStep.setDisable(true);
               refSim.simulateOneStep(300);
+              Thread.sleep(300);
+              btnOneStep.setDisable(false);
               doOnce = false;
             } else {
               while (!isCancelled() && !doOnce && !refWM.isWarOver() && refWM.isSimulationOpened()) {

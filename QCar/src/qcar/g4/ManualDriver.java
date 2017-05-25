@@ -20,6 +20,7 @@ public class ManualDriver implements IDriver {
 
   public void sendDecision(IDecision decision){
     pc.play(decision);
+    System.out.println("Decision sent");
   }
 
   public ManualDriver(int qcarIndex){
