@@ -23,7 +23,8 @@ public class GameProvider implements IGameProvider {
   
   public static final double MAX_SIDE_LENGTH = 7.4;
   
-  // ! Must be 0.0 < SIDE_LENGTH_RATIO < 1.0 !
+  // To define the minimal area ratio in function of maximal area given by (MAX_SIDE_LENGTH)^2
+  // ! Must be 0.0 < MIN_AREA_RATIO < 1.0 !
   public static final double MIN_AREA_RATIO = 0.5;
   // ! 0.0 < MIN_AREA <= MAX_SIDE_LENGTH * MAX_SIDE_LENGTH !
   public static final double MIN_AREA = (MAX_SIDE_LENGTH * MAX_SIDE_LENGTH) * MIN_AREA_RATIO;
@@ -31,14 +32,30 @@ public class GameProvider implements IGameProvider {
   private double max_dispersion = 300;
 
   private GameDescription.GameStyles game;
-  private boolean[][] map;
-  private double tol = 0.01 * MAX_SIDE_LENGTH; // Buffer for grid, avoid having a grid with the exact size of a QCar
   
+  // Map used to check the occupation of the current coordinates by a preexistant QCar
+  private boolean[][] map;
+  
+  // Buffer for grid, avoid having a grid with the exact size of a QCar
+  private double tol = 0.01 * MAX_SIDE_LENGTH; 
+  
+  /* Method to create a new GameProvider
+   * Initialize the next game with the wanted game style
+   * 
+   *    @param  : a GameStyles, from GameDescription.GameStyles, the wanted GameStyles to be used
+   *              when the function nextGame() is called
+   */
   public GameProvider(GameDescription.GameStyles game){
     this.max_dispersion = 300;
     this.game = game;
   }
   
+  /* Method to create a new game description
+   * Generate randomly distributed QCars in function of wanted game style
+   * 
+   *    @param  : integer, the number of wanted driven QCars
+   *    @return : a non-null new GameDescirption
+   */
   @Override
   public IGameDescription nextGame(int nbOfDrivers) {
     
@@ -83,7 +100,14 @@ public class GameProvider implements IGameProvider {
     
     return new GameDescription(cars);
   }
-  
+    
+  /* Method to create a list of new randomly distributed QCars containing only driven QCars
+   * 
+   * PRECONDITION : to have called nextGame() at least one time
+   * 
+   *    @param  : integer, the number of wanted driven QCars
+   *    @return : ArrayList<IQCar>, list of wanted QCars
+   */
   private ArrayList<IQCar> onlyDrivers(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
@@ -104,6 +128,17 @@ public class GameProvider implements IGameProvider {
     return cars;
   }
 
+  /* Method to create a list of new randomly distributed QCars with only driven and statics QCars
+   * 
+   * Return a list containing the specified number of driven QCars nbOfDrivers, and :
+   * if nbOfDrivers<MAX_QCARS : "MAX_QCARS-number of driven QCars" static QCars 
+   * if nbOfDrivers>MAX_QCARS : "nbOfDrivers/2" (rounded at lowest integer) static QCars
+   * 
+   * PRECONDITION : to have called nextGame() at least one time
+   * 
+   *    @param  : integer, the number of wanted driven QCars
+   *    @return : ArrayList<IQCar>, list of wanted QCars with a minimum of MAX_QCARS QCars
+   */
   private ArrayList<IQCar> noParkings(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
@@ -132,7 +167,18 @@ public class GameProvider implements IGameProvider {
     
     return cars;
   }
-  
+    
+  /* Method to create a list of new randomly distributed QCars with only driven and parking QCars
+   * 
+   * Return a list containing the specified number of driven QCars nbOfDrivers, and :
+   * if nbOfDrivers<MAX_QCARS : "MAX_QCARS-number of driven QCars" parking QCars 
+   * if nbOfDrivers>MAX_QCARS : "nbOfDrivers/2" (rounded at lowest integer) parking QCars
+   * 
+   * PRECONDITION : to have called nextGame() at least one time
+   * 
+   *    @param  : integer, the number of wanted driven QCars
+   *    @return : ArrayList<IQCar>, list of wanted QCars with a minimum of MAX_QCARS QCars
+   */
   private ArrayList<IQCar> noStatics(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
@@ -162,7 +208,20 @@ public class GameProvider implements IGameProvider {
     
     return cars;
   }
-  
+
+  /* Method to create a list of new randomly distributed QCars of mixed natures
+   * 
+   * Return a list containing the specified number of driven QCars nbOfDrivers, and :
+   * if nbOfDrivers<MAX_QCARS : "MAX_QCARS-number of driven QCars" non-driven QCars 
+   * if nbOfDrivers>MAX_QCARS : "nbOfDrivers/2" (rounded at lowest integer) non-driven QCars
+   * Thoses non-driven QCars have randomly distributed nature chosen as either parking, either
+   * static
+   * 
+   * PRECONDITION : to have called nextGame() at least one time
+   * 
+   *    @param  : integer, the number of wanted driven QCars
+   *    @return : ArrayList<IQCar>, list of wanted QCars with a minimum of MAX_QCARS QCars
+   */
   private ArrayList<IQCar> standardStyle(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
@@ -193,6 +252,13 @@ public class GameProvider implements IGameProvider {
     return cars;  
   }
   
+  /* Method to create a list containing a single driven QCar
+   * 
+   * PRECONDITION : to have called nextGame() at least one time
+   * 
+   *    @param  : -
+   *    @return : ArrayList<IQCar>, list of wanted containing a single QCar
+   */ 
   private ArrayList<IQCar> debugStyle(){
     
     ArrayList<IQCar> cars = new ArrayList<>();
@@ -204,21 +270,18 @@ public class GameProvider implements IGameProvider {
     return cars;
   }
   
-  // Used for tests only
-  private QCarNature randomNature (int currDrivers, int wantedDrivers) {
-    
-    boolean driven = currDrivers < wantedDrivers ? true : false;
-    boolean parkingTarget = driven ? false : R.nextBoolean();
-    boolean vertexTarget = R.nextBoolean();
-    boolean sideTarget = R.nextBoolean();
-    double maxSideLenght = MAX_SIDE_LENGTH;
-    double minArea = MIN_AREA;
-    
-    QCarNature nature = new QCarNature(driven, parkingTarget, vertexTarget, sideTarget, maxSideLenght, minArea);
-    
-    return nature;
-  }
- 
+  /* Method to randomly generate the vertices coordinates of a valid QCar given his nature
+   * 
+   * Method generate coordinates where the QCar cannot be superposed with others
+   * preexistant QCars
+   * Use the 2-dimensional array of boolean "map" to check and validate coordinates
+   * Coordinates are represented with Point2D.Double with non-negativ double coordinates
+   * 
+   * PRECONDITION : to have called nextGame() at least one time
+   * 
+   *    @param  : QCarNature, the nature of the QCar
+   *    @return : Point2D.Double array, the coordinates of the vertices of the QCar
+   */ 
   private Point2D[] randomAlignedPositions(QCarNature nature) {
 
     System.out.println("ENTER in randomAlignedPosition...");
@@ -344,9 +407,18 @@ public class GameProvider implements IGameProvider {
     return points;
   }  
   
-  // check occupation of this position
-  // occupationMap = game map divided in an grid of square with side length equals to the max side length of a QCar
-  //                 + buffer (tolerance on one side)
+  /* Method check occupation of the wanted emplacement for this QCar using "map" array
+   * 
+   * The game map is divided in an grid of square with side length equals to "maxSideLength+2*tol"
+   * of a QCar
+   * The occupation of thoses squares is represented by a 2-dimensional array of boolean where the
+   * position is set to "true" if the emplacement is occupied
+   * 
+   * PRECONDITION : to have called nextGame() at least one time
+   * 
+   *    @param  : Point2D.double array, representing the 4 vertices of a QCar
+   *    @return : boolean, true is the emplacement of this QCar is occupied
+   */                 
   private boolean checkEmplacementOnArena(Point2D[] vertices){
     
     double side = MAX_SIDE_LENGTH + 2*tol;
@@ -372,7 +444,15 @@ public class GameProvider implements IGameProvider {
     return true;
   }
   
-  // Dynamic augmentation of game map grid, in function of emplacement of checked area of grid
+  /* Dynamic augmentation of game map grid, in function of emplacement of checked area of grid
+   * and returning the new game map with all previous values of occupied emplacements
+   * 
+   * PRECONDITION : to have called nextGame at least once before
+   * 
+   *    @param  : integer: coordinate x of the current checked area
+   *              integre: coordinate y of the current checked area
+   *    @return : a new 2-dimensional array of booleans
+   */
   private boolean[][] augmentMapSize(int occupX, int occupY){
     boolean[][] newMap;
     if(occupX >= map.length && occupY >= map[0].length)
@@ -387,7 +467,13 @@ public class GameProvider implements IGameProvider {
     return newMap;
   }
   
-  // Return a QCar with the coordinates of each corners of the map that contains all QCars
+  /* Return a QCar with the coordinates of each corners of the map that contains all QCars
+   * 
+   * PRECONDITION : to have called nextGame at least once before
+   * 
+   *    @param  : -
+   *    @return : a single Qcar
+   */
   private QCar obtainBorders(){
     
     int side = Math.max(map.length, map[0].length);
@@ -406,7 +492,13 @@ public class GameProvider implements IGameProvider {
     return new QCar(nature, borderVertices);
   }
   
-  // Update the map in function of the coordinates of the vertices
+  /* Update the map in function of the coordinates of the vertices given in parameters
+   * 
+   * PRECONDITION : to have called nextGame at least once before
+   * 
+   *    @param  : array of Point2D.double
+   *    @return : -
+   */
   private void allocateVertices(Point2D[] vertices){
     
     double side = MAX_SIDE_LENGTH + 2*tol;
@@ -427,29 +519,7 @@ public class GameProvider implements IGameProvider {
         map[x][y] = true;
       }
     }
-    /*
-    double x, y, side;
-    int boolX, boolY;
-    
-    for(int i=0; i<vertices.length; i++){
-      x = vertices[i].getX(); y = vertices[i].getY();
-      side = (MAX_SIDE_LENGTH + tol *2);
-      boolX = (int)(x/side); boolY = (int)(y/side);
-      map[boolX][boolY] = true;
-    }
-    */
   }
-  
-  private void printQCarsList(ArrayList<IQCar> cars){
-    System.out.println("QCars List : ---------------");
-    for(IQCar car: cars){
-      System.out.println(car.toString());
-      System.out.println(car.nature().toString());
-      System.out.println();
-    }
-    System.out.println("----------------------------");
-  }
-  
 }
 
 
