@@ -7,11 +7,12 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
-import qcar.IQCar;
 import qcar.IWorldManager;
 
+/**
+ * Controller bound to the header of the simulation if there are no manual driver
+ */
 public class SimControlCtrl {
 
   @FXML
@@ -20,16 +21,18 @@ public class SimControlCtrl {
   @FXML
   private ToggleButton btnPlay;
 
-  @FXML
-  private Button btnStop;
-
   private SimulationCtrl refSim;
   private IWorldManager refWM;
-  private boolean doOnce;
+  private boolean doOnce;   // used when btnOneStep is pressed
 
+  /**
+   * Bind action to the different elements
+   */
   @FXML
   void initialize() {
 
+    // This service continuously call simulateOneStep if playBtn is selected
+    // or call simulateOneStep once if btnOneStep is clicked
     final Service<Void> playService = new Service<Void>(){
       @Override
       protected Task<Void> createTask() {
@@ -78,12 +81,20 @@ public class SimControlCtrl {
     });
   }
 
+  /**
+   * Button stop on click handler
+   */
   @FXML
   private void handleStopBtn(){
     refSim.endSimulation();
   }
 
 
+  /**
+   * Set up a reference to the worldmanager and to the parent view's controller
+   * @param refSim parent view's controller
+   * @param wm world manager
+   */
   public void setParentCtrl(SimulationCtrl refSim, IWorldManager wm){
     this.refSim = refSim;
     this.refWM = wm;

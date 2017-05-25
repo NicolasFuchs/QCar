@@ -26,6 +26,9 @@ import qcar.ui.QCarAnimationPane;
 import simviou.LogPanel;
 import simviou.ViewPort;
 
+/**
+ * Controller bound to the simulation view.
+ */
 public class SimulationCtrl {
 
   private IWorldManager worldManager;
@@ -53,9 +56,11 @@ public class SimulationCtrl {
   void initialize() {
   }
 
-
   /**
-   * This methods binds the view with the informations from the world manager
+   * This methods retrieve the information needed for the view from the world manager
+   * and set up the simviou panels and the header.
+   * @param wm World Manager
+   * @param manualDriver Manual Driver thread
    */
   public void setWM(IWorldManager wm, ManualDriver manualDriver){
 
@@ -72,13 +77,13 @@ public class SimulationCtrl {
     Rectangle2D r = wm.boundingBox();
     viewPort = new ViewPort((int) r.getMinY(), (int) r.getMaxY(), (int) r.getMinX(), (int) r.getMaxX(), 610, 350, true);
 
+    logPanel = new LogPanel(805, 100);
+    paneConsole.getChildren().add(logPanel);
+
     uiOp = new UIOp(wm, logPanel);
 
     world = new QCarAnimationPane(viewPort, Color.WHITE, uiOp, worldManager);
     paneQCar.getChildren().add(world);
-
-    logPanel = new LogPanel(805, 100);
-    paneConsole.getChildren().add(logPanel);
 
     ArrayList<IQCar> pilotedQcars = new ArrayList<>();
 
@@ -127,12 +132,20 @@ public class SimulationCtrl {
     return header;
   }
 
+  /**
+   * Simulate one step, log the changes after the step and test if the simulation is finished.
+   * @param ms collectiveDelayInMicroSeconds
+   */
   public void simulateOneStep(long ms){
     worldManager.simulateOneStep(ms);
     log();
     isSimulationOver();
   }
 
+  /**
+   * Simulate one step with a decision manually taken
+   * @param manualDecision Decision taken by the user
+   */
   public void simulateOneStep(IDecision manualDecision){
     manualDriver.sendDecision(manualDecision);
     simulateOneStep(100);
@@ -142,9 +155,7 @@ public class SimulationCtrl {
    * End the current simulation and go to the leaderboard view.
    */
   public void endSimulation(){
-    System.out.println("sim closing");
     worldManager.closeSimulation();
-    System.out.println("sim closed");
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/endedSimulation.fxml"));
     try{
       Scene scene = new Scene(loader.load());

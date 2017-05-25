@@ -14,6 +14,9 @@ import qcar.IDecision;
 import qcar.IQCar;
 import qcar.g4.Decision;
 
+/**
+ * Controller bound to the header of the simulation if there is a manual driver
+ */
 public class ManualDrivingCtrl {
 
   @FXML
@@ -45,6 +48,9 @@ public class ManualDrivingCtrl {
   private SimulationCtrl refSim;
   private IQCar qcar;
 
+  /**
+   * Setup the view elements
+   */
   @FXML
   void initialize() {
     sides = new ToggleGroup();

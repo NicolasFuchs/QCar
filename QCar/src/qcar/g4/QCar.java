@@ -137,5 +137,27 @@ public class QCar implements IQCar {
     if(nature.isParkingTarget())
       bonuses.set(8);
   }
+
+  public boolean isSideLengthValid(){
+    if(vertices[0].distance(vertices[1]) > nature.maxSideLength())
+      return false;
+    if(vertices[1].distance(vertices[2]) > nature.maxSideLength())
+      return false;
+    if(vertices[2].distance(vertices[3]) > nature.maxSideLength())
+      return false;
+    if(vertices[3].distance(vertices[0]) > nature.maxSideLength())
+      return false;
+    return true;
+  }
+
+  public boolean isMinAreaValid(){
+    double area = vertex(0).getX() * vertex(1).getY() - vertex(0).getY() * vertex(1).getX();
+    area += vertex(1).getX() * vertex(2).getY() - vertex(1).getY() * vertex(2).getX();
+    area += vertex(2).getX() * vertex(3).getY() - vertex(2).getY() * vertex(3).getX();
+    area += vertex(3).getX() * vertex(0).getY() - vertex(3).getY() * vertex(0).getX();
+    area = area / 2;
+    System.out.println("Qcar "+nature.qCarId()+" area :" + area);
+    return area > nature.minArea();
+  }
   
 }

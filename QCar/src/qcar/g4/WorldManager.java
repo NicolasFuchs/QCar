@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import javafx.geometry.Rectangle2D;
 import qcar.*;
 import qcar.ui.QCarAnimationPane;
@@ -33,6 +35,8 @@ public class WorldManager implements IWorldManager {
   private ArrayList<PlayerChannel> playerChannels;
 
   private ArrayList<Point2D> allPoints;
+
+  private Semaphore waitUntil;
 
   /*
    * Observers management
@@ -75,6 +79,8 @@ public class WorldManager implements IWorldManager {
 
     for (IQCar q : description.allQCar()) {
       QCar myQCar = new QCar(q);
+      System.out.println("Is maxSide lenght valid: " + myQCar.isSideLengthValid());
+      System.out.println("Is minArea valid: " + myQCar.isMinAreaValid());
       qcars.add(myQCar);
     }
 
@@ -87,10 +93,12 @@ public class WorldManager implements IWorldManager {
       }
     }
 
+    waitUntil = new Semaphore(drivenQCars.size());
+
     playerChannels = new ArrayList<>();
     for (int i = 0; i < players.size(); i++) {
       sensors.add(WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars));
-      playerChannels.add(new PlayerChannel(sensors.get(i)));
+      playerChannels.add(new PlayerChannel(sensors.get(i), waitUntil));
     }
     for (int i = 0; i < players.size(); i++) {
       players.get(i).startDriverThread(playerChannels.get(i));
@@ -112,9 +120,8 @@ public class WorldManager implements IWorldManager {
      * state of the world (sensors, collision, isWarOver, ...) - send the sensors the qcar drivers -
      * notify the view of the change - increment the number of step
      */
-        // notifyAllWorldObserver(0);
-
         // TODO uncomment the next line and send all decisions
+        waitUntil.drainPermits();
         List<IDecision> decisions = new ArrayList<>();
         for (int i = 0; i < sensors.size(); i++) {
             playerChannels.get(i).sendSensors(sensors.get(i));
@@ -123,9 +130,9 @@ public class WorldManager implements IWorldManager {
             playerChannels.get(i).release();
         }
         try {
-            Thread.sleep(collectiveDelayInMicroSeconds);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+          waitUntil.tryAcquire(drivenQCars.size(), collectiveDelayInMicroSeconds, TimeUnit.MICROSECONDS);
+        } catch (InterruptedException e){
+          e.printStackTrace();
         }
         for (PlayerChannel pc : playerChannels) {
             decisions.add(pc.getDecision());
@@ -192,7 +199,10 @@ public class WorldManager implements IWorldManager {
         sensors = newSensors;
     }
 
-    @Override
+  /**
+   * Close the simulation by ending each driver's thread.
+   */
+  @Override
     public void closeSimulation() {
         // stop each player's thread and release them from the chan
         for (int i = 0; i < players.size(); i++) {

@@ -5,10 +5,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Main class of the program.
+ */
 public class Main extends Application {
 
   private EditorCtrl ctrl;
 
+  /**
+   * This method start the IHM. It loads the editor pass him the stage.
+   * @param stage
+   */
   @Override
   public void start(Stage stage) {
     try{
@@ -24,7 +31,10 @@ public class Main extends Application {
     }
   }
 
-
+  /**
+   * Starting point of the program
+   * @param args
+   */
   public static void main(String[] args) {
     launch(args);
   }
