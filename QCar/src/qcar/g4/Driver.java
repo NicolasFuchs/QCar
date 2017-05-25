@@ -36,7 +36,11 @@ public class Driver implements IDriver {
   Thread driverThread = new Thread() {
     public void run() {
       while (!finished) {
+        System.out.println("before play");
         sensors = pc.play(takeDecision());
+        if (myCar == null) {
+          myCar = sensors.mySelf();
+        }
       }
     }
   };
@@ -65,9 +69,10 @@ public class Driver implements IDriver {
    */
   @Override
   public void startDriverThread(IPlayerChannel pc) {
+    System.out.println("Start driver thread called");
     this.pc = pc;
-    sensors = pc.play(MyDecision.IMMOBILE_DECISION);
-    myCar = sensors.mySelf();
+    // sensors = pc.play(MyDecision.IMMOBILE_DECISION);
+    // myCar = sensors.mySelf();
     pendingDecisions = new ArrayList<IDecision>();
     driverThread.start();
   }
