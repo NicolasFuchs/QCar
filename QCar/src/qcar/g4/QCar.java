@@ -1,9 +1,7 @@
 package qcar.g4;
 
 import java.awt.geom.Point2D;
-import java.util.Arrays;
 import java.util.BitSet;
-
 import qcar.IDecision;
 import qcar.IQCar;
 import qcar.IQCarNature;
@@ -15,7 +13,11 @@ public class QCar implements IQCar {
   private int score = 0;
   private IQCarNature nature;
 
-  //TODO check if we can pass vertices in the constructor
+  /**
+   * Constructor used by our gameProvider
+   * @param nature
+   * @param vertices
+   */
   public QCar(QCarNature nature, Point2D[] vertices) {
     this.nature = nature;
     this.vertices = vertices;
@@ -60,7 +62,12 @@ public class QCar implements IQCar {
   public void incrementScore(){
     score++;
   }
-  
+
+  /**
+   * PRE: vertexId < 4
+   * @param vertexId
+   * @return selected vertex
+   */
   @Override
   public Point2D vertex(int vertexId) {
     if(vertexId >= 0 && vertexId < vertices.length)
@@ -69,17 +76,28 @@ public class QCar implements IQCar {
       throw new IndexOutOfBoundsException("vertexId: "+vertexId+" should be >= 0 but < "+vertices.length);
   }
 
+  /**
+   * @return qcar's score
+   */
   @Override
   public int score() {
     return score;
   }
 
+  /**
+   * @return true if the QCar still has bonuses to offer or if it's static
+   */
   @Override
   public boolean isAlive() {
     return !bonuses.isEmpty() || (!nature().isDriven() && !nature().isParkingTarget()
         && !nature().isSideTarget() && !nature().isVertexTarget());
   }
 
+  /**
+   * PRE: vertexId < 4
+   * @param vertexId
+   * @return true if vertex offers bonus else false
+   */
   @Override
   public boolean vertexOffersBonus(int vertexId) {
     if (vertexId >= 0 && vertexId < vertices.length)
@@ -88,6 +106,11 @@ public class QCar implements IQCar {
       throw new IndexOutOfBoundsException("vertexId: "+vertexId+" should be >= 0 but < "+vertices.length);
   }
 
+  /**
+   * PRE: sideId < 4
+   * @param sideId
+   * @return true if side offers a bonus else false
+   */
   @Override
   public boolean sideOffersBonus(int sideId) {
     if (sideId >= 0 && sideId < vertices.length)
@@ -96,16 +119,26 @@ public class QCar implements IQCar {
       throw new IndexOutOfBoundsException("sideId: "+sideId+" should be >= 0 but < "+vertices.length);
   }
 
+  /**
+   * @return true if park offers bonus else false
+   */
   @Override
   public boolean parkOffersBonus() {
-    return bonuses.get(vertices.length);
+    return bonuses.get(8);
   }
 
+  /**
+   * @return QCar's nature
+   */
   @Override
   public IQCarNature nature() {
     return nature;
   }
 
+  /**
+   * Generate a string with the qcar id and his current score
+   * @return generated string
+   */
   @Override
   public String toString() {
     String builder = "Qcar n°" + nature().qCarId();
@@ -117,12 +150,11 @@ public class QCar implements IQCar {
     builder += " (" + score + ")";
     return builder;
   }
-  
-//  public static double distance(Point2D a, Point2D b) {
-//    return Math.sqrt(Math.sqrt(Math.abs(b.getX())-Math.abs(a.getX()) + Math.abs(b.getY())-Math.abs(a.getY())));
-//  }
 
-  // wm qcar constructor
+  /**
+   * Constructor, create a new QCar from another qcar
+   * @param qcar qcar to recreate (coming from a gameDescription)
+   */
   public QCar(IQCar qcar){
     for(int i = 0; i < 4; i++)
       vertices[i] = qcar.vertex(i);
@@ -136,6 +168,34 @@ public class QCar implements IQCar {
     if(nature.isParkingTarget())
       bonuses.set(8);
   }
-  
+
+  /**
+   * Test if the qcar's current position respect the maxSideLength
+   * @return true if maxsidelength is respected, else false
+   */
+  public boolean isSideLengthValid(){
+    if(vertices[0].distance(vertices[1]) > nature.maxSideLength())
+      return false;
+    if(vertices[1].distance(vertices[2]) > nature.maxSideLength())
+      return false;
+    if(vertices[2].distance(vertices[3]) > nature.maxSideLength())
+      return false;
+    if(vertices[3].distance(vertices[0]) > nature.maxSideLength())
+      return false;
+    return true;
+  }
+
+  /**
+   * Test if the current qcar area is bigger than minArea
+   * @return true if bigger, else false
+   */
+  public boolean isMinAreaValid(){
+    double area = vertex(0).getX() * vertex(1).getY() - vertex(0).getY() * vertex(1).getX();
+    area += vertex(1).getX() * vertex(2).getY() - vertex(1).getY() * vertex(2).getX();
+    area += vertex(2).getX() * vertex(3).getY() - vertex(2).getY() * vertex(3).getX();
+    area += vertex(3).getX() * vertex(0).getY() - vertex(3).getY() * vertex(0).getX();
+    area = area / 2;
+    return area > nature.minArea();
+  }
   
 }

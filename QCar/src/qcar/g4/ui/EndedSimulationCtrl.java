@@ -9,6 +9,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 
+/**
+ * Controller bound to the endedSimulation view.
+ */
 public class EndedSimulationCtrl {
 
   private Stage stage;
@@ -25,14 +28,25 @@ public class EndedSimulationCtrl {
   @FXML
   void initialize() {}
 
+  /**
+   * Set the final leaderboard from the simulation view
+   * @param results
+   */
   public void setFinalResults(ObservableList results){
     lstResults.setItems(results);
   }
 
+  /**
+   * Set the stage to pass it to the next view
+   * @param stage
+   */
   public void setStage(Stage stage){
     this.stage = stage;
   }
 
+  /**
+   * Handle onClick event on the newSimBtn, restart the program from the editor
+   */
   @FXML
   private void handleNewSimBtn(){
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/editor.fxml"));
@@ -46,6 +60,9 @@ public class EndedSimulationCtrl {
     }
   }
 
+  /**
+   * Handle onClick event on the exitBtn, close the program
+   */
   @FXML
   private void handleExitBtn(){
     System.exit(0);

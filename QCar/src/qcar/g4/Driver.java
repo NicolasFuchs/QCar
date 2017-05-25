@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import javax.swing.DefaultSingleSelectionModel;
-
 import java.awt.geom.Point2D;
 
 import qcar.*;
@@ -39,7 +37,6 @@ public class Driver implements IDriver {
   Thread driverThread = new Thread() {
     public void run() {
       while (!finished) {
-        System.out.println("before play");
         sensors = pc.play(takeDecision());
         if (myCar == null) {
           myCar = sensors.mySelf();
@@ -72,10 +69,9 @@ public class Driver implements IDriver {
    */
   @Override
   public void startDriverThread(IPlayerChannel pc) {
-    System.out.println("Start driver thread called");
     this.pc = pc;
+    // THIS IS NOT DONE HERE, BUT IN THE THREAD
     // sensors = pc.play(MyDecision.IMMOBILE_DECISION);
-
     // myCar = sensors.mySelf();
     pendingDecisions = new ArrayList<IDecision>();
     driverThread.start();
@@ -96,29 +92,38 @@ public class Driver implements IDriver {
    * 
    */
   private IDecision takeDecision() {
+
+
     if (myCar != null) {
+      System.out.println("MAXSIDELENGTH : "+ myCar.nature().maxSideLength());
+      System.out.println("coté 0 : "+ getSideLength(0));
+      System.out.println("coté 1 : "+ getSideLength(1));
       if (!pendingDecisions.isEmpty()) {
+        System.out.println("decision : " + pendingDecisions.get(0).toString());
         return pendingDecisions.remove(0);
-      }
+      }   
 
-      pendingDecisions.add(MyDecision.sideDecision(true, 0, getSideLength(1)));
-      return MyDecision.sideDecision(true, 2, getSideLength(1));
-    }
+      if (sensors != null) {
+        if (sensors.collisionsWithMe().isEmpty()) {
+          if (targetId == -1) {
+            IDecision d = acquireTarget();
+            System.out.println("decision :" + d.toString());
+            return acquireTarget();
+          } else {
 
-    if (sensors != null) {
-      if (sensors.collisionsWithMe().isEmpty()) {
-        if (targetId == -1) {
-          return acquireTarget();
+            IDecision d = followTargetDecision();
+            System.out.println("decision :" + d.toString());
+            return d ;
+          }
+
         } else {
-          return followTargetDecision();
+          IDecision d = collisionDecision(sensors.collisionsWithMe());
+          System.out.println("decision :" + d.toString());
+          return d;
         }
-
-      } else {
-        return collisionDecision(sensors.collisionsWithMe());
-      }
+      } 
     }
-    return MyDecision.IMMOBILE_DECISION;
-  }
+    return MyDecision.IMMOBILE_DECISION;}
 
 
   /**
@@ -154,14 +159,16 @@ public class Driver implements IDriver {
     int i = 0;
     for (ISeenVertex vertex : sensors.seenVertices()) {
       if (vertex.nature().qCarId() == targetId) {
-        target[i] = vertex.projectionLocation();
-        if (vertex.nature().isParkingTarget()) {
-          isTargetParking = true;
-          i++;
-        } else {
-          if (vertex.offersBonus()) {
-            target[0] = vertex.projectionLocation();
-            break;
+        if (i<4) {
+          target[i] = vertex.projectionLocation();
+          if (vertex.nature().isParkingTarget()) {
+            isTargetParking = true;
+            i++;
+          } else {
+            if (vertex.offersBonus()) {
+              target[0] = vertex.projectionLocation();
+              break;
+            }
           }
         }
       }
@@ -194,7 +201,7 @@ public class Driver implements IDriver {
     HashMap<Integer, ArrayList<ISeenVertex>> vertexesFromSameId = new HashMap<>();
     // listing of interesting vertexes and gathering all vertexes from a certain ID
     for (ISeenVertex v : sensors.seenVertices()) {
-      int id = v.vertexId();
+      int id = v.nature().qCarId();
       // create the entry in the map in not present
       if (!vertexesFromSameId.containsKey(id)) {
         ArrayList<ISeenVertex> vertexes = new ArrayList<>();
@@ -520,9 +527,9 @@ public class Driver implements IDriver {
    * 3-steps to make a quarter turn left
    */
   private IDecision quarterTurnLeft() {
-    pendingDecisions.add(MyDecision.Side_1_to_left(getSideLength(1)));
+    pendingDecisions.add(MyDecision.Side_3_to_left(getSideLength(3)));
     pendingDecisions.add(MyDecision.Side_2_to_left(getSideLength(2)));
-    return MyDecision.Side_3_to_left(getSideLength(3));
+    return MyDecision.Side_1_to_left(getSideLength(1));
   }
 
   // ----------------------------------------
@@ -531,9 +538,9 @@ public class Driver implements IDriver {
    * 3-steps to make a quarter turn right
    */
   private IDecision quarterTurnRight() {
-    pendingDecisions.add(MyDecision.angleDecision(false, 1, getSideLength(1)));
-    pendingDecisions.add(MyDecision.angleDecision(false, 2, getSideLength(2)));
-    return MyDecision.angleDecision(false, 3, getSideLength(3));
+    pendingDecisions.add(MyDecision.Side_1_to_right(getSideLength(1)));
+    pendingDecisions.add(MyDecision.Side_2_to_right(getSideLength(2)));
+    return MyDecision.Side_3_to_right(getSideLength(3));
   }
 
   // ----------------------------------------
@@ -703,7 +710,14 @@ public class Driver implements IDriver {
       }
       return new MyDecision(false, side, coeff * length);
     }
+
+    @Override
+    public String toString() {
+      return "isAnglemovement" + isAngleMovement + " side " + sideId + " req transl : " + requestedTranslation ;
+
+    }
   }
+
 
   // ----------------------------------------
   // ----------------------------------------
