@@ -143,7 +143,7 @@ public class Driver implements IDriver {
     Point2D[] target = new Point2D[4];
     int i = 0;
     for (ISeenVertex vertex : sensors.seenVertices()) {
-      if (vertex.vertexId() == targetId) {
+      if (vertex.nature().qCarId() == targetId) {
         target[i] = vertex.projectionLocation();
         if (vertex.nature().isParkingTarget()) {
           isTargetParking = true;
