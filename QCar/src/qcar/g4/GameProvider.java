@@ -27,13 +27,15 @@ public class GameProvider implements IGameProvider {
   public static final double MIN_AREA_RATIO = 0.5;
   // ! 0.0 < MIN_AREA <= MAX_SIDE_LENGTH * MAX_SIDE_LENGTH !
   public static final double MIN_AREA = (MAX_SIDE_LENGTH * MAX_SIDE_LENGTH) * MIN_AREA_RATIO;
+  
+  private double max_dispersion = 300;
 
   private GameDescription.GameStyles game;
   private boolean[][] map;
   private double tol = 0.01 * MAX_SIDE_LENGTH; // Buffer for grid, avoid having a grid with the exact size of a QCar
   
   public GameProvider(GameDescription.GameStyles game){
-    
+    this.max_dispersion = 300;
     this.game = game;
   }
   
@@ -41,9 +43,11 @@ public class GameProvider implements IGameProvider {
   public IGameDescription nextGame(int nbOfDrivers) {
     
     ArrayList<IQCar> cars = new ArrayList<>();    
-    int gridSide = (int)Math.sqrt(nbOfDrivers);
+    int gridSide = 1;//(int)Math.sqrt(nbOfDrivers);
     map = new boolean[gridSide][gridSide];
     QCarNature.resetIDs();
+    int maxCars = (nbOfDrivers>MAX_QCARS) ? nbOfDrivers : MAX_QCARS;
+    max_dispersion = maxCars * ((2*MAX_SIDE_LENGTH + 4*tol) * 1.5); 
  
     // Static : new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
     // Driven : new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
@@ -51,25 +55,26 @@ public class GameProvider implements IGameProvider {
     
     switch (game){
       
-      case STANDARD_WITH_BORDERS: cars = standardStyle(nbOfDrivers); // 0
-                                  cars.add(obtainBorders());
-                                  break;
-      case PARKINGS_WITH_BORDERS: cars = parkingsStyle(nbOfDrivers, 2); // 1
-                                  cars.add(obtainBorders());
-                                  break;
-      case DEBUG_WITH_BORDERS: cars = debugStyle(); // 2
+      case MIXED_WITH_BORDERS: cars = standardStyle(nbOfDrivers); // 0
                                cars.add(obtainBorders());
                                break;
+      case ONLY_DRIVERS_WITH_BORDERS: cars = onlyDrivers(nbOfDrivers); // 0
+                                      cars.add(obtainBorders());
+                                      break;                                                              
+      case NO_STATICS_WITH_BORDERS: cars = noStatics(nbOfDrivers); // 1
+                                  cars.add(obtainBorders());
+                                  break;
       case NO_PARKINGS_WITH_BORDERS: cars = noParkings(nbOfDrivers); // 3
                                      cars.add(obtainBorders());
                                      break;
 
-      case STANDARD_WITHOUT_BORDERS: cars = standardStyle(nbOfDrivers); // 4
+      case MIXED_WITHOUT_BORDERS: cars = standardStyle(nbOfDrivers); // 4
                                      break;
-      case PARKINGS_WITHOUT_BORDERS: cars = parkingsStyle(nbOfDrivers, 2); // 5
-                                     break;
-      case DEBUG_WITHOUT_BORDERS: cars = debugStyle(); // 6
-                                  break;
+      case ONLY_DRIVERS_WITHOUT_BORDERS: cars = onlyDrivers(nbOfDrivers); // 0
+                                         cars.add(obtainBorders());
+                                         break;                                 
+      case NO_STATICS_WITHOUT_BORDERS: cars = noStatics(nbOfDrivers); // 5
+                                       break;
       case NO_PARKINGS_WITHOUT_BORDERS: cars = noParkings(nbOfDrivers); // 7
                                         break;
 
@@ -79,14 +84,35 @@ public class GameProvider implements IGameProvider {
     return new GameDescription(cars);
   }
   
+  private ArrayList<IQCar> onlyDrivers(int nbOfDrivers){
+    
+    ArrayList<IQCar> cars = new ArrayList<>();
+    QCarNature driven;
+    Point2D[] vertices ;
+    
+    max_dispersion = nbOfDrivers * ((2*MAX_SIDE_LENGTH + 4*tol) * 1.5);
+    QCar car;
+    
+    for(int i = 0; i<nbOfDrivers; i++){
+      driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(driven); 
+      allocateVertices(vertices);
+      car = new QCar(driven, vertices);
+      cars.add(car);
+    }
+
+    return cars;
+  }
+
   private ArrayList<IQCar> noParkings(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
     QCarNature driven, staticNature;
     QCar car;
     Point2D[] vertices;
-    
-    int wantedQCars = (nbOfDrivers>MAX_QCARS) ? nbOfDrivers : MAX_QCARS;
+   
+    int wantedQCars = (nbOfDrivers>MAX_QCARS) ? ((int)(nbOfDrivers*1.5)) : MAX_QCARS;    
+    max_dispersion = wantedQCars * ((2*MAX_SIDE_LENGTH + 4*tol) * 1.5); 
     
     for(int i = 0; i<nbOfDrivers; i++){
       driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
@@ -107,16 +133,15 @@ public class GameProvider implements IGameProvider {
     return cars;
   }
   
-  private ArrayList<IQCar> parkingsStyle(int nbOfDrivers, int multiplier){
+  private ArrayList<IQCar> noStatics(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature randomNature, driven, staticNature;
+    QCarNature driven, parking;
 
-    
     Point2D[] vertices ;
-    int parkings = nbOfDrivers * multiplier;
-    int totalCars = nbOfDrivers + parkings;
-    int wantedQCars = (totalCars>MAX_QCARS) ? totalCars : MAX_QCARS;
+    
+    int wantedQCars = (nbOfDrivers>MAX_QCARS) ? ((int)(nbOfDrivers*1.5)) : MAX_QCARS;    
+    max_dispersion = wantedQCars * ((2*MAX_SIDE_LENGTH + 4*tol) * 1.5); 
     QCar car;
     
     for(int i = 0; i<nbOfDrivers; i++){
@@ -126,25 +151,12 @@ public class GameProvider implements IGameProvider {
       car = new QCar(driven, vertices);
       cars.add(car);
     }
-    
-    int k = 0;
-    while(k<parkings){
-      if(R.nextBoolean()){
-        randomNature = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
-        k++;
-      }
-      else randomNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
-      vertices = randomAlignedPositions(randomNature); 
-      allocateVertices(vertices);
-      car = new QCar(randomNature, vertices);
-      cars.add(car);
-    }
 
     for(int i = cars.size(); i<wantedQCars; i++){
-      staticNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
-      vertices = randomAlignedPositions(staticNature); 
+      parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(parking); 
       allocateVertices(vertices);
-      car = new QCar(staticNature, vertices);
+      car = new QCar(parking, vertices);
       cars.add(car);
     }
     
@@ -159,9 +171,10 @@ public class GameProvider implements IGameProvider {
     Point2D[] vertices ;
     QCar car;
    
-    int wantedQCars = (nbOfDrivers>MAX_QCARS) ? MAX_QCARS : nbOfDrivers;
+    int wantedQCars = (nbOfDrivers>MAX_QCARS) ? ((int)(nbOfDrivers*1.5)) : MAX_QCARS;    
+    max_dispersion = wantedQCars * ((2*MAX_SIDE_LENGTH + 4*tol) * 1.5); 
     
-    for(int i = 0; i<wantedQCars; i++){
+    for(int i = 0; i<nbOfDrivers; i++){
       
       driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(driven); 
@@ -169,7 +182,7 @@ public class GameProvider implements IGameProvider {
       car = new QCar(driven, vertices);
       cars.add(car);
     }
-    for(int i = wantedQCars; i<MAX_QCARS; i++){
+    for(int i = cars.size(); i<wantedQCars; i++){
       if(R.nextBoolean()) randomNature = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
       else randomNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(randomNature); 
@@ -208,14 +221,14 @@ public class GameProvider implements IGameProvider {
  
   private Point2D[] randomAlignedPositions(QCarNature nature) {
 
+    System.out.println("ENTER in randomAlignedPosition...");
     Point2D[] points = new Point2D[4];
     do{
       Point2D[] tmp = new Point2D[4];
       
       // Take random value for the position of the vertice 0 of the QCar
-      int positionFactor = R.nextInt(POSITION_DISPERSION);
-      double posX = R.nextDouble()*positionFactor;
-      double posY = R.nextDouble()*positionFactor;
+      double posX = R.nextDouble()*max_dispersion;
+      double posY = R.nextDouble()*max_dispersion;
       points[0] = new Point2D.Double(posX, posY);
 
       // Calculate a minimal length of first side of QCar to avoid side == 0.0 case
@@ -326,6 +339,8 @@ public class GameProvider implements IGameProvider {
 
     }while(!checkEmplacementOnArena(points));
 
+    System.out.println(" -- EXIT --");
+    
     return points;
   }  
   
@@ -353,14 +368,7 @@ public class GameProvider implements IGameProvider {
         if(map[x][y]) return false;
       }
     }
-    /*
-    for(int i = 0; i<vertices.length; i++){
-      double x=vertices[i].getX(), y = vertices[i].getY();
-      int occupX = (int)(x/side), occupY = (int)(y/side);
-      if(occupX>= map.length || occupY >= map[0].length) map = augmentMapSize(occupX, occupY);
-      if(map[occupX][occupY]) return false;
-    }
-    */
+    
     return true;
   }
   
