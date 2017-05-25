@@ -2,6 +2,9 @@ package qcar.g4;
 
 import qcar.IQCarNature;
 
+/**
+ * Describes the nature of each QCar
+ */
 public class QCarNature implements IQCarNature {
 
   private static int ID_COUNTER = 0;
@@ -14,6 +17,15 @@ public class QCarNature implements IQCarNature {
   private double maxSideLenght;
   private double minArea;
   
+  /**
+   * Constructor of the nature
+   * @param driven
+   * @param parkingTarget
+   * @param vertexTarget
+   * @param sideTarget
+   * @param maxSideLenght
+   * @param minArea
+   */
   public QCarNature(boolean driven, boolean parkingTarget, boolean vertexTarget, boolean sideTarget, double maxSideLenght, double minArea) {
     super();
     this.id = ID_COUNTER++;
@@ -25,41 +37,65 @@ public class QCarNature implements IQCarNature {
     this.minArea = minArea;
   }
 
+  /**
+   * @return id of the QCar
+   */
   @Override
   public int qCarId() {
     return id;
   }
 
+  /**
+   * @return if the QCar is driven or not
+   */
   @Override
   public boolean isDriven() {
     return driven;
   }
 
+  /**
+   * @return the maximal length of the sides of QCar
+   */
   @Override
   public double maxSideLength() {
     return maxSideLenght;
   }
 
+  /**
+   * @return the minimal area of the QCar
+   */
   @Override
   public double minArea() {
     return minArea;
   }
 
+  /**
+   * @return if the QCar is a parking or not
+   */
   @Override
   public boolean isParkingTarget() {
     return parkingTarget;
   }
 
+  /**
+   * @return if the QCar will give bonuses on the vertices
+   */
   @Override
   public boolean isVertexTarget() {
     return vertexTarget;
   }
 
+  /**
+   * @return if the QCar will give bonuses on the sides
+   */
   @Override
   public boolean isSideTarget() {
     return sideTarget;
   }
   
+  /**
+   * print the information about the QCar
+   */
   @Override
   public String toString() {
     StringBuilder bld = new StringBuilder();
@@ -76,6 +112,9 @@ public class QCarNature implements IQCarNature {
     return bld.toString();
   }
   
+  /**
+   * sets the ID counter back to zero
+   */
   public static void resetIDs(){
     ID_COUNTER=0;
   }
