@@ -44,6 +44,10 @@ public class GameProvider implements IGameProvider {
     int gridSide = (int)Math.sqrt(nbOfDrivers);
     map = new boolean[gridSide][gridSide];
     QCarNature.resetIDs();
+ 
+    // Static : new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+    // Driven : new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
+    // Parking : new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
     
     switch (game){
       
@@ -78,15 +82,25 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> noParkings(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature driven;
+    QCarNature driven, staticNature;
     QCar car;
     Point2D[] vertices;
+    
+    int wantedQCars = (nbOfDrivers>MAX_QCARS) ? nbOfDrivers : MAX_QCARS;
     
     for(int i = 0; i<nbOfDrivers; i++){
       driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(driven); 
       allocateVertices(vertices);
       car = new QCar(driven, vertices);
+      cars.add(car);
+    }
+    
+    for(int i = cars.size(); i<wantedQCars; i++){
+      staticNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(staticNature); 
+      allocateVertices(vertices);
+      car = new QCar(staticNature, vertices);
       cars.add(car);
     }
     
@@ -96,11 +110,13 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> parkingsStyle(int nbOfDrivers, int multiplier){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature parking, driven;
+    QCarNature randomNature, driven, staticNature;
+
     
     Point2D[] vertices ;
     int parkings = nbOfDrivers * multiplier;
     int totalCars = nbOfDrivers + parkings;
+    int wantedQCars = (totalCars>MAX_QCARS) ? totalCars : MAX_QCARS;
     QCar car;
     
     for(int i = 0; i<nbOfDrivers; i++){
@@ -110,11 +126,25 @@ public class GameProvider implements IGameProvider {
       car = new QCar(driven, vertices);
       cars.add(car);
     }
-    for(int i = nbOfDrivers; i<totalCars; i++){
-      parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
-      vertices = randomAlignedPositions(parking); 
+    
+    int k = 0;
+    while(k<parkings){
+      if(R.nextBoolean()){
+        randomNature = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
+        k++;
+      }
+      else randomNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(randomNature); 
       allocateVertices(vertices);
-      car = new QCar(parking, vertices);
+      car = new QCar(randomNature, vertices);
+      cars.add(car);
+    }
+
+    for(int i = cars.size(); i<wantedQCars; i++){
+      staticNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(staticNature); 
+      allocateVertices(vertices);
+      car = new QCar(staticNature, vertices);
       cars.add(car);
     }
     
@@ -124,7 +154,7 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> standardStyle(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature parking, driven;
+    QCarNature randomNature, driven;
     
     Point2D[] vertices ;
     QCar car;
@@ -140,10 +170,11 @@ public class GameProvider implements IGameProvider {
       cars.add(car);
     }
     for(int i = wantedQCars; i<MAX_QCARS; i++){
-      parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
-      vertices = randomAlignedPositions(parking); 
+      if(R.nextBoolean()) randomNature = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
+      else randomNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(randomNature); 
       allocateVertices(vertices);
-      car = new QCar(parking, vertices);
+      car = new QCar(randomNature, vertices);
       cars.add(car);
     }
     return cars;  
@@ -411,7 +442,6 @@ public class GameProvider implements IGameProvider {
     System.out.println("----------------------------");
   }
   
-
 }
 
 
