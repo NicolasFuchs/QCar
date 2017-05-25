@@ -37,7 +37,6 @@ public class Driver implements IDriver {
   Thread driverThread = new Thread() {
     public void run() {
       while (!finished) {
-        System.out.println("before play");
         sensors = pc.play(takeDecision());
         if (myCar == null) {
           myCar = sensors.mySelf();
@@ -70,7 +69,6 @@ public class Driver implements IDriver {
    */
   @Override
   public void startDriverThread(IPlayerChannel pc) {
-    System.out.println("Start driver thread called");
     this.pc = pc;
     // THIS IS NOT DONE HERE, BUT IN THE THREAD
     // sensors = pc.play(MyDecision.IMMOBILE_DECISION);
@@ -94,10 +92,8 @@ public class Driver implements IDriver {
    * 
    */
   private IDecision takeDecision() {
-    
+
     if (myCar != null) {
-      System.out.println("DIMENSIONS " + getSideLength(3));
-      System.out.println(getSideLength(2));
       if (!pendingDecisions.isEmpty()) {
         return pendingDecisions.remove(0);
       }   
@@ -115,9 +111,7 @@ public class Driver implements IDriver {
         }
       } 
     }
-
-    return MyDecision.IMMOBILE_DECISION;
-  }
+    return MyDecision.IMMOBILE_DECISION;}
 
 
   /**
@@ -153,14 +147,16 @@ public class Driver implements IDriver {
     int i = 0;
     for (ISeenVertex vertex : sensors.seenVertices()) {
       if (vertex.nature().qCarId() == targetId) {
-        target[i] = vertex.projectionLocation();
-        if (vertex.nature().isParkingTarget()) {
-          isTargetParking = true;
-          i++;
-        } else {
-          if (vertex.offersBonus()) {
-            target[0] = vertex.projectionLocation();
-            break;
+        if (i<4) {
+          target[i] = vertex.projectionLocation();
+          if (vertex.nature().isParkingTarget()) {
+            isTargetParking = true;
+            i++;
+          } else {
+            if (vertex.offersBonus()) {
+              target[0] = vertex.projectionLocation();
+              break;
+            }
           }
         }
       }
@@ -519,10 +515,6 @@ public class Driver implements IDriver {
    * 3-steps to make a quarter turn left
    */
   private IDecision quarterTurnLeft() {
-    System.out.println(getSideLength(3));
-    System.out.println(getSideLength(2));
-    System.out.println(getSideLength(1));
-    System.out.println(myCar.nature().maxSideLength()) ;
     pendingDecisions.add(MyDecision.Side_3_to_left(10000));
     pendingDecisions.add(MyDecision.Side_2_to_left(10000));
     return MyDecision.Side_1_to_left(10000);

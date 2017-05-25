@@ -57,8 +57,7 @@ public class Decision implements IDecision {
    * @param qcar the QCar whom Driver requested the Decision
    * 
    */
-  public static IDecision validDecision(IDecision decision, IQCar qcar) {
-    
+  public static IDecision validDecision(IDecision decision, IQCar qcar) {   
     
       // détermine si la décision dépasse la longueur maximale du Qcar, et dans ce cas renvoie une
       // nouvelle décision
