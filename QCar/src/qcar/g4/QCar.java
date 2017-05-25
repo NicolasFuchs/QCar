@@ -30,6 +30,28 @@ public class QCar implements IQCar {
       bonuses.set(8);
   }
   
+  public boolean hasStillBonuses(){
+    return !bonuses.isEmpty();
+  }
+  
+  public boolean useVertice(int vertice){
+    boolean use = bonuses.get(vertice);
+    bonuses.clear(vertice);
+    return use;
+  }
+  
+  public boolean useSide(int side){
+    boolean use = bonuses.get(side+4);
+    bonuses.clear(side+4);
+    return use;
+  }
+  
+  public boolean useParking(){
+    boolean use = bonuses.get(8);
+    bonuses.clear(8);
+    return use;
+  }
+  
   public void update(boolean isAngleMovement, int sideId, double requestedTranslation) {
     double[] vector = new double[2];
     if ((isAngleMovement && (sideId == 0 || sideId == 2)) || (!isAngleMovement && (sideId == 1 || sideId == 3))) {
