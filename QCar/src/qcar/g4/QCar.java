@@ -1,5 +1,6 @@
 package qcar.g4;
 
+import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -136,6 +137,5 @@ public class QCar implements IQCar {
     if(nature.isParkingTarget())
       bonuses.set(8);
   }
-  
   
 }
