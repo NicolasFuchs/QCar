@@ -132,8 +132,10 @@ public class WorldManager implements IWorldManager {
         }
         for (int i = 0 ; i < decisions.size() ; i++) {
           IDecision d = decisions.get(i) ;
+          System.out.println("decision demandée :" +d.toString());
           d = Decision.validDecision(d, drivenQCars.get(i)) ;
           decisions.set(i,d) ;
+          System.out.println("decision appliquéee : " +d.toString());
         }
         updateWorldState(decisions);
         fetchSensors();
