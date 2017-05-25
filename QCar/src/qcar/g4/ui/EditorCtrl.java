@@ -8,6 +8,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -24,6 +26,9 @@ import qcar.IWorldManager;
 import qcar.g4.Factory;
 import qcar.g4.ManualDriver;
 
+/**
+ * Controller bound to the editor view.
+ */
 public class EditorCtrl {
 
   public static final int NO_MANUAL_DRIVER = -1;
@@ -76,6 +81,9 @@ public class EditorCtrl {
   @FXML
   private CheckBox checkIsManual;
 
+  /**
+   * Set up the view
+   */
   @FXML
   void initialize() {
     setFactory(new Factory());
@@ -84,6 +92,12 @@ public class EditorCtrl {
     checkIsManual.setVisible(false);
   }
 
+  /**
+   * Handle the btnApply on click event.
+   * Generate the game with the selected style and the number of driven
+   * Qcar given by the user.
+   * Add the generated QCars to the listView.
+   */
   @FXML
   private void handleBtnApply(){
     try{
@@ -114,12 +128,20 @@ public class EditorCtrl {
       });
       emptyFields();
       btnPlay.setDisable(false);
-      System.out.println("Apply for : " + nDrivers + " QCars !");
     } catch (Exception e) {
-      System.out.println("Please enter a valid number of QCars");
+      Alert alert = new Alert(AlertType.ERROR);
+      alert.setTitle("Number of driver");
+      alert.setHeaderText(null);
+      alert.setContentText("Please input a valid amount of drivers");
+      alert.showAndWait();
     }
   }
 
+  /**
+   * Handle the btnPlay onclick event.
+   * Start a new Simulation, load the simulation view
+   * and pass it the wm and the stage.
+   */
   @FXML
   private void handleBtnPlay(){
     try {
@@ -153,6 +175,10 @@ public class EditorCtrl {
     }
   }
 
+  /**
+   * Handle the listview onclick event. Display the selected QCar information
+   * in the corresponding fields.
+   */
   @FXML
   private void handleListSelection() {
     if(listQCar.getSelectionModel().isEmpty()) return;
@@ -176,6 +202,9 @@ public class EditorCtrl {
       checkIsManual.setSelected(false);
   }
 
+  /**
+   * Handle events of the checkbox allowing you to chose a QCar to drive manually
+   */
   @FXML
   private void handleManualDriverSelection(){
     if(checkIsManual.isSelected())
@@ -184,6 +213,10 @@ public class EditorCtrl {
       manualDriverIndex = NO_MANUAL_DRIVER;
   }
 
+  /**
+   * Set the factory and every elements depending on it
+   * @param fact factory used by the simulation
+   */
   public void setFactory(IFactory fact){
     this.fact = fact;
     List<Integer> styles = new ArrayList<Integer>();
@@ -195,10 +228,17 @@ public class EditorCtrl {
     comboStyle.getSelectionModel().select(0);
   }
 
+  /**
+   * Set the stage so we can pass it to the next view
+   * @param stage
+   */
   public void setStage(Stage stage){
     this.stage = stage;
   }
 
+  /**
+   * Empty all the fields displaying QCar informations
+   */
   private void emptyFields(){
     txtQCarId.clear();
     txtMaxSide.clear();
