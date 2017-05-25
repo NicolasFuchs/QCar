@@ -21,8 +21,12 @@ public class GameProvider implements IGameProvider {
   // ! Must be 0.0 < SIDE_LENGTH_RATIO < 1.0 !
   public static final double SIDE_LENGTH_RATIO = 0.01;
   
-  public static final double MIN_AREA = 15.3;
   public static final double MAX_SIDE_LENGTH = 7.4;
+  
+  // ! Must be 0.0 < SIDE_LENGTH_RATIO < 1.0 !
+  public static final double MIN_AREA_RATIO = 0.5;
+  // ! 0.0 < MIN_AREA <= MAX_SIDE_LENGTH * MAX_SIDE_LENGTH !
+  public static final double MIN_AREA = (MAX_SIDE_LENGTH * MAX_SIDE_LENGTH) * MIN_AREA_RATIO;
 
   private GameDescription.GameStyles game;
   private boolean[][] map;
@@ -40,6 +44,10 @@ public class GameProvider implements IGameProvider {
     int gridSide = (int)Math.sqrt(nbOfDrivers);
     map = new boolean[gridSide][gridSide];
     QCarNature.resetIDs();
+ 
+    // Static : new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+    // Driven : new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
+    // Parking : new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
     
     switch (game){
       
@@ -74,15 +82,25 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> noParkings(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature driven;
+    QCarNature driven, staticNature;
     QCar car;
     Point2D[] vertices;
+    
+    int wantedQCars = (nbOfDrivers>MAX_QCARS) ? nbOfDrivers : MAX_QCARS;
     
     for(int i = 0; i<nbOfDrivers; i++){
       driven = new QCarNature(true, false, true, true, MAX_SIDE_LENGTH, MIN_AREA);
       vertices = randomAlignedPositions(driven); 
       allocateVertices(vertices);
       car = new QCar(driven, vertices);
+      cars.add(car);
+    }
+    
+    for(int i = cars.size(); i<wantedQCars; i++){
+      staticNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(staticNature); 
+      allocateVertices(vertices);
+      car = new QCar(staticNature, vertices);
       cars.add(car);
     }
     
@@ -92,11 +110,13 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> parkingsStyle(int nbOfDrivers, int multiplier){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature parking, driven;
+    QCarNature randomNature, driven, staticNature;
+
     
     Point2D[] vertices ;
     int parkings = nbOfDrivers * multiplier;
     int totalCars = nbOfDrivers + parkings;
+    int wantedQCars = (totalCars>MAX_QCARS) ? totalCars : MAX_QCARS;
     QCar car;
     
     for(int i = 0; i<nbOfDrivers; i++){
@@ -106,11 +126,25 @@ public class GameProvider implements IGameProvider {
       car = new QCar(driven, vertices);
       cars.add(car);
     }
-    for(int i = nbOfDrivers; i<totalCars; i++){
-      parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
-      vertices = randomAlignedPositions(parking); 
+    
+    int k = 0;
+    while(k<parkings){
+      if(R.nextBoolean()){
+        randomNature = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
+        k++;
+      }
+      else randomNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(randomNature); 
       allocateVertices(vertices);
-      car = new QCar(parking, vertices);
+      car = new QCar(randomNature, vertices);
+      cars.add(car);
+    }
+
+    for(int i = cars.size(); i<wantedQCars; i++){
+      staticNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(staticNature); 
+      allocateVertices(vertices);
+      car = new QCar(staticNature, vertices);
       cars.add(car);
     }
     
@@ -120,7 +154,7 @@ public class GameProvider implements IGameProvider {
   private ArrayList<IQCar> standardStyle(int nbOfDrivers){
     
     ArrayList<IQCar> cars = new ArrayList<>();
-    QCarNature parking, driven;
+    QCarNature randomNature, driven;
     
     Point2D[] vertices ;
     QCar car;
@@ -136,10 +170,11 @@ public class GameProvider implements IGameProvider {
       cars.add(car);
     }
     for(int i = wantedQCars; i<MAX_QCARS; i++){
-      parking = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
-      vertices = randomAlignedPositions(parking); 
+      if(R.nextBoolean()) randomNature = new QCarNature(false, true, true, false, MAX_SIDE_LENGTH, MIN_AREA);
+      else randomNature = new QCarNature(false, false, false, false, MAX_SIDE_LENGTH, MIN_AREA);
+      vertices = randomAlignedPositions(randomNature); 
       allocateVertices(vertices);
-      car = new QCar(parking, vertices);
+      car = new QCar(randomNature, vertices);
       cars.add(car);
     }
     return cars;  
@@ -185,15 +220,20 @@ public class GameProvider implements IGameProvider {
 
       // Calculate a minimal length of first side of QCar to avoid side == 0.0 case
       double minSideLength = SIDE_LENGTH_RATIO * nature.maxSideLength();
+      double minH = nature.maxSideLength();
+      double side1 = minSideLength;
+      
+      do{
+        // Calculate a random value for the base side
+        side1 = minSideLength + R.nextDouble()*(nature.maxSideLength()-minSideLength); 
 
-      // Calculate a random value for the base side
-      double side1 = minSideLength + R.nextDouble()*(nature.maxSideLength()-minSideLength); 
+        // Minimal height of parallelogram to respect minArea
+        minH = nature.minArea()/side1;
 
-      // Minimal height of parallelogram to respect minArea
-      double minH = nature.minArea()/side1; 
+      } while (minH>=nature.maxSideLength());
 
       // Calculate random second side of parallelogram in respect of maxSideLength and minArea
-      double side2 = minH + R.nextDouble() * Math.abs((nature.maxSideLength()-minH)); 
+      double side2 = minH + R.nextDouble() * Math.abs((nature.maxSideLength()-minH));
 
       // Calculate the maximum possible offset to respect minArea
       double maxOffset = Math.sqrt(Math.abs(side2*side2 - minH * minH)); 
@@ -222,7 +262,7 @@ public class GameProvider implements IGameProvider {
           points[3] = new Point2D.Double(posX+offset, posY+H);
         }
         else{
-          points[2] = new Point2D.Double(posX+side1-offset, posY+H);
+          points[2] = new Point2D.Double((posX+side1)-offset, posY+H);
           points[3] = new Point2D.Double(posX-offset, posY+H);
         }
       }
@@ -234,14 +274,14 @@ public class GameProvider implements IGameProvider {
         }
         else{
           points[1] = new Point2D.Double(posX+H, posY-offset);
-          points[2] = new Point2D.Double(posX+H, posY+side1-offset);
+          points[2] = new Point2D.Double(posX+H, (posY+side1)-offset);
         }
       }
       
       // Find the center of the current parallelogram, which is the center of rotation
       double dX = Math.abs(points[2].getX()-points[0].getX());
       double dY = Math.abs(points[2].getY()-points[0].getY());
-      dX = dX/2.0; dY = dY/2.0;
+      dX = dX/((double)2); dY = dY/((double)2);
       double rotationCenterX = points[0].getX()+dX;
       double rotationCenterY = points[0].getY()+dY;
       
@@ -280,7 +320,7 @@ public class GameProvider implements IGameProvider {
         tmp = new Point2D[4];
         AffineTransform translation = new AffineTransform();
         translation.translate(negativXOffset, negativYOffset);
-        rotation.transform(points, 0, tmp, 0, points.length);
+        translation.transform(points, 0, tmp, 0, points.length);
         points = tmp;
       }
 
@@ -295,12 +335,32 @@ public class GameProvider implements IGameProvider {
   private boolean checkEmplacementOnArena(Point2D[] vertices){
     
     double side = MAX_SIDE_LENGTH + 2*tol;
+    double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY;
+    double minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+    double ptX = 0, ptY = 0;
+    for(Point2D pt : vertices){
+      ptX = pt.getX(); ptY = pt.getY();
+      if(ptX<minX) minX = ptX;
+      if(ptX>maxX) maxX = ptX;
+      if(ptY<minY) minY = ptY;
+      if(ptY>maxY) maxY = ptY;
+    }
+    int beginX = (int)(minX/side), endX = (int)(maxX/side);
+    int beginY = (int)(minY/side), endY = (int)(maxY/side);
+    for(int x = beginX; x<=(endX+1); x++){
+      for(int y = beginY; y<=(endY+1); y++){
+        if(x>= map.length || y >= map[0].length) map = augmentMapSize(x, y);
+        if(map[x][y]) return false;
+      }
+    }
+    /*
     for(int i = 0; i<vertices.length; i++){
       double x=vertices[i].getX(), y = vertices[i].getY();
       int occupX = (int)(x/side), occupY = (int)(y/side);
       if(occupX>= map.length || occupY >= map[0].length) map = augmentMapSize(occupX, occupY);
       if(map[occupX][occupY]) return false;
     }
+    */
     return true;
   }
   
@@ -340,6 +400,26 @@ public class GameProvider implements IGameProvider {
   
   // Update the map in function of the coordinates of the vertices
   private void allocateVertices(Point2D[] vertices){
+    
+    double side = MAX_SIDE_LENGTH + 2*tol;
+    double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY;
+    double minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+    double ptX = 0, ptY = 0;
+    for(Point2D pt : vertices){
+      ptX = pt.getX(); ptY = pt.getY();
+      if(ptX<minX) minX = ptX;
+      if(ptX>maxX) maxX = ptX;
+      if(ptY<minY) minY = ptY;
+      if(ptY>maxY) maxY = ptY;
+    }
+    int beginX = (int)(minX/side), endX = (int)(maxX/side);
+    int beginY = (int)(minY/side), endY = (int)(maxY/side);
+    for(int x = beginX; x<=(endX+1); x++){
+      for(int y = beginY; y<=(endY+1); y++){
+        map[x][y] = true;
+      }
+    }
+    /*
     double x, y, side;
     int boolX, boolY;
     
@@ -349,6 +429,7 @@ public class GameProvider implements IGameProvider {
       boolX = (int)(x/side); boolY = (int)(y/side);
       map[boolX][boolY] = true;
     }
+    */
   }
   
   private void printQCarsList(ArrayList<IQCar> cars){
@@ -361,7 +442,6 @@ public class GameProvider implements IGameProvider {
     System.out.println("----------------------------");
   }
   
-
 }
 
 

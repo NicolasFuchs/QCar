@@ -67,7 +67,7 @@ public class WorldManager implements IWorldManager {
 //    Point2D.Double(23,42),new Point2D.Double(23,36)};
 //    QCar problem = new QCar(nature, vertices);
 //    qcars.add(0,problem);
-    
+
     QCarNature nature = new QCarNature(true, false, true, true, 10000, 0);
     Point2D[] vertices = {new Point2D.Double(10,10),new Point2D.Double(30,10),new Point2D.Double(40,20),new Point2D.Double(20,20)};
     QCar problem = new QCar(nature, vertices);
@@ -76,7 +76,7 @@ public class WorldManager implements IWorldManager {
     vertices = new Point2D[] {new Point2D.Double(30,30),new Point2D.Double(50,30),new Point2D.Double(60,40),new Point2D.Double(40,40)};
     problem = new QCar(nature, vertices);
     qcars.add(0,problem);
-    
+
 
     this.isSimulationRunning = true;
     this.step = 0;
@@ -96,10 +96,11 @@ public class WorldManager implements IWorldManager {
         allPoints.add(q.vertex(i));
       }
     }
+
     playerChannels = new ArrayList<>();
     for (int i = 0; i < players.size(); i++) {
-      playerChannels.add(
-          new PlayerChannel(WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars)));
+      sensors.add(WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars));
+      playerChannels.add(new PlayerChannel(sensors.get(i)));
     }
     for (int i = 0; i < players.size(); i++) {
       players.get(i).startDriverThread(playerChannels.get(i));
@@ -113,8 +114,8 @@ public class WorldManager implements IWorldManager {
     return isSimulationRunning;
   }
 
-  @Override
-  public void simulateOneStep(long collectiveDelayInMicroSeconds) {
+    @Override
+    public void simulateOneStep(long collectiveDelayInMicroSeconds) {
 
     /*
      * This method needs to : - get each driver decision and apply it to their qcar - update the
@@ -122,22 +123,29 @@ public class WorldManager implements IWorldManager {
      * notify the view of the change - increment the number of step
      */
 
-    step++;
-    // notifyAllWorldObserver(0);
-
     // TODO uncomment the next line and send all decisions
-    List<IDecision> decisions = new ArrayList<>();
-    Random random = new Random();
-    for (int i = 0; i < drivenQCars.size(); i++) {
-      //decisions.add(new Decision(random.nextBoolean(), random.nextInt(4), (random.nextBoolean()?1:-1)*random.nextInt(5)));
-      decisions.add(new Decision(false, 0, 10));
-    }
-    updateWorldState(decisions);
-    fetchSensors();
-    notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
-    notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
+        List<IDecision> decisions = new ArrayList<>();
+        for (int i = 0; i < sensors.size(); i++) {
+            playerChannels.get(i).sendSensors(sensors.get(i));
+        }
+        for (int i = 0; i < sensors.size(); i++) {
+            playerChannels.get(i).release();
+        }
+        try {
+            Thread.sleep(collectiveDelayInMicroSeconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (PlayerChannel pc : playerChannels) {
+            decisions.add(pc.getDecision());
+        }
+        updateWorldState(decisions);
+        fetchSensors();
+        step++;
+        notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
+
   }
-  
+
   private void fetchSensors() {
     List<Line2D> newPhotoSensors = new ArrayList<>();
     List<Line2D> newDistanceSensors = new ArrayList<>();
@@ -173,15 +181,15 @@ public class WorldManager implements IWorldManager {
     sensors = newSensors;
   }
 
-  @Override
-  public void closeSimulation() {
-
-    // stop each player's thread and release them from the chan
-    // for(int i = 0; i < players.size(); i++) {
-    // players.get(i).stopDriverThread();
-    // }
-    isSimulationRunning = false;
-  }
+    @Override
+    public void closeSimulation() {
+        // stop each player's thread and release them from the chan
+        for (int i = 0; i < players.size(); i++) {
+            players.get(i).stopDriverThread();
+            playerChannels.get(i).release();
+        }
+        isSimulationRunning = false;
+    }
 
   /*
    * Snapshot of the current state. Common PRE-condition: isSimulationOpened()
@@ -247,6 +255,7 @@ public class WorldManager implements IWorldManager {
     this.playerChannels = new ArrayList<>();
     this.allPoints = new ArrayList<>();
     this.qcars = new ArrayList<>();
+    this.sensors = new ArrayList<>();
   }
 
   // ======== Private methods =======================================
