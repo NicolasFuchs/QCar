@@ -58,23 +58,25 @@ public class Decision implements IDecision {
    * 
    */
   public static IDecision validDecision(IDecision decision, IQCar qcar) {
-    if (decision.isAngleMovement()) {
+    
+    
       // détermine si la décision dépasse la longueur maximale du Qcar, et dans ce cas renvoie une
       // nouvelle décision
       if (decision.requestedTranslation() > 0) {
         double maxTranslation =
             maxAllowedTranslation(qcar, decision.sideId(), decision.isAngleMovement());
+        System.out.println("max " +maxTranslation);
         if (decision.requestedTranslation() > maxTranslation) {
           return new Decision(decision.isAngleMovement(), decision.sideId(), maxTranslation);
         }
       } else {
         double minTranslation =
             minAllowedTranslation(qcar, decision.sideId(), decision.isAngleMovement());
+        System.out.println("min " + minTranslation);
         if (decision.requestedTranslation() < minTranslation) {
           return new Decision(decision.isAngleMovement(), decision.sideId(), minTranslation);
         }
-      }
-    }
+      }     
     return decision;
   }
 
@@ -99,7 +101,7 @@ public class Decision implements IDecision {
       if (lengthDiagonale13 > lengthDiagonale02) {
         dx = -dx;
       }
-      double maxDepl = Math.cos(Math.asin(maxSideLength / height)) * maxSideLength;
+      double maxDepl = Math.cos(Math.asin(height / maxSideLength)) * maxSideLength;
       return maxDepl + dx;
     } else {
       double lengthAdjSide = qcar.vertex((side + 1) % 4).distance(qcar.vertex((side + 2) % 4));
@@ -127,7 +129,8 @@ public class Decision implements IDecision {
       if (lengthDiagonale13 > lengthDiagonale02) {
         dx = -dx;
       }
-      double maxDepl = maxSideLength / Math.asin(maxSideLength / height);
+      double maxDepl = Math.cos(Math.asin(height / maxSideLength)) * maxSideLength;
+      System.out.println("maxDepl = "+ maxDepl);
       return -maxDepl + dx;
     } else {
       double lengthAdjSide = qcar.vertex((side + 1) % 4).distance(qcar.vertex((side + 2) % 4));
@@ -135,7 +138,7 @@ public class Decision implements IDecision {
       double height = sideLine.ptLineDist(qcar.vertex(side));
       double minimumLengthSide = minArea / height;
       // /!\ requestedTranslation < 0
-      return minimumLengthSide - lengthAdjSide;
+      return -(minimumLengthSide - lengthAdjSide);
     }
   }
 }
