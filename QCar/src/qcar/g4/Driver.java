@@ -37,7 +37,6 @@ public class Driver implements IDriver {
   Thread driverThread = new Thread() {
     public void run() {
       while (!finished) {
-        System.out.println("before play");
         sensors = pc.play(takeDecision());
         if (myCar == null) {
           myCar = sensors.mySelf();
@@ -70,7 +69,6 @@ public class Driver implements IDriver {
    */
   @Override
   public void startDriverThread(IPlayerChannel pc) {
-    System.out.println("Start driver thread called");
     this.pc = pc;
     // THIS IS NOT DONE HERE, BUT IN THE THREAD
     // sensors = pc.play(MyDecision.IMMOBILE_DECISION);
@@ -94,30 +92,38 @@ public class Driver implements IDriver {
    * 
    */
   private IDecision takeDecision() {
-    
+
+
     if (myCar != null) {
-      System.out.println("DIMENSIONS " + getSideLength(3));
-      System.out.println(getSideLength(2));
+      System.out.println("MAXSIDELENGTH : "+ myCar.nature().maxSideLength());
+      System.out.println("coté 0 : "+ getSideLength(0));
+      System.out.println("coté 1 : "+ getSideLength(1));
       if (!pendingDecisions.isEmpty()) {
+        System.out.println("decision : " + pendingDecisions.get(0).toString());
         return pendingDecisions.remove(0);
       }   
 
       if (sensors != null) {
         if (sensors.collisionsWithMe().isEmpty()) {
           if (targetId == -1) {
+            IDecision d = acquireTarget();
+            System.out.println("decision :" + d.toString());
             return acquireTarget();
           } else {
-            return followTargetDecision();
+
+            IDecision d = followTargetDecision();
+            System.out.println("decision :" + d.toString());
+            return d ;
           }
 
         } else {
-          return collisionDecision(sensors.collisionsWithMe());
+          IDecision d = collisionDecision(sensors.collisionsWithMe());
+          System.out.println("decision :" + d.toString());
+          return d;
         }
       } 
     }
-
-    return MyDecision.IMMOBILE_DECISION;
-  }
+    return MyDecision.IMMOBILE_DECISION;}
 
 
   /**
@@ -153,15 +159,16 @@ public class Driver implements IDriver {
     int i = 0;
     for (ISeenVertex vertex : sensors.seenVertices()) {
       if (vertex.nature().qCarId() == targetId) {
-        System.out.println("point " + i + " detected");
-        target[i] = vertex.projectionLocation();
-        if (vertex.nature().isParkingTarget()) {
-          isTargetParking = true;
-          i++;
-        } else {
-          if (vertex.offersBonus()) {
-            target[0] = vertex.projectionLocation();
-            break;
+        if (i<4) {
+          target[i] = vertex.projectionLocation();
+          if (vertex.nature().isParkingTarget()) {
+            isTargetParking = true;
+            i++;
+          } else {
+            if (vertex.offersBonus()) {
+              target[0] = vertex.projectionLocation();
+              break;
+            }
           }
         }
       }
@@ -194,7 +201,7 @@ public class Driver implements IDriver {
     HashMap<Integer, ArrayList<ISeenVertex>> vertexesFromSameId = new HashMap<>();
     // listing of interesting vertexes and gathering all vertexes from a certain ID
     for (ISeenVertex v : sensors.seenVertices()) {
-      int id = v.vertexId();
+      int id = v.nature().qCarId();
       // create the entry in the map in not present
       if (!vertexesFromSameId.containsKey(id)) {
         ArrayList<ISeenVertex> vertexes = new ArrayList<>();
@@ -520,13 +527,9 @@ public class Driver implements IDriver {
    * 3-steps to make a quarter turn left
    */
   private IDecision quarterTurnLeft() {
-    System.out.println(getSideLength(3));
-    System.out.println(getSideLength(2));
-    System.out.println(getSideLength(1));
-    System.out.println(myCar.nature().maxSideLength()) ;
-    pendingDecisions.add(MyDecision.Side_3_to_left(10000));
-    pendingDecisions.add(MyDecision.Side_2_to_left(10000));
-    return MyDecision.Side_1_to_left(10000);
+    pendingDecisions.add(MyDecision.Side_3_to_left(getSideLength(3)));
+    pendingDecisions.add(MyDecision.Side_2_to_left(getSideLength(2)));
+    return MyDecision.Side_1_to_left(getSideLength(1));
   }
 
   // ----------------------------------------
@@ -707,7 +710,14 @@ public class Driver implements IDriver {
       }
       return new MyDecision(false, side, coeff * length);
     }
+
+    @Override
+    public String toString() {
+      return "isAnglemovement" + isAngleMovement + " side " + sideId + " req transl : " + requestedTranslation ;
+
+    }
   }
+
 
   // ----------------------------------------
   // ----------------------------------------
