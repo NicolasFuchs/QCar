@@ -38,14 +38,14 @@ public class SimControlCtrl {
           protected Void call() throws Exception {
             if(doOnce && !refWM.isWarOver() && refWM.isSimulationOpened()){
               btnOneStep.setDisable(true);
-              refSim.simulateOneStep(300);
-              Thread.sleep(300);
+              refSim.simulateOneStep(10);
+              Thread.sleep(100);
               btnOneStep.setDisable(false);
               doOnce = false;
             } else {
               while (!isCancelled() && !doOnce && !refWM.isWarOver() && refWM.isSimulationOpened()) {
-                refSim.simulateOneStep(300);
-                Thread.sleep(600);
+                refSim.simulateOneStep(10);
+                Thread.sleep(40);
               }
             }
             return null;

@@ -77,7 +77,8 @@ public class ManualDrivingCtrl {
           protected Void call() throws Exception {
             System.out.println("Sim one step");
             refSim.simulateOneStep(getCurrentDecision());
-            System.out.println("Simulate on step done");
+            System.out.println("One step done");
+            setMoveLimit();
             return null;
           }
         };

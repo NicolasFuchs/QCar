@@ -135,7 +135,7 @@ public class SimulationCtrl {
 
   public void simulateOneStep(IDecision manualDecision){
     manualDriver.sendDecision(manualDecision);
-    simulateOneStep(1000);
+    simulateOneStep(100);
   }
 
   /**
