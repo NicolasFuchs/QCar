@@ -112,21 +112,26 @@ public class WorldManager implements IWorldManager {
      * notify the view of the change - increment the number of step
      */
 
-    step++;
-    // notifyAllWorldObserver(0);
-
-    // TODO uncomment the next line and send all decisions
-    List<IDecision> decisions = new ArrayList<>();
-    Random random = new Random();
-    for (int i = 0; i < drivenQCars.size(); i++) {
-      // decisions.add(new Decision(random.nextBoolean(), random.nextInt(4),
-      // (random.nextBoolean()?1:-1)*random.nextInt(5)));
-      decisions.add(new Decision(false, 2, Math.sqrt(3145)));
-    }
-    updateWorldState(decisions);
-    fetchSensors();
-    notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
-    notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
+     // TODO uncomment the next line and send all decisions
+     List<IDecision> decisions = new ArrayList<>();
+     for (int i = 0; i < sensors.size(); i++) {
+       playerChannels.get(i).sendSensors(sensors.get(i));
+     }
+     for (int i = 0; i < sensors.size(); i++) {
+       playerChannels.get(i).release();
+     }
+     try {
+       Thread.sleep(collectiveDelayInMicroSeconds);
+     } catch (InterruptedException e) {
+       e.printStackTrace();
+     }
+     for (PlayerChannel pc : playerChannels) {
+       decisions.add(pc.getDecision());
+     }
+     updateWorldState(decisions);
+     fetchSensors();
+     step++;
+     notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
   }
   
   private void fetchSensors() {
@@ -229,6 +234,7 @@ public class WorldManager implements IWorldManager {
     this.playerChannels = new ArrayList<>();
     this.allPoints = new ArrayList<>();
     this.qcars = new ArrayList<>();
+    this.sensors = new ArrayList<>();
   }
 
   // ======== Private methods =======================================
