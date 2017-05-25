@@ -122,18 +122,37 @@ public class WorldManager implements IWorldManager {
       // decisions.add(new Decision(random.nextBoolean(), random.nextInt(4),
       // (random.nextBoolean()?1:-1)*random.nextInt(5)));
       decisions.add(new Decision(false, 2, Math.sqrt(3145)));
-
     }
     updateWorldState(decisions);
+    fetchSensors();
+    notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
+    notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
+  }
+  
+  private void fetchSensors() {
+    List<Line2D> newPhotoSensors = new ArrayList<>();
+    List<Line2D> newDistanceSensors = new ArrayList<>();
+    List<ISensors> newSensors = new ArrayList<>();
     for (int i = 0; i < drivenQCars.size(); i++) {
-      ISensors sensor = WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars);
+      IQCar drivenQCar = drivenQCars.get(i);
+      ISensors sensor = WorldManagerPhysicsHelper.computeSensor(drivenQCar, qcars);
       if (sensor != null) {
-        sensors.add(sensor);
-        Line2D line0 = new Line2D.Double(sensor.mySelf().vertex(0), sensor.mySelf().vertex(1)); // FIX ME
-        // photoSensors.add(new Line2D.Double(sensor.mySelf(),
-        // WorldManagerPhysicsHelper.findIntersection(line0, lineSeen, true)));
+        newSensors.add(sensor);
+        // DistanceSensors
+        if (sensor.distanceSensor().isSomethingDetected()) {
+          Line2D distSensor = new Line2D.Double(new Point2D.Double((drivenQCar.vertex(0).getX()+drivenQCar.vertex(1).getX())/2, (drivenQCar.vertex(0).getY()+drivenQCar.vertex(1).getY())/2), sensor.distanceSensor().rayEnd());
+          newDistanceSensors.add(distSensor);
+        }
+        // PhotoSensors
+        for (ISeenVertex v : sensor.seenVertices()) {
+          Line2D photoS = new Line2D.Double(v.projectionLocation(), qcars.get(v.nature().qCarId()).vertex(v.vertexId()));
+          newPhotoSensors.add(photoS);
+        }
       }
     }
+    photoSensors = newPhotoSensors;
+    distanceSensors = newDistanceSensors;
+    sensors = newSensors;
   }
 
   @Override
@@ -260,9 +279,9 @@ public class WorldManager implements IWorldManager {
       car.vertex((sideId + 1) % 4).setLocation(car.vertex((sideId + 1) % 4).getX() + shiftX,
           car.vertex((sideId + 1) % 4).getY() + shiftY);
       collisions.add(collision);
-      notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
+      //notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
     }
-    notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
+    //notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
   }
 
   //Update the state of the world according to the latest changes
