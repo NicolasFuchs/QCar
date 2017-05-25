@@ -130,6 +130,11 @@ public class WorldManager implements IWorldManager {
         for (PlayerChannel pc : playerChannels) {
             decisions.add(pc.getDecision());
         }
+        for (int i = 0 ; i < decisions.size() ; i++) {
+          IDecision d = decisions.get(i) ;
+          d = Decision.validDecision(d, drivenQCars.get(i)) ;
+          decisions.set(i,d) ;
+        }
         updateWorldState(decisions);
         fetchSensors();
         step++;
