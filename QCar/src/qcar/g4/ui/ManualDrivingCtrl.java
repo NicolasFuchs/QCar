@@ -81,9 +81,7 @@ public class ManualDrivingCtrl {
         return new Task<Void>(){
           @Override
           protected Void call() throws Exception {
-            System.out.println("Sim one step");
             refSim.simulateOneStep(getCurrentDecision());
-            System.out.println("One step done");
             setMoveLimit();
             return null;
           }
@@ -145,16 +143,10 @@ public class ManualDrivingCtrl {
    * minimum translation possible for the driven QCar
    */
   private void setMoveLimit(){
-    System.out.println(sides.getSelectedToggle().getUserData() + " " +
-        movement.getSelectedToggle().getUserData());
-
     double min = Decision.minAllowedTranslation(qcar, (int) sides.getSelectedToggle().getUserData(),
         (boolean) movement.getSelectedToggle().getUserData());
     double max = Decision.maxAllowedTranslation(qcar, (int) sides.getSelectedToggle().getUserData(),
         (boolean) movement.getSelectedToggle().getUserData());
-
-    System.out.println("Span from " + min + " to " + max);
-
     sliderSpan.setMin(min);
     sliderSpan.setMax(max);
     sliderSpan.setValue(0.0);
