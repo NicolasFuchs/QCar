@@ -45,7 +45,7 @@ public class EndedSimulationCtrl {
   }
 
   /**
-   * Hand onClick event on the newSimBtn, restart the program from the editor
+   * Handle onClick event on the newSimBtn, restart the program from the editor
    */
   @FXML
   private void handleNewSimBtn(){

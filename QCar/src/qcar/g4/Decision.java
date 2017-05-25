@@ -83,16 +83,12 @@ public class Decision implements IDecision {
     if (decision.requestedTranslation() > 0) {
       double maxTranslation =
           maxAllowedTranslation(qcar, decision.sideId(), decision.isAngleMovement());
-      System.out.println("max " +maxTranslation);
-      System.out.println("requested" + decision.requestedTranslation());
       if (decision.requestedTranslation() > maxTranslation) {
         return new Decision(decision.isAngleMovement(), decision.sideId(), maxTranslation);
       }
     } else {
       double minTranslation =
           minAllowedTranslation(qcar, decision.sideId(), decision.isAngleMovement());
-      System.out.println("min " + minTranslation);
-      System.out.println("requested" + decision.requestedTranslation());
       if (decision.requestedTranslation() < minTranslation) {
         return new Decision(decision.isAngleMovement(), decision.sideId(), minTranslation);
       }
@@ -163,9 +159,12 @@ public class Decision implements IDecision {
       return -(minimumLengthSide - lengthAdjSide);
     }
   }
+
+  /**
+   * @return a string with all decision parameters
+   */
   @Override
   public String toString() {
     return "isAnglemovement" + isAngleMovement + " side " + sideId + " req transl : " + requestedTranslation ;
-
   }
 }

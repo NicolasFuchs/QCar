@@ -50,15 +50,27 @@ public class UIOp implements UIOperations {
 
   //------------------------------------------------------------------
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public MouseMode mouseMode() { return MouseMode.ZOOM; }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void actionRequest(double atX, double atY) { }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void infoRequest(double atX, double atY) { }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isActive(int zIndex) { return true; }
 
@@ -71,11 +83,17 @@ public class UIOp implements UIOperations {
     return ObservationPolicy.WORLD_BOUNDARY;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public SimulatorMode simulatorMode() {
     return simMode;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void zoneSelected(double fromX, double fromY,
       double toX,   double toY) {}
