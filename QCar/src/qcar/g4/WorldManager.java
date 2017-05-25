@@ -353,7 +353,7 @@ public class WorldManager implements IWorldManager {
             car.vertex(sideId).setLocation(car.vertex(sideId).getX() + shiftX, car.vertex(sideId).getY() + shiftY);
             car.vertex((sideId + 1) % 4).setLocation(car.vertex((sideId + 1) % 4).getX() + shiftX, car.vertex((sideId + 1) % 4).getY() + shiftY);
             collisions.add(collision);
-            //notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
+            notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
         }
         //notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
     }

@@ -10,7 +10,7 @@ import qcar.IQCar;
 
 public class GameProvider implements IGameProvider {
 
-  public static final int MAX_QCARS = 5;
+  public static final int MAX_QCARS = 20;
   public static final int POSITION_DISPERSION = 300;
   public static final Random R = new Random();
   public static final double SPAWN_PROBABILITY = 0.3;
