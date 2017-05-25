@@ -128,8 +128,8 @@ public class WorldManagerTest_g2 extends ApiTest {
         Point2D point = car.vertex(i);
         boolean inside=rect.contains(point.getX(), point.getY());
         if(!inside) {
-          System.out.println(rect);
-          System.out.println(point);
+          //System.out.println(rect);
+          //System.out.println(point);
         }
         assertTrue(inside);
       }

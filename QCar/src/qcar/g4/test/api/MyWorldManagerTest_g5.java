@@ -156,8 +156,8 @@ public class MyWorldManagerTest_g5 extends ApiTest {
               Point2D p=qcar.vertex(k);
               boolean inside=r.contains(p.getX(), p.getY());
               if(!inside) {
-                System.out.println(r);
-                System.out.println(p);
+                //System.out.println(r);
+                //System.out.println(p);
               }
               assertTrue(inside);
             }

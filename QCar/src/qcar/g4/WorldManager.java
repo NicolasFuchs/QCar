@@ -93,8 +93,8 @@ public class WorldManager implements IWorldManager {
 
     for (IQCar q : description.allQCar()) {
       QCar myQCar = new QCar(q);
-      System.out.println("Is maxSide lenght valid: " + myQCar.isSideLengthValid());
-      System.out.println("Is minArea valid: " + myQCar.isMinAreaValid());
+      //System.out.println("Is maxSide lenght valid: " + myQCar.isSideLengthValid());
+      //System.out.println("Is minArea valid: " + myQCar.isMinAreaValid());
       qcars.add(myQCar);
     }
 
@@ -117,7 +117,7 @@ public class WorldManager implements IWorldManager {
     for (int i = 0; i < players.size(); i++) {
       players.get(i).startDriverThread(playerChannels.get(i));
     }
-    System.out.println("SIMULATION OPENED");
+    //System.out.println("SIMULATION OPENED");
 
   }
 
@@ -153,10 +153,10 @@ public class WorldManager implements IWorldManager {
     }
     for (int i = 0 ; i < decisions.size() ; i++) {
       IDecision d = decisions.get(i) ;
-      System.out.println("decision demandée :" +d.toString());
+      //System.out.println("decision demandée :" +d.toString());
       d = Decision.validDecision(d, drivenQCars.get(i)) ;
       decisions.set(i,d) ;
-      System.out.println("decision appliquéee : " +d.toString());
+      //System.out.println("decision appliquéee : " +d.toString());
     }
     //        decisions = new ArrayList<>(); decisions.add(new Decision(false, 2, -Math.sqrt(20*20+25)));
     updateWorldState(decisions);

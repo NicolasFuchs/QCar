@@ -95,11 +95,11 @@ public class Driver implements IDriver {
 
 
     if (myCar != null) {
-      System.out.println("MAXSIDELENGTH : "+ myCar.nature().maxSideLength());
-      System.out.println("coté 0 : "+ getSideLength(0));
-      System.out.println("coté 1 : "+ getSideLength(1));
+      //System.out.println("MAXSIDELENGTH : "+ myCar.nature().maxSideLength());
+      //System.out.println("coté 0 : "+ getSideLength(0));
+      //System.out.println("coté 1 : "+ getSideLength(1));
       if (!pendingDecisions.isEmpty()) {
-        System.out.println("decision : " + pendingDecisions.get(0).toString());
+        //System.out.println("decision : " + pendingDecisions.get(0).toString());
         return pendingDecisions.remove(0);
       }   
 
@@ -107,18 +107,18 @@ public class Driver implements IDriver {
         if (sensors.collisionsWithMe().isEmpty()) {
           if (targetId == -1) {
             IDecision d = acquireTarget();
-            System.out.println("decision :" + d.toString());
+            //System.out.println("decision :" + d.toString());
             return acquireTarget();
           } else {
 
             IDecision d = followTargetDecision();
-            System.out.println("decision :" + d.toString());
+            //System.out.println("decision :" + d.toString());
             return d ;
           }
 
         } else {
           IDecision d = collisionDecision(sensors.collisionsWithMe());
-          System.out.println("decision :" + d.toString());
+          //System.out.println("decision :" + d.toString());
           return d;
         }
       } 

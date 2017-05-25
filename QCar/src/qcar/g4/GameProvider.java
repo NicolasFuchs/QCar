@@ -283,7 +283,7 @@ public class GameProvider implements IGameProvider {
    */ 
   private Point2D[] randomAlignedPositions(QCarNature nature) {
 
-    System.out.println("ENTER in randomAlignedPosition...");
+    //System.out.println("ENTER in randomAlignedPosition...");
     Point2D[] points = new Point2D[4];
     do{
       Point2D[] tmp = new Point2D[4];
@@ -401,7 +401,7 @@ public class GameProvider implements IGameProvider {
 
     }while(!checkEmplacementOnArena(points));
 
-    System.out.println(" -- EXIT --");
+    //System.out.println(" -- EXIT --");
     
     return points;
   }  

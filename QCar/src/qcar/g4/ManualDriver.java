@@ -52,7 +52,7 @@ public class ManualDriver implements IDriver {
   public void sendDecision(IDecision decision){
     this.currentDecision = decision;
     i++;
-    System.out.println(i + " - MPC: Decision received");
+    //System.out.println(i + " - MPC: Decision received");
   }
 
   /**
