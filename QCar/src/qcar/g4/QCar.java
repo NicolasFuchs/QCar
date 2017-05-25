@@ -15,8 +15,8 @@ public class QCar implements IQCar {
 
   /**
    * Constructor used by our gameProvider
-   * @param nature
-   * @param vertices
+   * @param nature nature of the new qcar
+   * @param vertices points of the new qcar
    */
   public QCar(QCarNature nature, Point2D[] vertices) {
     this.nature = nature;
@@ -31,29 +31,43 @@ public class QCar implements IQCar {
     if(nature.isParkingTarget())
       bonuses.set(8);
   }
-  
-  public boolean hasStillBonuses(){
-    return !bonuses.isEmpty();
-  }
-  
+
+  /**
+   * Consume the bonus from the Vertice if it's not already gone
+   * @return true if the Vertice still offers point, else false
+   */
   public boolean useVertice(int vertice){
     boolean use = bonuses.get(vertice);
     bonuses.clear(vertice);
     return use;
   }
-  
+
+  /**
+   * Consume the bonus from the Side if it's not already gone
+   * @return true if the side offers still point, else false
+   */
   public boolean useSide(int side){
     boolean use = bonuses.get(side+4);
     bonuses.clear(side+4);
     return use;
   }
-  
+
+  /**
+   * Consume the bonus from the parking if it's not already gone
+   * @return true if the parking offers still point, else false
+   */
   public boolean useParking(){
     boolean use = bonuses.get(8);
     bonuses.clear(8);
     return use;
   }
-  
+
+  /**
+   * Apply a movement to a QCar
+   * @param isAngleMovement type of movement
+   * @param sideId side targeted by the movement
+   * @param requestedTranslation movement size
+   */
   public void update(boolean isAngleMovement, int sideId, double requestedTranslation) {
     double[] vector = new double[2];
     if ((isAngleMovement && (sideId == 0 || sideId == 2)) || (!isAngleMovement && (sideId == 1 || sideId == 3))) {
@@ -76,11 +90,18 @@ public class QCar implements IQCar {
       vertices[p2] = new Point2D.Double(vertices[p2].getX()-vector[0],vertices[p2].getY()-vector[1]);
     }
   }
-  
+
+  /**
+   * Apply a decision to a qcar (not used)
+   * @param decision decision to apply
+   */
   public void update(IDecision decision) {
     update(decision.isAngleMovement(), decision.sideId(), decision.requestedTranslation()) ;
   }
-  
+
+  /**
+   * Increment the QCar score by 1
+   */
   public void incrementScore(){
     score++;
   }
