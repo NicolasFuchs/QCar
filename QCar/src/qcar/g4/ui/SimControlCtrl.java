@@ -23,15 +23,9 @@ public class SimControlCtrl {
   @FXML
   private Button btnStop;
 
-  @FXML
-  private Slider sliderSpeed;
-
   private SimulationCtrl refSim;
   private IWorldManager refWM;
   private boolean doOnce;
-
-
-
 
   @FXML
   void initialize() {
