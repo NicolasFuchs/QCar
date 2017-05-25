@@ -8,7 +8,7 @@ import qcar.IQCar;
 
 public class GameDescription implements IGameDescription{
   
-  /* Enumeration of the styles of games available
+  /** Enumeration of the styles of games available
    * 
    * The first QCars are always those being driven
    * 
@@ -39,7 +39,7 @@ public class GameDescription implements IGameDescription{
   
   private ArrayList<IQCar> cars;
   
-  /* Method to create a new GameDescription
+  /** Method to create a new GameDescription
    * Initialize the GameDescription with list of the QCar given in parameters
    * 
    *    @param  : ArrayList<IQCar>, the list of the QCars representing this game
@@ -48,9 +48,8 @@ public class GameDescription implements IGameDescription{
     this.cars = cars;
   }
   
-  /* Method to return the list of QCars describing this game
-   * 
-   *    @param  : -
+  /** Method to return the list of QCars describing this game
+   *
    *    @return : List<IQCar>, the list of the QCars representing this game
    */
   @Override

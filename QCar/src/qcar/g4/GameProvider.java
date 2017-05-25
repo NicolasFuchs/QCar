@@ -39,7 +39,7 @@ public class GameProvider implements IGameProvider {
   // Buffer for grid, avoid having a grid with the exact size of a QCar
   private double tol = 0.01 * MAX_SIDE_LENGTH; 
   
-  /* Method to create a new GameProvider
+  /** Method to create a new GameProvider
    * Initialize the next game with the wanted game style
    * 
    *    @param  : a GameStyles, from GameDescription.GameStyles, the wanted GameStyles to be used
@@ -50,7 +50,7 @@ public class GameProvider implements IGameProvider {
     this.game = game;
   }
   
-  /* Method to create a new game description
+  /** Method to create a new game description
    * Generate randomly distributed QCars in function of wanted game style
    * 
    *    @param  : integer, the number of wanted driven QCars
@@ -101,7 +101,7 @@ public class GameProvider implements IGameProvider {
     return new GameDescription(cars);
   }
     
-  /* Method to create a list of new randomly distributed QCars containing only driven QCars
+  /** Method to create a list of new randomly distributed QCars containing only driven QCars
    * 
    * PRECONDITION : to have called nextGame() at least one time
    * 
@@ -128,7 +128,7 @@ public class GameProvider implements IGameProvider {
     return cars;
   }
 
-  /* Method to create a list of new randomly distributed QCars with only driven and statics QCars
+  /** Method to create a list of new randomly distributed QCars with only driven and statics QCars
    * 
    * Return a list containing the specified number of driven QCars nbOfDrivers, and :
    * if nbOfDrivers<MAX_QCARS : "MAX_QCARS-number of driven QCars" static QCars 
@@ -168,7 +168,7 @@ public class GameProvider implements IGameProvider {
     return cars;
   }
     
-  /* Method to create a list of new randomly distributed QCars with only driven and parking QCars
+  /** Method to create a list of new randomly distributed QCars with only driven and parking QCars
    * 
    * Return a list containing the specified number of driven QCars nbOfDrivers, and :
    * if nbOfDrivers<MAX_QCARS : "MAX_QCARS-number of driven QCars" parking QCars 
@@ -209,7 +209,7 @@ public class GameProvider implements IGameProvider {
     return cars;
   }
 
-  /* Method to create a list of new randomly distributed QCars of mixed natures
+  /** Method to create a list of new randomly distributed QCars of mixed natures
    * 
    * Return a list containing the specified number of driven QCars nbOfDrivers, and :
    * if nbOfDrivers<MAX_QCARS : "MAX_QCARS-number of driven QCars" non-driven QCars 
@@ -252,11 +252,10 @@ public class GameProvider implements IGameProvider {
     return cars;  
   }
   
-  /* Method to create a list containing a single driven QCar
+  /** Method to create a list containing a single driven QCar
    * 
    * PRECONDITION : to have called nextGame() at least one time
-   * 
-   *    @param  : -
+   *
    *    @return : ArrayList<IQCar>, list of wanted containing a single QCar
    */ 
   private ArrayList<IQCar> debugStyle(){
@@ -270,7 +269,7 @@ public class GameProvider implements IGameProvider {
     return cars;
   }
   
-  /* Method to randomly generate the vertices coordinates of a valid QCar given his nature
+  /** Method to randomly generate the vertices coordinates of a valid QCar given his nature
    * 
    * Method generate coordinates where the QCar cannot be superposed with others
    * preexistant QCars
@@ -407,7 +406,7 @@ public class GameProvider implements IGameProvider {
     return points;
   }  
   
-  /* Method check occupation of the wanted emplacement for this QCar using "map" array
+  /** Method check occupation of the wanted emplacement for this QCar using "map" array
    * 
    * The game map is divided in an grid of square with side length equals to "maxSideLength+2*tol"
    * of a QCar
@@ -444,7 +443,7 @@ public class GameProvider implements IGameProvider {
     return true;
   }
   
-  /* Dynamic augmentation of game map grid, in function of emplacement of checked area of grid
+  /** Dynamic augmentation of game map grid, in function of emplacement of checked area of grid
    * and returning the new game map with all previous values of occupied emplacements
    * 
    * PRECONDITION : to have called nextGame at least once before
@@ -467,11 +466,10 @@ public class GameProvider implements IGameProvider {
     return newMap;
   }
   
-  /* Return a QCar with the coordinates of each corners of the map that contains all QCars
+  /** Return a QCar with the coordinates of each corners of the map that contains all QCars
    * 
    * PRECONDITION : to have called nextGame at least once before
-   * 
-   *    @param  : -
+   *
    *    @return : a single Qcar
    */
   private QCar obtainBorders(){
@@ -492,12 +490,11 @@ public class GameProvider implements IGameProvider {
     return new QCar(nature, borderVertices);
   }
   
-  /* Update the map in function of the coordinates of the vertices given in parameters
+  /** Update the map in function of the coordinates of the vertices given in parameters
    * 
    * PRECONDITION : to have called nextGame at least once before
    * 
    *    @param  : array of Point2D.double
-   *    @return : -
    */
   private void allocateVertices(Point2D[] vertices){
     
