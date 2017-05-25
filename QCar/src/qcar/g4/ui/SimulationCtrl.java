@@ -1,14 +1,11 @@
 package qcar.g4.ui;
 
-import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -19,10 +16,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Popup;
-import javafx.stage.PopupBuilder;
-import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import qcar.ICollision;
 import qcar.IDecision;
@@ -30,11 +23,7 @@ import qcar.IQCar;
 import qcar.IWorldManager;
 import qcar.g4.ManualDriver;
 import qcar.ui.QCarAnimationPane;
-import simviou.AnimationPane;
 import simviou.LogPanel;
-import simviou.ObservationPolicy;
-import simviou.UIOperations;
-import simviou.UIOperationsWithDefaults;
 import simviou.ViewPort;
 
 public class SimulationCtrl {
@@ -66,7 +55,7 @@ public class SimulationCtrl {
 
 
   /**
-   * This method get all the objects needed for the simulation from the previous view
+   * This methods binds the view with the informations from the world manager
    */
   public void setWM(IWorldManager wm, ManualDriver manualDriver){
 
@@ -103,10 +92,19 @@ public class SimulationCtrl {
     lstLeaderboard.setItems(sortedQCars);
   }
 
+  /**
+   * Set the stage so we can pass it to the next view later
+   * @param stage current stage
+   */
   public void setStage(Stage stage){
     this.stage = stage;
   }
 
+  /**
+   * This method load the header for a simulation without manually controlled QCar
+   * @return HBox containing all the controls
+   * @throws IOException exception with the fxml file
+   */
   private HBox getSimControl() throws IOException{
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/simControl.fxml"));
     HBox header = loader.load();
@@ -115,6 +113,11 @@ public class SimulationCtrl {
     return header;
   }
 
+  /**
+   * This method load the header for a simulation with a manually controlled QCar
+   * @return HBox containing all the controls
+   * @throws IOException exception with the fxml file
+   */
   private HBox getManualControl() throws IOException{
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/manualDriving.fxml"));
     HBox header = loader.load();
@@ -135,8 +138,13 @@ public class SimulationCtrl {
     simulateOneStep(1000);
   }
 
+  /**
+   * End the current simulation and go to the leaderboard view.
+   */
   public void endSimulation(){
+    System.out.println("sim closing");
     worldManager.closeSimulation();
+    System.out.println("sim closed");
     FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/fxml/endedSimulation.fxml"));
     try{
       Scene scene = new Scene(loader.load());
@@ -149,6 +157,9 @@ public class SimulationCtrl {
     }
   }
 
+  /**
+   * After each step, find the new events and add them to the logPane
+   */
   private void log(){
     String builder = "Step " + worldManager.stepNumber();
     if(worldManager.allNewCollisions().size() == 0)
@@ -161,10 +172,18 @@ public class SimulationCtrl {
     logPanel.addEntry(builder);
   }
 
+  /**
+   * Toggle between step by step mode and simulation running
+   * @param isAnimationRunning if true set ANIMATION_RUNNING in the UIOp
+   */
   public void changeSimMode(boolean isAnimationRunning){
     uiOp.setAnimationRunning(isAnimationRunning);
   }
 
+  /**
+   * Test if the simulation is still going on, if not inform the user
+   * and end the simulation
+   */
   private void isSimulationOver(){
     if(worldManager.isWarOver()){
       Alert alert = new Alert(AlertType.INFORMATION);
@@ -174,37 +193,6 @@ public class SimulationCtrl {
       alert.showAndWait();
       endSimulation();
     }
-  }
-
-  @FXML
-  private void handleListQCarClick(){
-//    IQCar clickedQcar = lstLeaderboard.getSelectionModel().getSelectedItem();
-//    double x0 = Double.MAX_VALUE;
-//    double y0 = Double.MAX_VALUE;
-//    double x1 = Double.MAX_VALUE * -1;
-//    double y1 = Double.MAX_VALUE * -1;
-//    double offset = clickedQcar.nature().maxSideLength();
-//    for(int i = 0; i < 4; i++){
-//      Point2D p = clickedQcar.vertex(i);
-//      if(x0 > p.getX())
-//        x0 = p.getX();
-//      if(y0 > p.getY())
-//        y0 = p.getY();
-//      if(x1 < p.getX())
-//        x1 = p.getX();
-//      if(y1 < p.getY())
-//        y1 = p.getY();
-//    }
-//    x0 -= offset;
-//    y0 -= offset;
-//    x1 += offset;
-//    y1 += offset;
-//
-//    viewPort.setNewWorldRegion(x0, x1, y0, y1);
-//    System.out.println("Zone selected x0="+x0+" x1="+x1+" y0="+y0+" y1="+y1);
-//    world.redrawAll();
-//    // TODO: Find a way to refresh the view after click
-//    // TODO: go back to the original view
   }
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
 import java.awt.geom.Point2D;
 
 import qcar.*;
@@ -36,7 +37,6 @@ public class Driver implements IDriver {
   Thread driverThread = new Thread() {
     public void run() {
       while (!finished) {
-        System.out.println("before play");
         sensors = pc.play(takeDecision());
         if (myCar == null) {
           myCar = sensors.mySelf();
@@ -69,8 +69,8 @@ public class Driver implements IDriver {
    */
   @Override
   public void startDriverThread(IPlayerChannel pc) {
-    System.out.println("Start driver thread called");
     this.pc = pc;
+    // THIS IS NOT DONE HERE, BUT IN THE THREAD
     // sensors = pc.play(MyDecision.IMMOBILE_DECISION);
     // myCar = sensors.mySelf();
     pendingDecisions = new ArrayList<IDecision>();
@@ -82,12 +82,7 @@ public class Driver implements IDriver {
    */
   @Override
   public void stopDriverThread() {
-    try {
-      finished = true;
-      driverThread.join();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    finished = true;
   }
 
   /**
@@ -97,23 +92,38 @@ public class Driver implements IDriver {
    * 
    */
   private IDecision takeDecision() {
-    if (!pendingDecisions.isEmpty()) {
-      return pendingDecisions.remove(0);
-    }
-    if (sensors != null) {
-      if (sensors.collisionsWithMe().isEmpty()) {
-        if (targetId == -1) {
-          return acquireTarget();
-        } else {
-          return followTargetDecision();
-        }
 
-      } else {
-        return collisionDecision(sensors.collisionsWithMe());
-      }
+
+    if (myCar != null) {
+      System.out.println("MAXSIDELENGTH : "+ myCar.nature().maxSideLength());
+      System.out.println("coté 0 : "+ getSideLength(0));
+      System.out.println("coté 1 : "+ getSideLength(1));
+      if (!pendingDecisions.isEmpty()) {
+        System.out.println("decision : " + pendingDecisions.get(0).toString());
+        return pendingDecisions.remove(0);
+      }   
+
+      if (sensors != null) {
+        if (sensors.collisionsWithMe().isEmpty()) {
+          if (targetId == -1) {
+            IDecision d = acquireTarget();
+            System.out.println("decision :" + d.toString());
+            return acquireTarget();
+          } else {
+
+            IDecision d = followTargetDecision();
+            System.out.println("decision :" + d.toString());
+            return d ;
+          }
+
+        } else {
+          IDecision d = collisionDecision(sensors.collisionsWithMe());
+          System.out.println("decision :" + d.toString());
+          return d;
+        }
+      } 
     }
-    return MyDecision.IMMOBILE_DECISION;
-  }
+    return MyDecision.IMMOBILE_DECISION;}
 
 
   /**
@@ -149,14 +159,16 @@ public class Driver implements IDriver {
     int i = 0;
     for (ISeenVertex vertex : sensors.seenVertices()) {
       if (vertex.nature().qCarId() == targetId) {
-        target[i] = vertex.projectionLocation();
-        if (vertex.nature().isParkingTarget()) {
-          isTargetParking = true;
-          i++;
-        } else {
-          if (vertex.offersBonus()) {
-            target[0] = vertex.projectionLocation();
-            break;
+        if (i<4) {
+          target[i] = vertex.projectionLocation();
+          if (vertex.nature().isParkingTarget()) {
+            isTargetParking = true;
+            i++;
+          } else {
+            if (vertex.offersBonus()) {
+              target[0] = vertex.projectionLocation();
+              break;
+            }
           }
         }
       }
@@ -189,7 +201,7 @@ public class Driver implements IDriver {
     HashMap<Integer, ArrayList<ISeenVertex>> vertexesFromSameId = new HashMap<>();
     // listing of interesting vertexes and gathering all vertexes from a certain ID
     for (ISeenVertex v : sensors.seenVertices()) {
-      int id = v.vertexId();
+      int id = v.nature().qCarId();
       // create the entry in the map in not present
       if (!vertexesFromSameId.containsKey(id)) {
         ArrayList<ISeenVertex> vertexes = new ArrayList<>();
@@ -265,224 +277,208 @@ public class Driver implements IDriver {
     if (vertexCode != 0) {
       switch (vertexCode) {
         case 15: // all vertices touch something -> try to reduce my size
-          decision = new MyDecision(false, r.nextInt(4), -GameProvider.MAX_SIDE_LENGTH);
+          // reduce one on the biggest side
+          int side = getSideLength(0) > getSideLength(1) ? 0 : 1;
+          if (r.nextBoolean()) {
+            side += 2;
+          }
+          decision = MyDecision.sideDecision(false, side, getSideLength((side + 1) % 4));
           break;
         case 14: // all vertices excepted the 3rd touch something
-          decision = MyDecision.ANGLE_NEG_SIDE_3;
+          decision = MyDecision.Side_3_to_right(getSideLength(3));
           break;
         case 13: // all vertices excepted the 2nd touch something
-          decision = MyDecision.ANGLE_NEG_SIDE_2;
+          decision = MyDecision.Side_2_to_right(getSideLength(3));
           break;
         case 12: // vertices 0 and 1 touch something
           if (previousVertexCode != vertexCode) {
-            decision = MyDecision.GROWTH_SIDE_0;
+            decision = MyDecision.Side_0_decr(getSideLength(1));
             break;
           } else {
-            decision = MyDecision.GROWTH_SIDE_2;
+            decision = MyDecision.Side_2_incr(getSideLength(1));
             previousVertexCode = -1;
             return decision;
           }
         case 11: // all vertices excepted the 1st touch something
-          decision = MyDecision.ANGLE_NEG_SIDE_1;
+          decision = MyDecision.Side_1_to_right(getSideLength(1));
           break;
         case 10: // vertices 0 and 2 touch something
           if (r.nextBoolean()) {
-            decision = MyDecision.ANGLE_POS_SIDE_2;
+            decision = MyDecision.Side_2_to_left(getSideLength(2));
           } else {
-            decision = MyDecision.ANGLE_POS_SIDE_0;
+            decision = MyDecision.Side_0_to_left(getSideLength(0));
           }
           break;
         case 9: // vertices 0 and 3 touch something
           if (previousVertexCode != vertexCode) {
-            decision = MyDecision.REDUCTION_SIDE_3;
+            decision = MyDecision.Side_3_decr(getSideLength(0));
             break;
           } else {
-            decision = MyDecision.REDUCTION_SIDE_1;
+            decision = MyDecision.Side_1_incr(getSideLength(0));
             previousVertexCode = -1;
             return decision;
           }
         case 8: // vertice 0 touch something
-          decision = MyDecision.ANGLE_POS_SIDE_0;
+          decision = MyDecision.Side_0_to_left(getSideLength(0));
           break;
         case 7: // all vertices excepted the 0th touch something
-          decision = MyDecision.ANGLE_NEG_SIDE_0;
+          decision = MyDecision.Side_0_to_right(getSideLength(0));
           break;
         case 6: // vertices 1 and 2 touch something
           if (previousVertexCode != vertexCode) {
-            decision = MyDecision.GROWTH_SIDE_1;
+            decision = MyDecision.Side_1_decr(getSideLength(0));
             break;
           } else {
-            decision = MyDecision.GROWTH_SIDE_3;
+            decision = MyDecision.Side_3_incr(getSideLength(0));
             previousVertexCode = -1;
             return decision;
           }
         case 5: // vertice 1 and 3 touch something
           if (r.nextBoolean()) {
-            decision = MyDecision.ANGLE_POS_SIDE_1;
+            decision = MyDecision.Side_1_to_left(getSideLength(1));
           } else {
-            decision = MyDecision.ANGLE_POS_SIDE_3;
+            decision = MyDecision.Side_3_to_left(getSideLength(3));
           }
           break;
         case 4: // vertice 1 touch something
-          decision = MyDecision.ANGLE_POS_SIDE_1;
+          decision = MyDecision.Side_1_to_left(getSideLength(1));;
           break;
         case 3: // vertices 2 and 3 touch something
           if (previousVertexCode != vertexCode) {
-            decision = MyDecision.REDUCTION_SIDE_2;
+            decision = MyDecision.Side_2_decr(getSideLength(1));
             break;
           } else {
-            decision = MyDecision.REDUCTION_SIDE_0;
+            decision = MyDecision.Side_0_incr(getSideLength(1));
             previousVertexCode = -1;
             return decision;
           }
         case 2: // vertex 2 touch something
-          decision = MyDecision.ANGLE_POS_SIDE_2;
+          decision = MyDecision.Side_2_to_left(getSideLength(2));
           break;
         case 1: // vertex 3 touch something
-          decision = MyDecision.ANGLE_POS_SIDE_3;
+          decision = MyDecision.Side_3_to_left(getSideLength(3));
           break;
       }
       previousVertexCode = vertexCode;
       return decision;
     } else {
       switch (sideCode) {
-        case 15: // all sides touch something -> try to reduce my size
-          decision = new MyDecision(false, r.nextInt(4), -GameProvider.MAX_SIDE_LENGTH);
+        case 15: // all vertices touch something -> try to reduce my size
+          // reduce one on the biggest side
+          int side = getSideLength(0) > getSideLength(1) ? 0 : 1;
+          if (r.nextBoolean()) {
+            side += 2;
+          }
+          decision = MyDecision.sideDecision(false, side, getSideLength((side + 1) % 4));
           break;
         case 14: // all sides excepted the 3rd touch something
-          if (previousSideCode != sideCode) {
-            decision = MyDecision.GROWTH_SIDE_1;
+        case 4: // side 1 touch something
+          if (previousVertexCode != vertexCode) {
+            decision = MyDecision.Side_1_decr(getSideLength(0));
             break;
           } else {
-            decision = MyDecision.GROWTH_SIDE_3;
-            previousSideCode = -1;
+            decision = MyDecision.Side_3_incr(getSideLength(0));
+            previousVertexCode = -1;
             return decision;
           }
-        case 13: // all sides excepted the 2nd touch something
-          if (previousSideCode != sideCode) {
-            decision = MyDecision.GROWTH_SIDE_0;
+        case 13:// all sides excepted the 2nd touch something
+        case 8: // side 0 touch something
+          if (previousVertexCode != vertexCode) {
+            decision = MyDecision.Side_0_decr(getSideLength(1));
             break;
           } else {
-            decision = MyDecision.GROWTH_SIDE_2;
-            previousSideCode = -1;
+            decision = MyDecision.Side_2_incr(getSideLength(1));
+            previousVertexCode = -1;
             return decision;
           }
         case 12: // sides 0 and 1 touch something
           if (r.nextBoolean()) {
-            decision = MyDecision.ANGLE_POS_SIDE_2;
+            decision = MyDecision.Side_2_to_left(getSideLength(2));
           } else {
-            decision = MyDecision.ANGLE_NEG_SIDE_3;
+            decision = MyDecision.Side_3_to_right(getSideLength(3));
           }
           break;
         case 11: // all sides excepted the 1st touch something
-          if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUCTION_SIDE_3;
+        case 1: // side 3 touch something
+          if (previousVertexCode != vertexCode) {
+            decision = MyDecision.Side_3_decr(getSideLength(0));
             break;
           } else {
-            decision = MyDecision.REDUCTION_SIDE_1;
-            previousSideCode = -1;
+            decision = MyDecision.Side_1_incr(getSideLength(0));
+            previousVertexCode = -1;
             return decision;
           }
         case 10: // sides 0 and 2 touch something
           if (myCar.sideOffersBonus(1)) {// try to gain distance from collisions
             if (r.nextBoolean()) {
-              decision = MyDecision.ANGLE_POS_SIDE_0;
+              decision = MyDecision.Side_0_to_left(getSideLength(0));
             } else {
-              decision = MyDecision.ANGLE_NEG_SIDE_2;
+              decision = MyDecision.Side_2_to_right(getSideLength(2));
             }
           } else {
             if (r.nextBoolean()) {
-              decision = MyDecision.ANGLE_NEG_SIDE_0;
+              decision = MyDecision.Side_0_to_right(getSideLength(0));
             } else {
-              decision = MyDecision.ANGLE_POS_SIDE_2;
+              decision = MyDecision.Side_2_to_left(getSideLength(2));
             }
           }
           break;
         case 9: // sides 0 and 3 touch something
           if (r.nextBoolean()) {
-            decision = MyDecision.ANGLE_POS_SIDE_1;
+            decision = MyDecision.Side_1_to_left(getSideLength(1));
           } else {
-            decision = MyDecision.ANGLE_NEG_SIDE_2;
+            decision = MyDecision.Side_2_to_right(getSideLength(2));
           }
           break;
-        case 8: // side 0 touch something
-          if (previousSideCode != sideCode) {
-            decision = MyDecision.GROWTH_SIDE_0;
-            break;
-          } else {
-            decision = MyDecision.GROWTH_SIDE_2;
-            previousSideCode = -1;
-            return decision;
-          }
+
         case 7: // all sides excepted the 0th touch something
+        case 2: // side 2 touch something
           if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUCTION_SIDE_2;
+            decision = MyDecision.Side_2_decr(getSideLength(1));
             break;
           } else {
-            decision = MyDecision.REDUCTION_SIDE_0;
+            decision = MyDecision.Side_0_incr(getSideLength(1));
             previousSideCode = -1;
             return decision;
           }
         case 6: // sides 1 and 2 touch something
           if (r.nextBoolean()) {
-            decision = MyDecision.ANGLE_POS_SIDE_3;
+            decision = MyDecision.Side_3_to_left(getSideLength(3));
           } else {
-            decision = MyDecision.ANGLE_NEG_SIDE_0;
+            decision = MyDecision.Side_0_to_right(getSideLength(0));
           }
           break;
         case 5: // sides 1 and 3 touch something
           if (myCar.sideOffersBonus(2)) { // try to gain distance from collisions
             if (r.nextBoolean()) {
-              decision = MyDecision.ANGLE_POS_SIDE_1;
+              decision = MyDecision.Side_1_to_left(getSideLength(1));
             } else {
-              decision = MyDecision.ANGLE_NEG_SIDE_3;
+              decision = MyDecision.Side_3_to_right(getSideLength(3));
             }
           } else {
             if (r.nextBoolean()) {
-              decision = MyDecision.ANGLE_NEG_SIDE_1;
+              decision = MyDecision.Side_1_to_right(getSideLength(1));
             } else {
-              decision = MyDecision.ANGLE_POS_SIDE_3;
+              decision = MyDecision.Side_3_to_left(getSideLength(3));
             }
           }
           break;
-        case 4: // side 1 touch something
-          if (previousSideCode != sideCode) {
-            decision = MyDecision.GROWTH_SIDE_1;
-            break;
-          } else {
-            decision = MyDecision.GROWTH_SIDE_3;
-            previousSideCode = -1;
-            return decision;
-          }
+
+
         case 3: // sides 2 and 3 touch something
           if (r.nextBoolean()) {
-            decision = MyDecision.ANGLE_POS_SIDE_0;
+            decision = MyDecision.Side_0_to_left(getSideLength(0));
           } else {
-            decision = MyDecision.ANGLE_NEG_SIDE_1;
+            decision = MyDecision.Side_1_to_right(getSideLength(1));
           }
           break;
-        case 2: // side 2 touch something
-          if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUCTION_SIDE_2;
-            break;
-          } else {
-            decision = MyDecision.REDUCTION_SIDE_0;
-            previousSideCode = -1;
-            return decision;
-          }
-        case 1: // side 3 touch something
-          if (previousSideCode != sideCode) {
-            decision = MyDecision.REDUCTION_SIDE_3;
-            break;
-          } else {
-            decision = MyDecision.REDUCTION_SIDE_1;
-            previousSideCode = -1;
-            return decision;
-          }
       }
-      previousSideCode = sideCode;
-      return decision;
     }
+
+
+    previousSideCode = sideCode;
+    return decision;
+
   }
 
   // ----------------------------------------
@@ -491,8 +487,8 @@ public class Driver implements IDriver {
    * 2-steps to make an advance in direction 0 (down)
    */
   private IDecision advanceDirection0() {
-    pendingDecisions.add(MyDecision.REDUCTION_SIDE_2);
-    return MyDecision.GROWTH_SIDE_0;
+    pendingDecisions.add(MyDecision.Side_2_decr(getSideLength(1)));
+    return MyDecision.Side_0_incr(myCar.nature().maxSideLength());
   }
 
   // ----------------------------------------
@@ -501,8 +497,8 @@ public class Driver implements IDriver {
    * 2-steps to make an advance in direction 1 (right)
    */
   private IDecision advanceDirection1() {
-    pendingDecisions.add(MyDecision.REDUCTION_SIDE_3);
-    return MyDecision.GROWTH_SIDE_1;
+    pendingDecisions.add(MyDecision.Side_3_decr(getSideLength(0)));
+    return MyDecision.Side_1_incr(myCar.nature().maxSideLength());
   }
 
   // ----------------------------------------
@@ -511,8 +507,8 @@ public class Driver implements IDriver {
    * 2-steps to make an advance in direction 2 (up)
    */
   private IDecision advanceDirection2() {
-    pendingDecisions.add(MyDecision.REDUCTION_SIDE_0);
-    return MyDecision.GROWTH_SIDE_2;
+    pendingDecisions.add(MyDecision.Side_0_decr(getSideLength(1)));
+    return MyDecision.Side_2_incr(myCar.nature().maxSideLength());
   }
 
   // ----------------------------------------
@@ -521,8 +517,8 @@ public class Driver implements IDriver {
    * 2-steps to make an advance in direction 3 (left)
    */
   private IDecision advanceDirection3() {
-    pendingDecisions.add(MyDecision.REDUCTION_SIDE_1);
-    return MyDecision.GROWTH_SIDE_3;
+    pendingDecisions.add(MyDecision.Side_1_decr(getSideLength(0)));
+    return MyDecision.Side_3_incr(myCar.nature().maxSideLength());
   }
 
   // ----------------------------------------
@@ -531,9 +527,9 @@ public class Driver implements IDriver {
    * 3-steps to make a quarter turn left
    */
   private IDecision quarterTurnLeft() {
-    pendingDecisions.add(MyDecision.angleDecision(true, 1, getSideLength(1)));
-    pendingDecisions.add(MyDecision.angleDecision(true, 2, getSideLength(2)));
-    return MyDecision.angleDecision(true, 3, getSideLength(3));
+    pendingDecisions.add(MyDecision.Side_3_to_left(getSideLength(3)));
+    pendingDecisions.add(MyDecision.Side_2_to_left(getSideLength(2)));
+    return MyDecision.Side_1_to_left(getSideLength(1));
   }
 
   // ----------------------------------------
@@ -542,9 +538,9 @@ public class Driver implements IDriver {
    * 3-steps to make a quarter turn right
    */
   private IDecision quarterTurnRight() {
-    pendingDecisions.add(MyDecision.angleDecision(false, 1, getSideLength(1)));
-    pendingDecisions.add(MyDecision.angleDecision(false, 2, getSideLength(2)));
-    return MyDecision.angleDecision(false, 3, getSideLength(3));
+    pendingDecisions.add(MyDecision.Side_1_to_right(getSideLength(1)));
+    pendingDecisions.add(MyDecision.Side_2_to_right(getSideLength(2)));
+    return MyDecision.Side_3_to_right(getSideLength(3));
   }
 
   // ----------------------------------------
@@ -590,48 +586,9 @@ public class Driver implements IDriver {
   /**
    * Decision generator with hardcoded ones
    */
-  /**
-   *
-   */
+
   public static class MyDecision implements IDecision {
     public final static MyDecision IMMOBILE_DECISION = new MyDecision(false, 0, 0);
-
-    public final static MyDecision REDUCTION_SIDE_0 =
-        new MyDecision(false, 0, -GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision REDUCTION_SIDE_1 =
-        new MyDecision(false, 1, -GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision REDUCTION_SIDE_2 =
-        new MyDecision(false, 2, -GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision REDUCTION_SIDE_3 =
-        new MyDecision(false, 3, -GameProvider.MAX_SIDE_LENGTH);
-
-
-    public final static MyDecision GROWTH_SIDE_0 =
-        new MyDecision(false, 0, GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision GROWTH_SIDE_1 =
-        new MyDecision(false, 1, GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision GROWTH_SIDE_2 =
-        new MyDecision(false, 2, GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision GROWTH_SIDE_3 =
-        new MyDecision(false, 3, GameProvider.MAX_SIDE_LENGTH);
-
-    public final static MyDecision ANGLE_POS_SIDE_0 =
-        new MyDecision(true, 0, GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision ANGLE_POS_SIDE_1 =
-        new MyDecision(true, 1, GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision ANGLE_POS_SIDE_2 =
-        new MyDecision(true, 2, GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision ANGLE_POS_SIDE_3 =
-        new MyDecision(true, 3, GameProvider.MAX_SIDE_LENGTH);
-
-    public final static MyDecision ANGLE_NEG_SIDE_0 =
-        new MyDecision(true, 0, -GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision ANGLE_NEG_SIDE_1 =
-        new MyDecision(true, 1, -GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision ANGLE_NEG_SIDE_2 =
-        new MyDecision(true, 2, -GameProvider.MAX_SIDE_LENGTH);
-    public final static MyDecision ANGLE_NEG_SIDE_3 =
-        new MyDecision(true, 3, -GameProvider.MAX_SIDE_LENGTH);
 
     private boolean isAngleMovement;
     private int sideId;
@@ -667,7 +624,71 @@ public class Driver implements IDriver {
           r.nextDouble() * qcar.nature().maxSideLength());
     }
 
-    // PRE: left is -1 or 1
+    public static MyDecision Side_0_to_left(double requestedTranslation) {
+      return angleDecision(true, 0, requestedTranslation);
+    }
+
+    public static MyDecision Side_0_to_right(double requestedTranslation) {
+      return angleDecision(false, 0, requestedTranslation);
+    }
+
+    public static MyDecision Side_0_incr(double requestedTranslation) {
+      return sideDecision(true, 0, requestedTranslation);
+    }
+
+    public static MyDecision Side_0_decr(double requestedTranslation) {
+      return sideDecision(false, 0, requestedTranslation);
+    }
+
+    public static MyDecision Side_1_to_left(double requestedTranslation) {
+      return angleDecision(true, 1, requestedTranslation);
+    }
+
+    public static MyDecision Side_1_to_right(double requestedTranslation) {
+      return angleDecision(false, 1, requestedTranslation);
+    }
+
+    public static MyDecision Side_1_incr(double requestedTranslation) {
+      return sideDecision(true, 1, requestedTranslation);
+    }
+
+    public static MyDecision Side_1_decr(double requestedTranslation) {
+      return sideDecision(false, 1, requestedTranslation);
+    }
+
+    public static MyDecision Side_2_to_left(double requestedTranslation) {
+      return angleDecision(true, 2, requestedTranslation);
+    }
+
+    public static MyDecision Side_2_to_right(double requestedTranslation) {
+      return angleDecision(false, 2, requestedTranslation);
+    }
+
+    public static MyDecision Side_2_incr(double requestedTranslation) {
+      return sideDecision(true, 2, requestedTranslation);
+    }
+
+    public static MyDecision Side_2_decr(double requestedTranslation) {
+      return sideDecision(false, 2, requestedTranslation);
+    }
+
+    public static MyDecision Side_3_to_left(double requestedTranslation) {
+      return angleDecision(true, 3, requestedTranslation);
+    }
+
+    public static MyDecision Side_3_to_right(double requestedTranslation) {
+      return angleDecision(false, 0, requestedTranslation);
+    }
+
+    public static MyDecision Side_3_incr(double requestedTranslation) {
+      return sideDecision(true, 3, requestedTranslation);
+    }
+
+    public static MyDecision Side_3_decr(double requestedTranslation) {
+      return sideDecision(false, 3, requestedTranslation);
+    }
+
+
     /**
      * @return an angle decision
      */
@@ -689,7 +710,14 @@ public class Driver implements IDriver {
       }
       return new MyDecision(false, side, coeff * length);
     }
+
+    @Override
+    public String toString() {
+      return "isAnglemovement" + isAngleMovement + " side " + sideId + " req transl : " + requestedTranslation ;
+
+    }
   }
+
 
   // ----------------------------------------
   // ----------------------------------------

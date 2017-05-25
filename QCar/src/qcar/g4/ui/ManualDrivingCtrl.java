@@ -1,12 +1,16 @@
 package qcar.g4.ui;
 
-
-import java.awt.geom.Point2D;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleGroup;
+import qcar.IDecision;
 import qcar.IQCar;
 import qcar.g4.Decision;
 
@@ -49,87 +53,115 @@ public class ManualDrivingCtrl {
     radioRotation.setToggleGroup(movement);
     radioTranslation.setToggleGroup(movement);
 
+    radioRotation.setUserData(true);
+    radioTranslation.setUserData(false);
+
     radioSide0.setToggleGroup(sides);
     radioSide1.setToggleGroup(sides);
     radioSide2.setToggleGroup(sides);
     radioSide3.setToggleGroup(sides);
 
-    radioSide0.setSelected(true);
+    radioSide0.setUserData(0);
+    radioSide1.setUserData(1);
+    radioSide2.setUserData(2);
+    radioSide3.setUserData(3);
+
     radioRotation.setSelected(true);
+    radioSide0.setSelected(true);
+
+    final Service<Void> moveService = new Service<Void>(){
+      @Override
+      protected Task<Void> createTask() {
+        return new Task<Void>(){
+          @Override
+          protected Void call() throws Exception {
+            System.out.println("Sim one step");
+            refSim.simulateOneStep(getCurrentDecision());
+            System.out.println("Simulate on step done");
+            return null;
+          }
+        };
+      }
+    };
+
+    btnMove.setOnAction(new EventHandler<ActionEvent>() {
+      @Override public void handle(ActionEvent e) {
+        moveService.cancel();
+        moveService.reset();
+        moveService.start();
+      }
+    });
   }
 
+  /**
+   * Set the qcar to be controlled manually
+   * @param qcar manually controlled QCar
+   */
   public void setManualQcar(IQCar qcar){
     this.qcar = qcar;
-    // setMoveLimit();
+
+    EventHandler radioChangeEvent = new EventHandler() {
+      @Override
+      public void handle(Event event) {
+        setMoveLimit();
+      }
+    };
+
+    radioSide0.setOnAction(radioChangeEvent);
+    radioSide1.setOnAction(radioChangeEvent);
+    radioSide2.setOnAction(radioChangeEvent);
+    radioSide3.setOnAction(radioChangeEvent);
+    radioTranslation.setOnAction(radioChangeEvent);
+    radioRotation.setOnAction(radioChangeEvent);
+
+    setMoveLimit();
   }
 
+  /**
+   * Set the reference of the parent controller
+   * @param refSim parent controller
+   */
   public void setParentCtrl(SimulationCtrl refSim){
     this.refSim = refSim;
   }
 
+  /**
+   * Handle the end of the simulation
+   */
   @FXML
   private void handleStopBtn(){
     refSim.endSimulation();
   }
 
-  public void setMoveLimit(){
-    // TODO calculate maxSpan and minSpan for every cases
-    double maxSpan = 0;
-    double minSpan = 0;
-    if (radioRotation.isSelected()) {   // case rotation
+  /**
+   * Set the slider values according the maximum and
+   * minimum translation possible for the driven QCar
+   */
+  private void setMoveLimit(){
+    System.out.println(sides.getSelectedToggle().getUserData() + " " +
+        movement.getSelectedToggle().getUserData());
 
-      if(radioSide0.isSelected()){
+    double min = Decision.minAllowedTranslation(qcar, (int) sides.getSelectedToggle().getUserData(),
+        (boolean) movement.getSelectedToggle().getUserData());
+    double max = Decision.maxAllowedTranslation(qcar, (int) sides.getSelectedToggle().getUserData(),
+        (boolean) movement.getSelectedToggle().getUserData());
 
-      } else if (radioSide1.isSelected()) {
+    System.out.println("Span from " + min + " to " + max);
 
-      } else if (radioSide2.isSelected()) {
-
-      } else if (radioSide3.isSelected()) {
-
-      }
-
-    } else {    // case Translation
-
-      if(radioSide0.isSelected() || radioSide2.isSelected()){
-        Point2D p0 =qcar.vertex(0);
-        Point2D p3 = qcar.vertex(3);
-        maxSpan = qcar.nature().maxSideLength() - p0.distance(p3);
-      } else if (radioSide1.isSelected() || radioSide3.isSelected()) {
-        Point2D p0 =qcar.vertex(0);
-        Point2D p1 = qcar.vertex(1);
-        maxSpan = qcar.nature().maxSideLength() - p0.distance(p1);
-      }
-
-    }
-    sliderSpan.setMin(minSpan);
-    sliderSpan.setMax(maxSpan);
+    sliderSpan.setMin(min);
+    sliderSpan.setMax(max);
     sliderSpan.setValue(0.0);
-    System.out.println("");
   }
 
-  @FXML
-  private void handleMoveButton(){
-    int sideId;
-    boolean isAngledMovement;
-    double requestedTranslation;
-
-    if(radioSide0.isSelected())
-      sideId = 0;
-    else if (radioSide1.isSelected())
-      sideId = 1;
-    else if (radioSide2.isSelected())
-      sideId = 2;
-    else
-      sideId = 3;
-
-    if(radioRotation.isSelected())
-      isAngledMovement = true;
-    else
-      isAngledMovement = false;
-
-    requestedTranslation = sliderSpan.getValue();
-
-    refSim.simulateOneStep(new Decision(isAngledMovement, sideId, requestedTranslation));
+  /**
+   * Create a decision with the side, movement type and span currently selected
+   * @return manual driver decision
+   */
+  private IDecision getCurrentDecision(){
+    return new Decision((boolean) movement.getSelectedToggle().getUserData(),
+        (int) sides.getSelectedToggle().getUserData(),
+        sliderSpan.getValue());
   }
+
 }
 

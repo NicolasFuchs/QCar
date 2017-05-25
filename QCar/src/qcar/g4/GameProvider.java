@@ -20,7 +20,7 @@ public class GameProvider implements IGameProvider {
   // SIDE_LENGTH_RATIO * nature.maxSideLength = minimal side length
   // ! Must be 0.0 < SIDE_LENGTH_RATIO < 1.0 !
   public static final double SIDE_LENGTH_RATIO = 0.01;
-  
+
   public static final double MAX_SIDE_LENGTH = 7.4;
   
   // ! Must be 0.0 < SIDE_LENGTH_RATIO < 1.0 !

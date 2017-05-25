@@ -1,5 +1,6 @@
 package qcar.g4;
 
+import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -49,11 +50,13 @@ public class WorldManagerPhysicsHelper {
         }
         Point2D PointInA = pointBaseXYToBaseA12(allQCars.get(i).vertex(j), eye, IMatrix);
         if (PointInA.getX() >= 0 && PointInA.getY() >= 0) {
-          for (int k = 0; k < allQCars.size(); k++) {
+          intersected : for (int k = 0; k < allQCars.size(); k++) {
             if (!allQCars.get(k).isAlive()) continue;
             for (int l = 0; l < 4; l++) {
               if (allQCars.get(k).vertex(l) == allQCars.get(i).vertex(j) || allQCars.get(k).vertex((l+1)%4) == allQCars.get(i).vertex(j)) continue;
-              if (findIntersection(new Line2D.Double(allQCars.get(i).vertex(j), eye), new Line2D.Double(allQCars.get(k).vertex(l), allQCars.get(k).vertex((l+1)%4)), false) != null) continue;
+              if (findIntersection(new Line2D.Double(allQCars.get(i).vertex(j), eye), new Line2D.Double(allQCars.get(k).vertex(l), allQCars.get(k).vertex((l+1)%4)), false) != null) {
+                break intersected;
+              }
               start = (drivenQCar.vertex(0).getX() < drivenQCar.vertex(1).getX())? drivenQCar.vertex(0) : drivenQCar.vertex(1);
               end = (drivenQCar.vertex(0).getX() < drivenQCar.vertex(1).getX())? drivenQCar.vertex(1) : drivenQCar.vertex(0);
               Line2D line0 = new Line2D.Double(start, end);
@@ -89,15 +92,25 @@ public class WorldManagerPhysicsHelper {
       double requestedTranslation = decision.requestedTranslation();
       boolean isAngleMovement = decision.isAngleMovement();
       Point2D[] vertices = {car.vertex(0), car.vertex(1), car.vertex(2), car.vertex(3)};
-      if (requestedTranslation == 0 || (!isAngleMovement && (((sideId == 0 || sideId == 1) && requestedTranslation > 0) || ((sideId == 2 || sideId == 3) && requestedTranslation < 0)))) continue; // No generated collision (inner movement)
+      if (!isAngleMovement && requestedTranslation <= 0) continue; // No generated collision (inner movement)
       Line2D[] A1A2 = findAxes(decision, car);
       double ratio = (Math.pow(A1A2[1].getX2()-A1A2[1].getX1(), 2)+Math.pow(A1A2[1].getY2()-A1A2[1].getY1(), 2))/(Math.pow(A1A2[0].getX2()-A1A2[0].getX1(), 2)+Math.pow(A1A2[0].getY2()-A1A2[0].getY1(), 2));
       double A2_coor = (isAngleMovement) ? ratio : 1;    // The final collision is the one with the smallest A2 coordinate (!isAngleMovement) or the the smallest ratio A2/A1 (isAngleMovement)
       ICollision col = null;
       List<ICollision> colCandidates = new ArrayList<>();
-      Line2D[] areaLines = findLines(decision, car, A1A2[1]);
-      double[][] IMatrix = invertMatrix(computePMatrix(A1A2[0],A1A2[1]));
-      Point2D origin = (!isAngleMovement || ((sideId == 0 || sideId == 3) && requestedTranslation < 0) || ((sideId == 1 || sideId == 2) && requestedTranslation > 0)) ? car.vertex((sideId+1)%4) : car.vertex(sideId);
+      Line2D[] areaLines = findLines(decision, car, A1A2);
+      double[][] Matrix = computePMatrix(A1A2[0],A1A2[1]);
+      double[][] IMatrix = invertMatrix(Matrix);
+      Point2D origin = null;
+      if (!isAngleMovement) {
+        origin = car.vertex((sideId+1)%4);
+      } else {
+        if (requestedTranslation > 0) {
+          origin = car.vertex((sideId+1)%4);
+        } else {
+          origin = car.vertex(sideId);
+        }
+      }
       Point2D PointInA = null, thePointInA = null;
       for (int j = 0; j < allQCars.size(); j++) {
         if (car == allQCars.get(j)) continue;
@@ -113,7 +126,7 @@ public class WorldManagerPhysicsHelper {
               colCandidates.add(col);
               thePointInA = PointInA;
               A2_coor = (isAngleMovement) ? (PointInA.getY())/(1-PointInA.getX()) : PointInA.getY();
-              
+
             }
           }
           if (!hitCar.nature().isParkingTarget()) {
@@ -150,16 +163,11 @@ public class WorldManagerPhysicsHelper {
     }
     return colList;
   }
-  
+
   // returns the ID of the vertex/side of the driven QCar involved in the collision
   private static int collisionID(Point2D[] vertices, Point2D PointInA, Point2D origin, int sideID, boolean isAngleMovement) {
-    if (isAngleMovement) {
-      if (PointInA.getX() == 0 && vertices[sideID] != origin) return (sideID+1)%4;
+      if ((isAngleMovement && PointInA.getX() == 0 && vertices[sideID] != origin) || (!isAngleMovement && PointInA.getX() == 0)) return (sideID+1)%4;
       else return sideID;
-    } else {
-      if (PointInA.getX() == 0) return (sideID+1)%4;
-      else return sideID;
-    }
   }
 
   // returns the axes a1 and a2 according to the movement and the QCar
@@ -168,50 +176,53 @@ public class WorldManagerPhysicsHelper {
     Point2D p1,p2,p3,p4;
     int sideId = decision.sideId();
     if (decision.isAngleMovement()) {
-      if (((sideId == 0 || sideId == 3) && decision.requestedTranslation() > 0) || ((sideId == 1 || sideId == 2) && decision.requestedTranslation() < 0)) {
-        p1 = car.vertex((sideId+3)%4); p2 = car.vertex(sideId); p3 = car.vertex((sideId+1)%4); p4 = car.vertex(sideId);
+      if (decision.requestedTranslation() > 0) {
+        p1 = car.vertex((sideId+1)%4); p2 = car.vertex((sideId+2)%4); p3 = car.vertex(sideId); p4 = car.vertex((sideId+1)%4);
       } else {
-        p1 = car.vertex(sideId); p2 = car.vertex((sideId+3)%4); p3 = car.vertex(sideId); p4 = car.vertex((sideId+1)%4);
+        p1 = car.vertex(sideId); p2 = car.vertex((sideId+3)%4); p3 = car.vertex((sideId+1)%4); p4 = car.vertex(sideId);
       }
     } else {
-      p1 = car.vertex(sideId); p2 = car.vertex((sideId+1)%4); p3 = car.vertex((sideId+2)%4); p4 = car.vertex((sideId+1)%4);
+      if (decision.requestedTranslation() > 0) {
+        p1 = car.vertex((sideId+1)%4); p2 = car.vertex(sideId); p3 = car.vertex((sideId+2)%4); p4 = car.vertex((sideId+1)%4);
+      } else {
+        return null;
+      }
     }
     double divider = Math.abs(decision.requestedTranslation())/Math.sqrt(Math.pow(p4.getX()-p3.getX(),2) + Math.pow(p4.getY()-p3.getY(),2));
-    res[0] = new Line2D.Double(new Point2D.Double(p2.getX(),p2.getY()), new Point2D.Double(p1.getX(),p1.getY()));                                                               // a1
+    res[0] = new Line2D.Double(new Point2D.Double(p1.getX(),p1.getY()), new Point2D.Double(p2.getX(),p2.getY()));                                                               // a1
     res[1] = new Line2D.Double(new Point2D.Double(p4.getX(),p4.getY()), new Point2D.Double(p4.getX()+(p4.getX()-p3.getX())*divider,p4.getY()+(p4.getY()-p3.getY())*divider));   // a2
     return res;
   }
 
   // returns 2 (angleMovement) or 3 (!angleMovement) lines delimiting the area swept by the movement
-  private static Line2D[] findLines(IDecision decision, IQCar car, Line2D A2) {
-    Line2D[] res = new Line2D[3]; Point2D p1,p2; int sideId = decision.sideId(); double requestedTranslation = decision.requestedTranslation();
-    double shiftX = A2.getX2()-A2.getX1(); double shiftY = A2.getY2()-A2.getY1();
+  private static Line2D[] findLines(IDecision decision, IQCar car, Line2D [] A1A2) {
+    Line2D[] res = new Line2D[3];
     if (decision.isAngleMovement()) {
-      if (((sideId == 0 || sideId == 3) && requestedTranslation > 0) || ((sideId == 1 || sideId == 2) && requestedTranslation < 0)) {
-        p1 = car.vertex(sideId); p2 = car.vertex((sideId+1)%4);
-        if (p1.getX()+shiftX >= p2.getX()) res[0] = new Line2D.Double(p1.getX(), p1.getY(), p1.getX()+shiftX, p1.getY()+shiftY);
-        else res[0] = new Line2D.Double(p1.getX()+shiftX, p1.getY()+shiftY, p1.getX(), p1.getY());
-        p1 = car.vertex(sideId); p2 = car.vertex((sideId+3)%4);
-        if (p1.getX()+shiftX >= p2.getX()) res[1] = new Line2D.Double(p2.getX(), p2.getY(), p1.getX()+shiftX, p1.getY()+shiftY);
-        else res[1] = new Line2D.Double(p1.getX()+shiftX, p1.getY()+shiftY, p2.getX(), p2.getY());     
-      } else {
-        p1 = car.vertex(sideId); p2 = car.vertex((sideId+1)%4);
-        if (p1.getX()+shiftX >= p2.getX()) res[0] = new Line2D.Double(p2.getX()+shiftX, p2.getY()+shiftY, p2.getX(), p2.getY());
-        else res[0] = new Line2D.Double(p2.getX(), p2.getY(), p2.getX()+shiftX, p2.getY()+shiftY);
-        p1 = car.vertex((sideId+1)%4); p2 = car.vertex((sideId+2)%4);
-        if (p1.getX()+shiftX >= p2.getX()) res[1] = new Line2D.Double(p2.getX(), p2.getY(), p1.getX()+shiftX, p1.getY()+shiftY);
-        else res[1] = new Line2D.Double(p1.getX()+shiftX, p1.getY()+shiftY, p2.getX(), p2.getY());
-      }
+      //Ligne de l'axe A2
+      Point2D start = (A1A2[1].getX1() < A1A2[1].getX2()) ? A1A2[1].getP1() : A1A2[1].getP2() ;
+      Point2D end = (A1A2[1].getX1() > A1A2[1].getX2()) ? A1A2[1].getP1() : A1A2[1].getP2() ;
+      res[0] = new Line2D.Double(start, end);
+
+      //Ligne de l'axe A2_P2 - A1_P2 (hypothenuse des axes)
+      start = (A1A2[1].getX2() < A1A2[0].getX2()) ? A1A2[1].getP2() : A1A2[0].getP2() ;
+      end = (A1A2[1].getX2() > A1A2[0].getX2()) ? A1A2[1].getP2() : A1A2[0].getP2() ;
+      res[1] = new Line2D.Double(start, end);
     } else {
-      p1 = car.vertex((sideId+1)%4); p2 = car.vertex((sideId+2)%4);
-      if (p1.getX() >= p2.getX()) res[0] = new Line2D.Double(p1.getX(), p1.getY(), p1.getX()+shiftX, p1.getY()+shiftY);
-      else res[0] = new Line2D.Double(p1.getX()+shiftX, p1.getY()+shiftY, p1.getX(), p1.getY());
-      p1 = car.vertex(sideId); p2 = car.vertex((sideId+1)%4);
-      if (p1.getX() >= p2.getX()) res[1] = new Line2D.Double(p2.getX()+shiftX, p2.getY()+shiftY, p1.getX()+shiftX, p1.getY()+shiftY);
-      else res[1] = new Line2D.Double(p1.getX()+shiftX, p1.getY()+shiftY, p2.getX()+shiftX, p2.getY()+shiftY);
-      p1 = car.vertex((sideId+3)%4); p2 = car.vertex(sideId);
-      if (p1.getX() >= p2.getX()) res[2] = new Line2D.Double(p2.getX()+shiftX, p2.getY()+shiftY, p2.getX(), p2.getY());
-      else res[2] = new Line2D.Double(p2.getX(), p2.getY(), p2.getX()+shiftX, p2.getY()+shiftY);
+      //Ligne de l'axe A2
+      Point2D start = (A1A2[1].getX1() < A1A2[1].getX2()) ? A1A2[1].getP1() : A1A2[1].getP2() ;
+      Point2D end = (A1A2[1].getX1() > A1A2[1].getX2()) ? A1A2[1].getP1() : A1A2[1].getP2() ;
+      res[0] = new Line2D.Double(start, end);
+
+      //Ligne de l'axe A1 decale
+      start = (A1A2[1].getX2() < (A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[1].getP2() : new Point2D.Double((A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY2() + (A1A2[1].getY2() - A1A2[1].getY1())));
+      end = (A1A2[1].getX2() > (A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[1].getP2() : new Point2D.Double((A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY2() + (A1A2[1].getY2() - A1A2[1].getY1())));
+      res[1] = new Line2D.Double(start, end);
+
+      //Ligne de l'axe A2 decale
+      start = (A1A2[0].getX2() < (A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[0].getP2() : new Point2D.Double((A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY2() + (A1A2[1].getY2() - A1A2[1].getY1())));
+      end = (A1A2[0].getX2() > (A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[0].getP2() : new Point2D.Double((A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY2() + (A1A2[1].getY2() - A1A2[1].getY1())));
+      res[2] = new Line2D.Double(start, end);
+
     }
     return res;
   }
@@ -307,6 +318,17 @@ public class WorldManagerPhysicsHelper {
     double y = computePointFrom0XYToBaseA12(p_O, p_1Matrix).getY();
     Point2D p_A = new Point2D.Double(x, y);
     return p_A;
+  }
+  
+  public static double signedArea(Point2D p1, Point2D p2, Point2D p3) {
+    return (p2.getX()-p1.getX())*(p3.getY()-p1.getY()) - (p3.getX()-p1.getX())*(p2.getY()-p1.getY());
+    // negative if clockwise; twice the area of the triangle
+  }
+  public static int ccw(Point2D p1, Point2D p2, Point2D p3) {
+      double a = signedArea(p1, p2, p3);
+      if (a<0) return -1;
+      if (a>0) return +1;
+      return 0;
   }
 
 }

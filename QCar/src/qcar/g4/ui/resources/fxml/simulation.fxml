@@ -15,7 +15,7 @@
       <VBox prefHeight="373.0" prefWidth="176.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="Leaderboard :" />
-            <ListView fx:id="lstLeaderboard" onMouseClicked="#handleListQCarClick" prefHeight="503.0" prefWidth="161.0" />
+            <ListView fx:id="lstLeaderboard" prefHeight="503.0" prefWidth="161.0" />
          </children>
          <BorderPane.margin>
             <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
