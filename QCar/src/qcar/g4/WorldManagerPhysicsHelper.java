@@ -49,11 +49,13 @@ public class WorldManagerPhysicsHelper {
         }
         Point2D PointInA = pointBaseXYToBaseA12(allQCars.get(i).vertex(j), eye, IMatrix);
         if (PointInA.getX() >= 0 && PointInA.getY() >= 0) {
-          for (int k = 0; k < allQCars.size(); k++) {
+          intersected : for (int k = 0; k < allQCars.size(); k++) {
             if (!allQCars.get(k).isAlive()) continue;
             for (int l = 0; l < 4; l++) {
               if (allQCars.get(k).vertex(l) == allQCars.get(i).vertex(j) || allQCars.get(k).vertex((l+1)%4) == allQCars.get(i).vertex(j)) continue;
-              if (findIntersection(new Line2D.Double(allQCars.get(i).vertex(j), eye), new Line2D.Double(allQCars.get(k).vertex(l), allQCars.get(k).vertex((l+1)%4)), false) != null) continue;
+              if (findIntersection(new Line2D.Double(allQCars.get(i).vertex(j), eye), new Line2D.Double(allQCars.get(k).vertex(l), allQCars.get(k).vertex((l+1)%4)), false) != null) {
+                break intersected;
+              }
               start = (drivenQCar.vertex(0).getX() < drivenQCar.vertex(1).getX())? drivenQCar.vertex(0) : drivenQCar.vertex(1);
               end = (drivenQCar.vertex(0).getX() < drivenQCar.vertex(1).getX())? drivenQCar.vertex(1) : drivenQCar.vertex(0);
               Line2D line0 = new Line2D.Double(start, end);
