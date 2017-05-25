@@ -556,7 +556,7 @@ public class Driver implements IDriver {
    * @return the length of the requested side
    */
   private double getSideLength(int sideId) {
-    return myCar.vertex(sideId).distance(myCar.vertex((sideId + 1 % 4)));
+    return myCar.vertex(sideId).distance(myCar.vertex((sideId + 1) % 4));
   }
 
   // ----------------------------------------
