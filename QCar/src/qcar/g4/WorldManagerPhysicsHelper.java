@@ -1,5 +1,6 @@
 package qcar.g4;
 
+import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -91,14 +92,15 @@ public class WorldManagerPhysicsHelper {
       double requestedTranslation = decision.requestedTranslation();
       boolean isAngleMovement = decision.isAngleMovement();
       Point2D[] vertices = {car.vertex(0), car.vertex(1), car.vertex(2), car.vertex(3)};
-      if (requestedTranslation <= 0) continue; // No generated collision (inner movement)
+      if (!isAngleMovement && requestedTranslation <= 0) continue; // No generated collision (inner movement)
       Line2D[] A1A2 = findAxes(decision, car);
       double ratio = (Math.pow(A1A2[1].getX2()-A1A2[1].getX1(), 2)+Math.pow(A1A2[1].getY2()-A1A2[1].getY1(), 2))/(Math.pow(A1A2[0].getX2()-A1A2[0].getX1(), 2)+Math.pow(A1A2[0].getY2()-A1A2[0].getY1(), 2));
       double A2_coor = (isAngleMovement) ? ratio : 1;    // The final collision is the one with the smallest A2 coordinate (!isAngleMovement) or the the smallest ratio A2/A1 (isAngleMovement)
       ICollision col = null;
       List<ICollision> colCandidates = new ArrayList<>();
       Line2D[] areaLines = findLines(decision, car, A1A2);
-      double[][] IMatrix = invertMatrix(computePMatrix(A1A2[0],A1A2[1]));
+      double[][] Matrix = computePMatrix(A1A2[0],A1A2[1]);
+      double[][] IMatrix = invertMatrix(Matrix);
       Point2D origin = null;
       if (!isAngleMovement) {
         origin = car.vertex((sideId+1)%4);
@@ -187,7 +189,7 @@ public class WorldManagerPhysicsHelper {
       }
     }
     double divider = Math.abs(decision.requestedTranslation())/Math.sqrt(Math.pow(p4.getX()-p3.getX(),2) + Math.pow(p4.getY()-p3.getY(),2));
-    res[0] = new Line2D.Double(new Point2D.Double(p2.getX(),p2.getY()), new Point2D.Double(p1.getX(),p1.getY()));                                                               // a1
+    res[0] = new Line2D.Double(new Point2D.Double(p1.getX(),p1.getY()), new Point2D.Double(p2.getX(),p2.getY()));                                                               // a1
     res[1] = new Line2D.Double(new Point2D.Double(p4.getX(),p4.getY()), new Point2D.Double(p4.getX()+(p4.getX()-p3.getX())*divider,p4.getY()+(p4.getY()-p3.getY())*divider));   // a2
     return res;
   }
@@ -212,13 +214,13 @@ public class WorldManagerPhysicsHelper {
       res[0] = new Line2D.Double(start, end);
 
       //Ligne de l'axe A1 decale
-      start = (A1A2[1].getX2() < (A1A2[0].getX1() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[1].getP2() : new Point2D.Double((A1A2[0].getX1() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY1() + (A1A2[1].getY2() - A1A2[1].getY1())));
-      end = (A1A2[1].getX2() > (A1A2[0].getX1() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[1].getP2() : new Point2D.Double((A1A2[0].getX1() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY1() + (A1A2[1].getY2() - A1A2[1].getY1())));
+      start = (A1A2[1].getX2() < (A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[1].getP2() : new Point2D.Double((A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY2() + (A1A2[1].getY2() - A1A2[1].getY1())));
+      end = (A1A2[1].getX2() > (A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[1].getP2() : new Point2D.Double((A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY2() + (A1A2[1].getY2() - A1A2[1].getY1())));
       res[1] = new Line2D.Double(start, end);
 
       //Ligne de l'axe A2 decale
-      start = (A1A2[0].getX1() < (A1A2[0].getX1() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[0].getP1() : new Point2D.Double((A1A2[0].getX1() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY1() + (A1A2[1].getY2() - A1A2[1].getY1())));
-      end = (A1A2[0].getX1() > (A1A2[0].getX1() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[0].getP1() : new Point2D.Double((A1A2[0].getX1() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY1() + (A1A2[1].getY2() - A1A2[1].getY1())));
+      start = (A1A2[0].getX2() < (A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[0].getP2() : new Point2D.Double((A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY2() + (A1A2[1].getY2() - A1A2[1].getY1())));
+      end = (A1A2[0].getX2() > (A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1()))) ? A1A2[0].getP2() : new Point2D.Double((A1A2[0].getX2() + (A1A2[1].getX2() - A1A2[1].getX1())), (A1A2[0].getY2() + (A1A2[1].getY2() - A1A2[1].getY1())));
       res[2] = new Line2D.Double(start, end);
 
     }
@@ -316,6 +318,17 @@ public class WorldManagerPhysicsHelper {
     double y = computePointFrom0XYToBaseA12(p_O, p_1Matrix).getY();
     Point2D p_A = new Point2D.Double(x, y);
     return p_A;
+  }
+  
+  public static double signedArea(Point2D p1, Point2D p2, Point2D p3) {
+    return (p2.getX()-p1.getX())*(p3.getY()-p1.getY()) - (p3.getX()-p1.getX())*(p2.getY()-p1.getY());
+    // negative if clockwise; twice the area of the triangle
+  }
+  public static int ccw(Point2D p1, Point2D p2, Point2D p3) {
+      double a = signedArea(p1, p2, p3);
+      if (a<0) return -1;
+      if (a>0) return +1;
+      return 0;
   }
 
 }
