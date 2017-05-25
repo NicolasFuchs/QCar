@@ -13,8 +13,14 @@ public class WorldManagerPhysicsHelper {
 
   // stores the collisions for each driver
   private static HashMap<Integer, ArrayList<ICollision>> driversColCache;
+  // stores the projected point of the collision on side A2
   public static HashMap<ICollision, Point2D> collisionOrigins;
 
+  /**
+   * @param drivenQCar : QCar driven manually or by a driver
+   * @param allQCars : List of all QCar of the simulation
+   * @return Sensor for the drivenQCar
+   */
   public static ISensors computeSensor(IQCar drivenQCar, List<IQCar> allQCars) {
     if (driversColCache == null) {
       driversColCache = new HashMap<>();
@@ -74,7 +80,11 @@ public class WorldManagerPhysicsHelper {
     return sensors;
   }
 
-  // The Decision at index i is applied to the driven QCar at index i
+  /**
+   * @param drivenQCars : QCar driven manually or by a driver
+   * @param allDecisions : The Decision at index i is applied to the driven QCar at index i
+   * @return List of all Collision created
+   */
   public static List<ICollision> computeCollisions(List<IQCar> drivenQCars, List<IDecision> allDecisions, List<IQCar> allQCars) {
     if (drivenQCars == null || allDecisions == null || allQCars == null) return null;
     if (drivenQCars.size() != allDecisions.size()) return null; // Incoherence if the drivenQCars and allDecisions sizes are different
@@ -164,13 +174,24 @@ public class WorldManagerPhysicsHelper {
     return colList;
   }
 
-  // returns the ID of the vertex/side of the driven QCar involved in the collision
+  /**
+   * @param vertices : points of the QCar
+   * @param PointInA : vertex transformed into A1A2 axes
+   * @param origin : center of the axes
+   * @param sideID : side moved
+   * @param isAngleMovement
+   * @return ID of the vertex/side of the driven QCar involved in the collision
+   */
   private static int collisionID(Point2D[] vertices, Point2D PointInA, Point2D origin, int sideID, boolean isAngleMovement) {
       if ((isAngleMovement && PointInA.getX() == 0 && vertices[sideID] != origin) || (!isAngleMovement && PointInA.getX() == 0)) return (sideID+1)%4;
       else return sideID;
   }
 
-  // returns the axes a1 and a2 according to the movement and the QCar
+  /**
+   * @param decision : move to apply to de QCar
+   * @param car : QCar moving
+   * @return axes A1 and A2 according to the movement and the QCar
+   */
   private static Line2D[] findAxes(IDecision decision, IQCar car) {
     Line2D[] res = new Line2D[2];
     Point2D p1,p2,p3,p4;
@@ -194,8 +215,13 @@ public class WorldManagerPhysicsHelper {
     return res;
   }
 
-  // returns 2 (angleMovement) or 3 (!angleMovement) lines delimiting the area swept by the movement
-  private static Line2D[] findLines(IDecision decision, IQCar car, Line2D [] A1A2) {
+  /**
+   * @param decision : move to apply to de QCar
+   * @param car : QCar moving
+   * @param A1A2 : array of axes
+   * @return 2 (angleMovement) or 3 (!angleMovement) lines delimiting the area swept by the movement
+   */
+  private static Line2D[] findLines(IDecision decision, IQCar car, Line2D[] A1A2) {
     Line2D[] res = new Line2D[3];
     if (decision.isAngleMovement()) {
       //Ligne de l'axe A2
@@ -227,8 +253,13 @@ public class WorldManagerPhysicsHelper {
     return res;
   }
 
-  // returns a Point if an intersection is found, otherwise null
-  // In case of overlap, the intersection will be on one of the 2 Points of hittingQCar, otherwise on one of the 2 Points of hitQCar
+  /**
+   * In case of overlap, the intersection will be on one of the 2 Points of hittingQCar, otherwise on one of the 2 Points of hitQCar
+   * @param seg1 : first line to find intersection
+   * @param seg2 : second line to find intersection
+   * @param seenLines : defines whether we are calculating intersections or seenvertices
+   * @return Point if an intersection is found, otherwise null
+   */
   private static Point2D findIntersection(Line2D seg1, Line2D seg2, boolean seenLines) {
     if (seenLines || seg1.intersectsLine(seg2)) {
       // 2 crossed constant lines
@@ -281,7 +312,11 @@ public class WorldManagerPhysicsHelper {
     return null;
   }
 
-  // returns matrix as an array, first index is column, second is line
+  /**
+   * @param a1_XY : A1 axe in base XY
+   * @param 21_XY : A2 axe in base XY
+   * @return matrix as an array, first index is column, second is line
+   */
   public static double[][] computePMatrix(Line2D a1_XY, Line2D a2_XY) {
     double[][] pMatrix = new double[2][2];
     pMatrix[0][0] = a1_XY.getX2()-a1_XY.getX1();
@@ -291,7 +326,10 @@ public class WorldManagerPhysicsHelper {
     return pMatrix;
   }
 
-  // returns the inverted matrix given as parameter
+  /**
+   * @param pMatrix : matrix of passage
+   * @return the inverted matrix given as parameter
+   */
   public static double[][] invertMatrix(double[][] pMatrix) {
     assert(pMatrix.length == 2 && pMatrix[0].length == 2);
     double[][] p_1Matrix = new double[2][2];
@@ -303,7 +341,10 @@ public class WorldManagerPhysicsHelper {
     return p_1Matrix;
   }
 
-  // transforms a Point in XY coordinates to the same Point in A12 coordinates. A1 and A2 are generated from origin (0,0)
+  /**
+   * @param point_XY : point to convert
+   * @return Point in XY coordinates to the same Point in A12 coordinates. A1 and A2 are generated from origin (0,0)
+   */
   public static Point2D computePointFrom0XYToBaseA12(Point2D point_XY, double[][] p_1Matrix) {
     double x = (p_1Matrix[0][0]*point_XY.getX()) + (p_1Matrix[1][0]*point_XY.getY());
     double y = (p_1Matrix[0][1]*point_XY.getX()) + (p_1Matrix[1][1]*point_XY.getY());
@@ -311,7 +352,12 @@ public class WorldManagerPhysicsHelper {
     return origin_A;
   }
 
-  // transforms a Point in XY coordinates to the same Point in A12 coordinates from the specified origin
+  /**
+   * @param point_XY : point to convert
+   * @param origin_XY : specified origin in XY coordinates
+   * @param p_1Matrix : inverted matrix
+   * @return Point in XY coordinates to the same Point in A12 coordinates from the specified origin
+   */
   public static Point2D pointBaseXYToBaseA12(Point2D point_XY, Point2D origin_XY, double[][] p_1Matrix) {
     Point2D p_O = new Point2D.Double(point_XY.getX()-origin_XY.getX(), point_XY.getY()-origin_XY.getY());   // Base origin subtracted
     double x = computePointFrom0XYToBaseA12(p_O, p_1Matrix).getX();
@@ -320,10 +366,23 @@ public class WorldManagerPhysicsHelper {
     return p_A;
   }
   
+  /**
+   * @param p1 : Point 1
+   * @param p2 : Point 2
+   * @param p3 : Point 3
+   * @return the sign area of the triangle
+   */
   public static double signedArea(Point2D p1, Point2D p2, Point2D p3) {
     return (p2.getX()-p1.getX())*(p3.getY()-p1.getY()) - (p3.getX()-p1.getX())*(p2.getY()-p1.getY());
     // negative if clockwise; twice the area of the triangle
   }
+  
+  /**
+   * @param p1 : Point 1
+   * @param p2 : Point 2
+   * @param p3 : Point 3
+   * @return the sign corresponding to the clockwise or counter-clockwise order
+   */
   public static int ccw(Point2D p1, Point2D p2, Point2D p3) {
       double a = signedArea(p1, p2, p3);
       if (a<0) return -1;
