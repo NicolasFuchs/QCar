@@ -148,7 +148,7 @@ public class Driver implements IDriver {
     Point2D[] target = new Point2D[4];
     int i = 0;
     for (ISeenVertex vertex : sensors.seenVertices()) {
-      if (vertex.vertexId() == targetId) {
+      if (vertex.nature().qCarId() == targetId) {
         target[i] = vertex.projectionLocation();
         if (vertex.nature().isParkingTarget()) {
           isTargetParking = true;
@@ -556,7 +556,7 @@ public class Driver implements IDriver {
    * @return the length of the requested side
    */
   private double getSideLength(int sideId) {
-    return myCar.vertex(sideId).distance(myCar.vertex((sideId + 1 % 4)));
+    return myCar.vertex(sideId).distance(myCar.vertex((sideId + 1) % 4));
   }
 
   // ----------------------------------------

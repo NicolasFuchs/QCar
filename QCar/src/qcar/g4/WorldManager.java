@@ -86,10 +86,11 @@ public class WorldManager implements IWorldManager {
         allPoints.add(q.vertex(i));
       }
     }
+
     playerChannels = new ArrayList<>();
     for (int i = 0; i < players.size(); i++) {
-      playerChannels.add(
-          new PlayerChannel(WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars)));
+      sensors.add(WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars));
+      playerChannels.add(new PlayerChannel(sensors.get(i)));
     }
     for (int i = 0; i < players.size(); i++) {
       players.get(i).startDriverThread(playerChannels.get(i));
@@ -103,72 +104,89 @@ public class WorldManager implements IWorldManager {
     return isSimulationRunning;
   }
 
-  @Override
-  public void simulateOneStep(long collectiveDelayInMicroSeconds) {
+    @Override
+    public void simulateOneStep(long collectiveDelayInMicroSeconds) {
 
     /*
      * This method needs to : - get each driver decision and apply it to their qcar - update the
      * state of the world (sensors, collision, isWarOver, ...) - send the sensors the qcar drivers -
      * notify the view of the change - increment the number of step
      */
+        // notifyAllWorldObserver(0);
 
-     // TODO uncomment the next line and send all decisions
-     List<IDecision> decisions = new ArrayList<>();
-     for (int i = 0; i < sensors.size(); i++) {
-       playerChannels.get(i).sendSensors(sensors.get(i));
-     }
-     for (int i = 0; i < sensors.size(); i++) {
-       playerChannels.get(i).release();
-     }
-     try {
-       Thread.sleep(collectiveDelayInMicroSeconds);
-     } catch (InterruptedException e) {
-       e.printStackTrace();
-     }
-     for (PlayerChannel pc : playerChannels) {
-       decisions.add(pc.getDecision());
-     }
-     updateWorldState(decisions);
-     fetchSensors();
-     step++;
-     notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
-  }
-  
-  private void fetchSensors() {
-    List<Line2D> newPhotoSensors = new ArrayList<>();
-    List<Line2D> newDistanceSensors = new ArrayList<>();
-    List<ISensors> newSensors = new ArrayList<>();
-    for (int i = 0; i < drivenQCars.size(); i++) {
-      IQCar drivenQCar = drivenQCars.get(i);
-      ISensors sensor = WorldManagerPhysicsHelper.computeSensor(drivenQCar, qcars);
-      if (sensor != null) {
-        newSensors.add(sensor);
-        // DistanceSensors
-        if (sensor.distanceSensor().isSomethingDetected()) {
-          Line2D distSensor = new Line2D.Double(new Point2D.Double((drivenQCar.vertex(0).getX()+drivenQCar.vertex(1).getX())/2, (drivenQCar.vertex(0).getY()+drivenQCar.vertex(1).getY())/2), sensor.distanceSensor().rayEnd());
-          newDistanceSensors.add(distSensor);
+        // TODO uncomment the next line and send all decisions
+        List<IDecision> decisions = new ArrayList<>();
+        for (int i = 0; i < sensors.size(); i++) {
+            playerChannels.get(i).sendSensors(sensors.get(i));
         }
-        // PhotoSensors
-        for (ISeenVertex v : sensor.seenVertices()) {
-          Line2D photoS = new Line2D.Double(v.projectionLocation(), qcars.get(v.nature().qCarId()).vertex(v.vertexId()));
-          newPhotoSensors.add(photoS);
+        for (int i = 0; i < sensors.size(); i++) {
+            playerChannels.get(i).release();
         }
-      }
+        try {
+            Thread.sleep(collectiveDelayInMicroSeconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (PlayerChannel pc : playerChannels) {
+            decisions.add(pc.getDecision());
+        }
+        updateWorldState(decisions);
+        fetchSensors();
+        step++;
+        notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
+
+    /*
+     * //Random random = new Random(); for (int i = 0; i < drivenQCars.size(); i++) { //
+     * decisions.add(new Decision(random.nextBoolean(), random.nextInt(4), //
+     * (random.nextBoolean()?1:-1)*random.nextInt(5))); decisions.add(new Decision(false, 2,
+     * Math.sqrt(3145))); }
+     */
+
+    /*
+     * for (int i = 0; i < drivenQCars.size(); i++) { ISensors sensor =
+     * WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars); if (sensor != null) {
+     * sensors.add(sensor); Line2D line0 = new Line2D.Double(sensor.mySelf().vertex(0),
+     * sensor.mySelf().vertex(1)); // FIX // ME // photoSensors.add(new
+     * Line2D.Double(sensor.mySelf(), // WorldManagerPhysicsHelper.findIntersection(line0, lineSeen,
+     * true))); } }
+     */
     }
-    photoSensors = newPhotoSensors;
-    distanceSensors = newDistanceSensors;
-    sensors = newSensors;
-  }
 
-  @Override
-  public void closeSimulation() {
+    private void fetchSensors() {
+        List<Line2D> newPhotoSensors = new ArrayList<>();
+        List<Line2D> newDistanceSensors = new ArrayList<>();
+        List<ISensors> newSensors = new ArrayList<>();
+        for (int i = 0; i < drivenQCars.size(); i++) {
+            IQCar drivenQCar = drivenQCars.get(i);
+            ISensors sensor = WorldManagerPhysicsHelper.computeSensor(drivenQCar, qcars);
+            if (sensor != null) {
+                newSensors.add(sensor);
+                // DistanceSensors
+                if (sensor.distanceSensor().isSomethingDetected()) {
+                    Line2D distSensor = new Line2D.Double(new Point2D.Double((drivenQCar.vertex(0).getX()+drivenQCar.vertex(1).getX())/2, (drivenQCar.vertex(0).getY()+drivenQCar.vertex(1).getY())/2), sensor.distanceSensor().rayEnd());
+                    newDistanceSensors.add(distSensor);
+                }
+                // PhotoSensors
+                for (ISeenVertex v : sensor.seenVertices()) {
+                    Line2D photoS = new Line2D.Double(v.projectionLocation(), qcars.get(v.nature().qCarId()).vertex(v.vertexId()));
+                    newPhotoSensors.add(photoS);
+                }
+            }
+        }
+        photoSensors = newPhotoSensors;
+        distanceSensors = newDistanceSensors;
+        sensors = newSensors;
+    }
 
-    // stop each player's thread and release them from the chan
-    // for(int i = 0; i < players.size(); i++) {
-    // players.get(i).stopDriverThread();
-    // }
-    isSimulationRunning = false;
-  }
+    @Override
+    public void closeSimulation() {
+        // stop each player's thread and release them from the chan
+        for (int i = 0; i < players.size(); i++) {
+            players.get(i).stopDriverThread();
+            playerChannels.get(i).release();
+        }
+        isSimulationRunning = false;
+    }
 
   /*
    * Snapshot of the current state. Common PRE-condition: isSimulationOpened()
@@ -238,8 +256,9 @@ public class WorldManager implements IWorldManager {
   }
 
   // ======== Private methods =======================================
-  
-  private void updateMove(IQCar car, boolean isAngleMovement, double requestedTranslation, int sideId, ICollision collision) {
+
+  private void updateMove(IQCar car, boolean isAngleMovement, double requestedTranslation,
+      int sideId, ICollision collision) {
     if (collision == null) {
       double[] vector = new double[2];
       if ((isAngleMovement && (sideId == 0 || sideId == 2))
@@ -290,22 +309,22 @@ public class WorldManager implements IWorldManager {
     //notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
   }
 
-  //Update the state of the world according to the latest changes
-   private void updateWorldState(List<IDecision> allDecisions) {
-     collisions = WorldManagerPhysicsHelper.computeCollisions(drivenQCars, allDecisions, allQCars());
-     for (int q = 0; q < drivenQCars.size(); q++) {
-       try {
-         double requestedTranslation = allDecisions.get(q).requestedTranslation();
-         ICollision collision = null;
-         for (int i = 0; i < collisions.size(); i++) {
-           if (collisions.get(i).hittingQCarId() == drivenQCars.get(q).nature().qCarId()) collision = collisions.get(i);
-         }
-         if (requestedTranslation < Math.pow(10, -2)) requestedTranslation = 0;  // tolerance : Math.pow(10, -2)
-         updateMove(drivenQCars.get(q), allDecisions.get(q).isAngleMovement(), requestedTranslation, allDecisions.get(q).sideId(), collision);
-       } catch (Exception e) {
-         e.printStackTrace();
-       }
-     }
-   }
+    //Update the state of the world according to the latest changes
+    private void updateWorldState(List<IDecision> allDecisions) {
+        collisions = WorldManagerPhysicsHelper.computeCollisions(drivenQCars, allDecisions, allQCars());
+        for (int q = 0; q < drivenQCars.size(); q++) {
+            try {
+                double requestedTranslation = allDecisions.get(q).requestedTranslation();
+                ICollision collision = null;
+                for (int i = 0; i < collisions.size(); i++) {
+                    if (collisions.get(i).hittingQCarId() == drivenQCars.get(q).nature().qCarId()) collision = collisions.get(i);
+                }
+                if (requestedTranslation < Math.pow(10, -2)) requestedTranslation = 0;  // tolerance : Math.pow(10, -2)
+                updateMove(drivenQCars.get(q), allDecisions.get(q).isAngleMovement(), requestedTranslation, allDecisions.get(q).sideId(), collision);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }
