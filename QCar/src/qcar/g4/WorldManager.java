@@ -14,15 +14,15 @@ import simviou.WorldChangeObserver;
 
 public class WorldManager implements IWorldManager {
 
-  private List<WorldChangeObserver> observers;      // contains all currently observing objects
+  private List<WorldChangeObserver> observers; // contains all currently observing objects
 
-  private long step;                                // number of step played
-  private boolean isSimulationRunning;              // true if simulation is running else false
+  private long step; // number of step played
+  private boolean isSimulationRunning; // true if simulation is running else false
   private boolean isWarOver;
   private Rectangle2D boundingBox;
 
   private List<IQCar> drivenQCars;
-  private List<IQCar> qcars;                        // contains all the qcars
+  private List<IQCar> qcars; // contains all the qcars
   private List<Line2D> photoSensors;
   private List<ISensors> sensors;
   private List<Line2D> distanceSensors;
@@ -35,8 +35,8 @@ public class WorldManager implements IWorldManager {
   private ArrayList<Point2D> allPoints;
 
   /*
-  *   Observers management
-  */
+   * Observers management
+   */
   @Override
   public void addWorldObserver(WorldChangeObserver o) {
     if (o != null && !observers.contains(o))
@@ -48,47 +48,54 @@ public class WorldManager implements IWorldManager {
     observers.remove(o);
   }
 
-  private void notifyAllWorldObserver(int eventType){
-    for(WorldChangeObserver wo : observers){
+  private void notifyAllWorldObserver(int eventType) {
+    for (WorldChangeObserver wo : observers) {
       wo.worldStateChanged(eventType, step);
     }
   }
 
   /*
-  *   Simulation setup/teardown
-  */
+   * Simulation setup/teardown
+   */
   @Override
   public void openNewSimulation(IGameDescription description, List<? extends IDriver> players) {
-    
+
     // add a specific QCar for testing
-    //qcars.remove(0);
-    //QCarNature nature = new QCarNature(true, false, true, true, 10000, 0);
-    //Point2D[] vertices = {new Point2D.Double(52,84),new Point2D.Double(52,90),new Point2D.Double(23,42),new Point2D.Double(23,36)};
-    //QCar problem = new QCar(nature, vertices);
-    //qcars.add(0,problem);
-    
-    this.players = players;
+    // qcars.remove(0);
+    // QCarNature nature = new QCarNature(true, false, true, true, 10000, 0);
+    // Point2D[] vertices = {new Point2D.Double(52,84),new Point2D.Double(52,90),new
+    // Point2D.Double(23,42),new Point2D.Double(23,36)};
+    // QCar problem = new QCar(nature, vertices);
+    // qcars.add(0,problem);
 
     this.isSimulationRunning = true;
     this.step = 0;
     drivenQCars = new ArrayList<>();
     this.players = players;
 
-    for(IQCar q : description.allQCar()) {
+    for (IQCar q : description.allQCar()) {
       QCar myQCar = new QCar(q);
       qcars.add(myQCar);
     }
 
-    for(IQCar q : qcars){
+    for (IQCar q : qcars) {
       if (q.nature().isDriven()) {
         drivenQCars.add(q);
       }
-      for(int i = 0; i < 4; i++) {
+      for (int i = 0; i < 4; i++) {
         allPoints.add(q.vertex(i));
       }
     }
-    
-    // TODO generate sensors, create player channel, pass the sensors and launch player threads
+
+    playerChannels = new ArrayList<>();
+    for (int i = 0; i < players.size(); i++) {
+      sensors.add(WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars));
+      playerChannels.add(new PlayerChannel(sensors.get(i)));
+    }
+    for (int i = 0; i < players.size(); i++) {
+      players.get(i).startDriverThread(playerChannels.get(i));
+    }
+    System.out.println("SIMULATION OPENED");
 
   }
 
@@ -97,53 +104,93 @@ public class WorldManager implements IWorldManager {
     return isSimulationRunning;
   }
 
-  @Override
-  public void simulateOneStep(long collectiveDelayInMicroSeconds) {
+    @Override
+    public void simulateOneStep(long collectiveDelayInMicroSeconds) {
 
     /*
-        This method needs to :
-          - get each driver decision and apply it to their qcar
-          - update the state of the world (sensors, collision, isWarOver, ...)
-          - send the sensors the qcar drivers
-          - notify the view of the change
-          - increment the number of step
+     * This method needs to : - get each driver decision and apply it to their qcar - update the
+     * state of the world (sensors, collision, isWarOver, ...) - send the sensors the qcar drivers -
+     * notify the view of the change - increment the number of step
+     */
+        // notifyAllWorldObserver(0);
+
+        // TODO uncomment the next line and send all decisions
+        List<IDecision> decisions = new ArrayList<>();
+        for (int i = 0; i < sensors.size(); i++) {
+            playerChannels.get(i).sendSensors(sensors.get(i));
+        }
+        for (int i = 0; i < sensors.size(); i++) {
+            playerChannels.get(i).release();
+        }
+        try {
+            Thread.sleep(collectiveDelayInMicroSeconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (PlayerChannel pc : playerChannels) {
+            decisions.add(pc.getDecision());
+        }
+        updateWorldState(decisions);
+        fetchSensors();
+        step++;
+        notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
+
+    /*
+     * //Random random = new Random(); for (int i = 0; i < drivenQCars.size(); i++) { //
+     * decisions.add(new Decision(random.nextBoolean(), random.nextInt(4), //
+     * (random.nextBoolean()?1:-1)*random.nextInt(5))); decisions.add(new Decision(false, 2,
+     * Math.sqrt(3145))); }
      */
 
-    step++;
-    // notifyAllWorldObserver(0);
-
-    //TODO uncomment the next line and send all decisions
-    List<IDecision> decisions = new ArrayList<>();
-    Random random = new Random();
-    for (int i = 0; i < drivenQCars.size(); i++) {
-//      decisions.add(new Decision(random.nextBoolean(), random.nextInt(4), (random.nextBoolean()?1:-1)*random.nextInt(5)));
-      decisions.add(new Decision(false,2,Math.sqrt(3145)));
-
+    /*
+     * for (int i = 0; i < drivenQCars.size(); i++) { ISensors sensor =
+     * WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars); if (sensor != null) {
+     * sensors.add(sensor); Line2D line0 = new Line2D.Double(sensor.mySelf().vertex(0),
+     * sensor.mySelf().vertex(1)); // FIX // ME // photoSensors.add(new
+     * Line2D.Double(sensor.mySelf(), // WorldManagerPhysicsHelper.findIntersection(line0, lineSeen,
+     * true))); } }
+     */
     }
-    updateWorldState(decisions);
-    for (int i = 0; i < drivenQCars.size(); i++) {
-      ISensors sensor = WorldManagerPhysicsHelper.computeSensor(drivenQCars.get(i), qcars);
-      if (sensor != null) {
-        sensors.add(sensor);
-        Line2D line0 = new Line2D.Double(sensor.mySelf().vertex(0), sensor.mySelf().vertex(1)); // FIX ME
-//        photoSensors.add(new Line2D.Double(sensor.mySelf(), WorldManagerPhysicsHelper.findIntersection(line0, lineSeen, true)));
-      }
+
+    private void fetchSensors() {
+        List<Line2D> newPhotoSensors = new ArrayList<>();
+        List<Line2D> newDistanceSensors = new ArrayList<>();
+        List<ISensors> newSensors = new ArrayList<>();
+        for (int i = 0; i < drivenQCars.size(); i++) {
+            IQCar drivenQCar = drivenQCars.get(i);
+            ISensors sensor = WorldManagerPhysicsHelper.computeSensor(drivenQCar, qcars);
+            if (sensor != null) {
+                newSensors.add(sensor);
+                // DistanceSensors
+                if (sensor.distanceSensor().isSomethingDetected()) {
+                    Line2D distSensor = new Line2D.Double(new Point2D.Double((drivenQCar.vertex(0).getX()+drivenQCar.vertex(1).getX())/2, (drivenQCar.vertex(0).getY()+drivenQCar.vertex(1).getY())/2), sensor.distanceSensor().rayEnd());
+                    newDistanceSensors.add(distSensor);
+                }
+                // PhotoSensors
+                for (ISeenVertex v : sensor.seenVertices()) {
+                    Line2D photoS = new Line2D.Double(v.projectionLocation(), qcars.get(v.nature().qCarId()).vertex(v.vertexId()));
+                    newPhotoSensors.add(photoS);
+                }
+            }
+        }
+        photoSensors = newPhotoSensors;
+        distanceSensors = newDistanceSensors;
+        sensors = newSensors;
     }
-  }
 
-  @Override
-  public void closeSimulation() {
-
-    // stop each player's thread and release them from the chan
-//    for(int i = 0; i < players.size(); i++) {
-//      players.get(i).stopDriverThread();
-//    }
-    isSimulationRunning = false;
-  }
+    @Override
+    public void closeSimulation() {
+        // stop each player's thread and release them from the chan
+        for (int i = 0; i < players.size(); i++) {
+            players.get(i).stopDriverThread();
+            playerChannels.get(i).release();
+        }
+        isSimulationRunning = false;
+    }
 
   /*
-  *   Snapshot of the current state. Common PRE-condition: isSimulationOpened()
-  */
+   * Snapshot of the current state. Common PRE-condition: isSimulationOpened()
+   */
 
   @Override
   public boolean isWarOver() {
@@ -160,18 +207,18 @@ public class WorldManager implements IWorldManager {
     // todo go throught the qcar list and find the furthest apart points
     double minX = Double.MAX_VALUE;
     double minY = Double.MAX_VALUE;
-    double maxX = Double.MAX_VALUE*-1;
-    double maxY = Double.MAX_VALUE*-1;
-    for(Point2D candidate : allPoints){
+    double maxX = Double.MAX_VALUE * -1;
+    double maxY = Double.MAX_VALUE * -1;
+    for (Point2D candidate : allPoints) {
       double x = candidate.getX();
       double y = candidate.getY();
-      if(minY > y)
+      if (minY > y)
         minY = y;
-      if(minX > x)
+      if (minX > x)
         minX = x;
-      if(maxY < y)
+      if (maxY < y)
         maxY = y;
-      if(maxX < x)
+      if (maxX < x)
         maxX = x;
     }
     return new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
@@ -197,7 +244,7 @@ public class WorldManager implements IWorldManager {
     return distanceSensors;
   }
 
-  public WorldManager(){
+  public WorldManager() {
     this.observers = new ArrayList<>();
     this.photoSensors = new ArrayList<>();
     this.distanceSensors = new ArrayList<>();
@@ -205,117 +252,79 @@ public class WorldManager implements IWorldManager {
     this.playerChannels = new ArrayList<>();
     this.allPoints = new ArrayList<>();
     this.qcars = new ArrayList<>();
+    this.sensors = new ArrayList<>();
   }
 
   // ======== Private methods =======================================
 
-//  private void updateMove(IQCar car, boolean isAngleMovement, int sideId, double requestedTranslation) {
-//    double[] vector = new double[2];
-//    if ((isAngleMovement && (sideId == 0 || sideId == 2)) || (!isAngleMovement && (sideId == 1 || sideId == 3))) {
-//      vector[0] = car.vertex(0).getX()-car.vertex(1).getX();
-//      vector[1] = car.vertex(0).getY()-car.vertex(1).getY();
-//    } else {
-//      vector[0] = car.vertex(3).getX()-car.vertex(0).getX();
-//      vector[1] = car.vertex(3).getY()-car.vertex(0).getY();
-//    }
-//    double unitVecDiv = Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)); //
-//    vector[0] = vector[0] / unitVecDiv * Math.abs(requestedTranslation);        // Transformation en vecteur unitaire puis multiplication par un scalaire
-//    vector[1] = vector[1] / unitVecDiv * Math.abs(requestedTranslation);        //
-//    int p1 = sideId;
-//    int p2 = (sideId+1)%4;
-//    Point2D point1 = car.vertex(p1);
-//    Point2D point2 = car.vertex(p2);
-//    if (requestedTranslation > 0) {
-//      point1.setLocation(point1.getX()+vector[0], point1.getY()+vector[1]);
-//      point2.setLocation(point2.getX()+vector[0], point2.getY()+vector[1]);
-//    } else {
-//      point1.setLocation(point1.getX()-vector[0], point1.getY()-vector[1]);
-//      point2.setLocation(point2.getX()-vector[0], point2.getY()-vector[1]);
-//    }
-//    notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
-//  }
-  
-  private void updateMove(IQCar car, boolean isAngleMovement, double requestedTranslation, int sideId, ICollision collision) {
+  private void updateMove(IQCar car, boolean isAngleMovement, double requestedTranslation,
+      int sideId, ICollision collision) {
     if (collision == null) {
       double[] vector = new double[2];
-      if ((isAngleMovement && (sideId == 0 || sideId == 2)) || (!isAngleMovement && (sideId == 1 || sideId == 3))) {
-        vector[0] = car.vertex(0).getX()-car.vertex(1).getX();
-        vector[1] = car.vertex(0).getY()-car.vertex(1).getY();
+      if ((isAngleMovement && (sideId == 0 || sideId == 2))
+          || (!isAngleMovement && (sideId == 1 || sideId == 3))) {
+        vector[0] = car.vertex(0).getX() - car.vertex(1).getX();
+        vector[1] = car.vertex(0).getY() - car.vertex(1).getY();
       } else {
-        vector[0] = car.vertex(3).getX()-car.vertex(0).getX();
-        vector[1] = car.vertex(3).getY()-car.vertex(0).getY();
+        vector[0] = car.vertex(3).getX() - car.vertex(0).getX();
+        vector[1] = car.vertex(3).getY() - car.vertex(0).getY();
       }
-      double unitVecDiv = Math.sqrt(Math.pow(vector[0],2)+Math.pow(vector[1],2)); //
-      vector[0] = vector[0] / unitVecDiv * Math.abs(requestedTranslation);        // Transformation en vecteur unitaire puis multiplication par un scalaire
-      vector[1] = vector[1] / unitVecDiv * Math.abs(requestedTranslation);        //
+      double unitVecDiv = Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2)); //
+      vector[0] = vector[0] / unitVecDiv * Math.abs(requestedTranslation); // Transformation en
+      // vecteur unitaire puis
+      // multiplication par un
+      // scalaire
+      vector[1] = vector[1] / unitVecDiv * Math.abs(requestedTranslation); //
       int p1 = sideId;
-      int p2 = (sideId+1)%4;
+      int p2 = (sideId + 1) % 4;
       Point2D point1 = car.vertex(p1);
       Point2D point2 = car.vertex(p2);
       if (requestedTranslation > 0) {
-        point1.setLocation(point1.getX()+vector[0], point1.getY()+vector[1]);
-        point2.setLocation(point2.getX()+vector[0], point2.getY()+vector[1]);
+        point1.setLocation(point1.getX() + vector[0], point1.getY() + vector[1]);
+        point2.setLocation(point2.getX() + vector[0], point2.getY() + vector[1]);
       } else {
-        point1.setLocation(point1.getX()-vector[0], point1.getY()-vector[1]);
-        point2.setLocation(point2.getX()-vector[0], point2.getY()-vector[1]);
+        point1.setLocation(point1.getX() - vector[0], point1.getY() - vector[1]);
+        point2.setLocation(point2.getX() - vector[0], point2.getY() - vector[1]);
       }
     } else {
       Point2D endPoint = null;
       for (ICollision col : WorldManagerPhysicsHelper.collisionOrigins.keySet()) {
         if (col == collision) {
-           endPoint = WorldManagerPhysicsHelper.collisionOrigins.get(col);
+          endPoint = WorldManagerPhysicsHelper.collisionOrigins.get(col);
         }
       }
-      Point2D origin = (!isAngleMovement || ((sideId == 0 || sideId == 3) && requestedTranslation < 0) || ((sideId == 1 || sideId == 2) && requestedTranslation > 0)) ? car.vertex((sideId+1)%4) : car.vertex(sideId);
-      double shiftX = endPoint.getX()-origin.getX();
-      double shiftY = endPoint.getY()-origin.getY();
-      car.vertex(sideId).setLocation(car.vertex(sideId).getX()+shiftX, car.vertex(sideId).getY()+shiftY);
-      car.vertex((sideId+1)%4).setLocation(car.vertex((sideId+1)%4).getX()+shiftX, car.vertex((sideId+1)%4).getY()+shiftY);
+      Point2D origin =
+          (!isAngleMovement || ((sideId == 0 || sideId == 3) && requestedTranslation < 0)
+              || ((sideId == 1 || sideId == 2) && requestedTranslation > 0))
+                  ? car.vertex((sideId + 1) % 4) : car.vertex(sideId);
+      double shiftX = endPoint.getX() - origin.getX();
+      double shiftY = endPoint.getY() - origin.getY();
+      car.vertex(sideId).setLocation(car.vertex(sideId).getX() + shiftX,
+          car.vertex(sideId).getY() + shiftY);
+      car.vertex((sideId + 1) % 4).setLocation(car.vertex((sideId + 1) % 4).getX() + shiftX,
+          car.vertex((sideId + 1) % 4).getY() + shiftY);
       collisions.add(collision);
-      notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
+      //notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
     }
-    notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
+    //notifyAllWorldObserver(QCarAnimationPane.STATE_CHANGE_EVENT);
   }
-  
-  //Update the state of the world according to the latest changes
-   private void updateWorldState(List<IDecision> allDecisions) {
-     collisions = WorldManagerPhysicsHelper.computeCollisions(drivenQCars, allDecisions, allQCars());
-     for (int q = 0; q < drivenQCars.size(); q++) {
-       try {
-         double requestedTranslation = allDecisions.get(q).requestedTranslation();
-         ICollision collision = null;
-         for (int i = 0; i < collisions.size(); i++) {
-           if (collisions.get(i).hittingQCarId() == drivenQCars.get(q).nature().qCarId()) collision = collisions.get(i);
-         }
-         if (requestedTranslation < Math.pow(10, -2)) requestedTranslation = 0;  // tolerance : Math.pow(10, -2)
-         updateMove(drivenQCars.get(q), allDecisions.get(q).isAngleMovement(), requestedTranslation, allDecisions.get(q).sideId(), collision);
-       } catch (Exception e) {
-         e.printStackTrace();
-       }
-     }
-   }
 
-//  // Update the state of the world according to the latest changes
-//  private void updateWorldState(List<IDecision> allDecisions) {
-//    collisions = WorldManagerPhysicsHelper.computeCollisions(drivenQCars, allDecisions, allQCars());
-//    for (int q = 0; q < drivenQCars.size(); q++) {
-//      try {
-//        double requestedTranslation = allDecisions.get(q).requestedTranslation();
-//          ICollision collision = null;
-//          for (int i = 0; i < collisions.size(); i++) {
-//            if (collisions.get(i).hittingQCarId() == drivenQCars.get(q).nature().qCarId()) collision = collisions.get(i);
-//          }
-//          if (collision != null) {
-//            requestedTranslation = Math.signum(requestedTranslation)*Math.sqrt(Math.pow(collision.position().getX()-allQCars().get(q).vertex(collision.hittingSideOrVertexId()).getX(), 2)+Math.pow(collision.position().getY()-allQCars().get(q).vertex(collision.hittingSideOrVertexId()).getY(), 2));
-//            //requestedTranslation -= Math.signum(requestedTranslation)*Math.pow(10, -5);
-//            notifyAllWorldObserver(QCarAnimationPane.COLLISION_EVENT);
-//          }
-//        //}
-//        if (requestedTranslation < Math.pow(10, -5)) requestedTranslation = 0;  // tolerance : Math.pow(10, -2)
-//        updateMove(drivenQCars.get(q), allDecisions.get(q).isAngleMovement(), allDecisions.get(q).sideId(), requestedTranslation);
-//      } catch (Exception e) {
-//        e.printStackTrace();
-//      }
-//    }
-//  }
+    //Update the state of the world according to the latest changes
+    private void updateWorldState(List<IDecision> allDecisions) {
+        collisions = WorldManagerPhysicsHelper.computeCollisions(drivenQCars, allDecisions, allQCars());
+        for (int q = 0; q < drivenQCars.size(); q++) {
+            try {
+                double requestedTranslation = allDecisions.get(q).requestedTranslation();
+                ICollision collision = null;
+                for (int i = 0; i < collisions.size(); i++) {
+                    if (collisions.get(i).hittingQCarId() == drivenQCars.get(q).nature().qCarId()) collision = collisions.get(i);
+                }
+                if (requestedTranslation < Math.pow(10, -2)) requestedTranslation = 0;  // tolerance : Math.pow(10, -2)
+                updateMove(drivenQCars.get(q), allDecisions.get(q).isAngleMovement(), requestedTranslation, allDecisions.get(q).sideId(), collision);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
