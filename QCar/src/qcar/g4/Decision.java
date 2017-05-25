@@ -99,7 +99,7 @@ public class Decision implements IDecision {
       if (lengthDiagonale13 > lengthDiagonale02) {
         dx = -dx;
       }
-      double maxDepl = maxSideLength / Math.asin(maxSideLength / height);
+      double maxDepl = Math.cos(Math.asin(maxSideLength / height)) * maxSideLength;
       return maxDepl + dx;
     } else {
       double lengthAdjSide = qcar.vertex((side + 1) % 4).distance(qcar.vertex((side + 2) % 4));
