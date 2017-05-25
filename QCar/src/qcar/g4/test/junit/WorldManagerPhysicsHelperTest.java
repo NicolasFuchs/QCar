@@ -9,6 +9,11 @@ import org.junit.Test;
 
 import qcar.g4.WorldManagerPhysicsHelper;
 
+/**
+ * Tests some of the core methods ot the WorldManagerPhysicsHelper
+ *
+ * Run this test to check for regression testing.
+ */
 public class WorldManagerPhysicsHelperTest {
 
   @Test
