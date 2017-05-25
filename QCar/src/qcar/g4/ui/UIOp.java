@@ -56,7 +56,7 @@ public class UIOp implements UIOperations {
 
   @Override
   public ObservationPolicy observationPolicy() {
-    return ObservationPolicy.ZOOMABLE_ZONE;
+    return ObservationPolicy.WORLD_BOUNDARY;
   }
 
   @Override
