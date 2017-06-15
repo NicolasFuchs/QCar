@@ -30,7 +30,7 @@ public class EndedSimulationCtrl {
 
   /**
    * Set the final leaderboard from the simulation view
-   * @param results
+   * @param results the final leaderboard
    */
   public void setFinalResults(ObservableList results){
     lstResults.setItems(results);
@@ -38,7 +38,7 @@ public class EndedSimulationCtrl {
 
   /**
    * Set the stage to pass it to the next view
-   * @param stage
+   * @param stage the main window
    */
   public void setStage(Stage stage){
     this.stage = stage;

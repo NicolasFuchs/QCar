@@ -42,7 +42,7 @@ public class GameProvider implements IGameProvider {
   /** Method to create a new GameProvider
    * Initialize the next game with the wanted game style
    * 
-   *    @param  : a GameStyles, from GameDescription.GameStyles, the wanted GameStyles to be used
+   *    @param game : a GameStyles, from GameDescription.GameStyles, the wanted GameStyles to be used
    *              when the function nextGame() is called
    */
   public GameProvider(GameDescription.GameStyles game){
@@ -53,7 +53,7 @@ public class GameProvider implements IGameProvider {
   /** Method to create a new game description
    * Generate randomly distributed QCars in function of wanted game style
    * 
-   *    @param  : integer, the number of wanted driven QCars
+   *    @param nbOfDrivers : integer, the number of wanted driven QCars
    *    @return : a non-null new GameDescirption
    */
   @Override

@@ -83,6 +83,7 @@ public class WorldManagerPhysicsHelper {
   /**
    * @param drivenQCars : QCar driven manually or by a driver
    * @param allDecisions : The Decision at index i is applied to the driven QCar at index i
+   * @param allQCars : the list of all the QCars
    * @return List of all Collision created
    */
   public static List<ICollision> computeCollisions(List<IQCar> drivenQCars, List<IDecision> allDecisions, List<IQCar> allQCars) {
@@ -314,7 +315,7 @@ public class WorldManagerPhysicsHelper {
 
   /**
    * @param a1_XY : A1 axe in base XY
-   * @param 21_XY : A2 axe in base XY
+   * @param a2_XY : A2 axe in base XY
    * @return matrix as an array, first index is column, second is line
    */
   public static double[][] computePMatrix(Line2D a1_XY, Line2D a2_XY) {
@@ -343,6 +344,7 @@ public class WorldManagerPhysicsHelper {
 
   /**
    * @param point_XY : point to convert
+   * @param p_1Matrix : the transformation matrix
    * @return Point in XY coordinates to the same Point in A12 coordinates. A1 and A2 are generated from origin (0,0)
    */
   public static Point2D computePointFrom0XYToBaseA12(Point2D point_XY, double[][] p_1Matrix) {

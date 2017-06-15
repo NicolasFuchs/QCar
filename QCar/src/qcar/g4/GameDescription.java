@@ -42,7 +42,7 @@ public class GameDescription implements IGameDescription{
   /** Method to create a new GameDescription
    * Initialize the GameDescription with list of the QCar given in parameters
    * 
-   *    @param  : ArrayList<IQCar>, the list of the QCars representing this game
+   *    @param cars : ArrayList of {@link IQCar}, the list of the QCars representing this game
    */
   public GameDescription(ArrayList<IQCar> cars) {
     this.cars = cars;
@@ -50,7 +50,7 @@ public class GameDescription implements IGameDescription{
   
   /** Method to return the list of QCars describing this game
    *
-   *    @return : List<IQCar>, the list of the QCars representing this game
+   *    @return : List of {@link IQCar}, the list of the QCars representing this game
    */
   @Override
   public List<IQCar> allQCar() {

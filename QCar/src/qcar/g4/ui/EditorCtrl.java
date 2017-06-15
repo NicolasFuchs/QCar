@@ -230,7 +230,7 @@ public class EditorCtrl {
 
   /**
    * Set the stage so we can pass it to the next view
-   * @param stage
+   * @param stage the main window
    */
   public void setStage(Stage stage){
     this.stage = stage;

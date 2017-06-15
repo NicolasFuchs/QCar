@@ -18,7 +18,7 @@ public class Decision implements IDecision {
    * 
    * @param isAngleMovement true if sideId remains on its supporting line (angles change)
    * @param sideId side i contains points p(i) and p((i+1) mod 4)
-   * @param requestedTranslation the distance requested >0 means "to the left" or "forwards", when
+   * @param requestedTranslation the distance requested &gt;0 means "to the left" or "forwards", when
    *        standing on that side and facing the outside world
    */
   public Decision(boolean isAngleMovement, int sideId, double requestedTranslation) {
@@ -58,7 +58,8 @@ public class Decision implements IDecision {
    *  
    * @param decision the decision to be checked
    * @param qcar the QCar whom Driver requested the Decision
-   * 
+   *
+   * @return returns a correct decision
    */
   public static IDecision validDecision(IDecision decision, IQCar qcar) { 
     /*double maxSideLength = qcar.nature().maxSideLength() ;
@@ -98,9 +99,11 @@ public class Decision implements IDecision {
 
   /**
    * return the maximum double for an allowed Decision for a QCar and a side
-   * @param QCar the QCar concerned
+   * @param qcar the QCar concerned
    * @param side the sideId of the concerned QCar
    * @param isAngleMovement true if the request is an angle movement
+   *
+   * @return the max allowed translation
    */
   public static double maxAllowedTranslation(IQCar qcar, int side, boolean isAngleMovement) {
     double maxSideLength = qcar.nature().maxSideLength();   
@@ -129,9 +132,11 @@ public class Decision implements IDecision {
 
   /**
    * return the maximum negative double (minimum) for an allowed Decision for a QCar and a side
-   * @param QCar the QCar concerned
+   * @param qcar the QCar concerned
    * @param side the sideId of the concerned QCar
    * @param isAngleMovement true if the request is an angle movement
+   *
+   * @return the min allowed translation
    */
   public static double minAllowedTranslation(IQCar qcar, int side, boolean isAngleMovement) {
     double maxSideLength = qcar.nature().maxSideLength();

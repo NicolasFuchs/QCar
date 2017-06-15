@@ -14,7 +14,7 @@ public class Main extends Application {
 
   /**
    * This method start the IHM. It loads the editor pass him the stage.
-   * @param stage
+   * @param stage the main window
    */
   @Override
   public void start(Stage stage) {
@@ -33,7 +33,7 @@ public class Main extends Application {
 
   /**
    * Starting point of the program
-   * @param args
+   * @param args the command line params
    */
   public static void main(String[] args) {
     launch(args);

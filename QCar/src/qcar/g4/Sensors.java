@@ -15,10 +15,10 @@ public class Sensors implements ISensors {
   
   /**
    * Constructor of a Sensor
-   * @param myself
-   * @param sv
-   * @param cwm
-   * @param distanceSensor
+   * @param myself the QCar who owns the sensors
+   * @param sv the list of the seen vertices
+   * @param cwm the list of collisions with the QCar who owns the sensors
+   * @param distanceSensor the distance sensor of the QCar who owns the sensors
    */
   public Sensors(IQCar myself, List<ISeenVertex> sv, List<ICollision> cwm, IDistanceSensor distanceSensor) {
     this.mySelf = (QCar)myself;

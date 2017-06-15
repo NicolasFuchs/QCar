@@ -40,7 +40,7 @@ public class UIOp implements UIOperations {
 
   /**
    * Return a new QCarAnimationPane
-   * @param vPort
+   * @param vPort container of the layers
    * @return QCarAnimationPane
    */
   @Override
@@ -103,7 +103,7 @@ public class UIOp implements UIOperations {
    * return a String with the qcarId, his maxSideLength and his minArea
    * @param atX x coordinate of the clicked point
    * @param atY y coordinate of the clicked point
-   * @param mouseMode
+   * @param mouseMode the mode of the mouse
    * @return tooltip string
    */
   @Override
@@ -134,7 +134,7 @@ public class UIOp implements UIOperations {
 
   /**
    * Get a hashmap containing the keybinds and their associated action
-   * @param mouseMode
+   * @param mouseMode the mode of the mouse
    * @return Hashmap
    */
   @Override

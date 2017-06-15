@@ -617,6 +617,10 @@ public class Driver implements IDriver {
     }
 
     /**
+     * Generate a random decision.
+     *
+     * @param qcar the QCar for which to generate a decision.
+     *
      * @return a randomDecision for a QCar
      */
     public static MyDecision randomDecision(IQCar qcar) {
@@ -690,6 +694,12 @@ public class Driver implements IDriver {
 
 
     /**
+     * Generate an angle decision.
+     *
+     * @param left true if going left, right otherwise
+     * @param side the number of the side
+     * @param length the length of the side movement
+     *
      * @return an angle decision
      */
     public static MyDecision angleDecision(boolean left, int side, double length) {
@@ -701,7 +711,12 @@ public class Driver implements IDriver {
     }
 
     /**
-     * @return an side decision
+     * Generate an angle decision.
+     *
+     * @param increase true if going the QCar is growing, shrinking otherwise
+     * @param side the number of the side
+     * @param length the length of the side movement
+     * @return a side decision
      */
     public static MyDecision sideDecision(boolean increase, int side, double length) {
       int coeff = -1;

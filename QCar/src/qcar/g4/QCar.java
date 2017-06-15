@@ -34,6 +34,9 @@ public class QCar implements IQCar {
 
   /**
    * Consume the bonus from the Vertice if it's not already gone
+   *
+   * @param vertice the vertice to use
+   *
    * @return true if the Vertice still offers point, else false
    */
   public boolean useVertice(int vertice){
@@ -44,6 +47,9 @@ public class QCar implements IQCar {
 
   /**
    * Consume the bonus from the Side if it's not already gone
+   *
+   * @param side the side to use
+   *
    * @return true if the side offers still point, else false
    */
   public boolean useSide(int side){
@@ -107,8 +113,8 @@ public class QCar implements IQCar {
   }
 
   /**
-   * PRE: vertexId < 4
-   * @param vertexId
+   * PRE: vertexId &lt; 4
+   * @param vertexId the id of the vertex
    * @return selected vertex
    */
   @Override
@@ -137,8 +143,8 @@ public class QCar implements IQCar {
   }
 
   /**
-   * PRE: vertexId < 4
-   * @param vertexId
+   * PRE: vertexId &lt; 4
+   * @param vertexId the id of the vertex
    * @return true if vertex offers bonus else false
    */
   @Override
@@ -150,8 +156,8 @@ public class QCar implements IQCar {
   }
 
   /**
-   * PRE: sideId < 4
-   * @param sideId
+   * PRE: sideId &lt; 4
+   * @param sideId the id of the side
    * @return true if side offers a bonus else false
    */
   @Override

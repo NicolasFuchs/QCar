@@ -19,12 +19,12 @@ public class QCarNature implements IQCarNature {
   
   /**
    * Constructor of the nature
-   * @param driven
-   * @param parkingTarget
-   * @param vertexTarget
-   * @param sideTarget
-   * @param maxSideLenght
-   * @param minArea
+   * @param driven if the QCar is driven
+   * @param parkingTarget if the QCar is a parking
+   * @param vertexTarget if the QCar's vertices give points
+   * @param sideTarget if the QCar's sides give points
+   * @param maxSideLenght the QCar's max side length
+   * @param minArea the QCar's min area
    */
   public QCarNature(boolean driven, boolean parkingTarget, boolean vertexTarget, boolean sideTarget, double maxSideLenght, double minArea) {
     super();
